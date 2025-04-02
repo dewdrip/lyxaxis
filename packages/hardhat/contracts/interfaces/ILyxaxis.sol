@@ -2,7 +2,7 @@
 pragma solidity 0.8.27;
 
 interface ILyxaxis {
-    event CreatedMultisig(address multisig);
+    event CreatedMultisig(address deployer, address multisig);
 
     function createWallet(
         string calldata _name,

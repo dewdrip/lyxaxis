@@ -24,7 +24,7 @@ contract Lyxaxis is ILyxaxis {
 
         s_multisigs.push(address(multisig));
 
-        emit CreatedMultisig(address(multisig));
+        emit CreatedMultisig(msg.sender, address(multisig));
 
         return address(multisig);
     }

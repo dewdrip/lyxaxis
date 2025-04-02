@@ -37,7 +37,7 @@ describe("Lyxaxis", function () {
 
       // Decode the event
       const event = lyxaxis.interface.parseLog(eventLog!);
-      const multisigAddress = event?.args[0];
+      const multisigAddress = event?.args[1];
 
       // Validate the multisig address
       expect(multisigAddress).to.be.properAddress;
@@ -91,13 +91,13 @@ describe("Lyxaxis", function () {
       const tx1 = await lyxaxis.createWallet("Wallet 1", 1, [owner.address], 1);
       const receipt1 = await tx1.wait();
       const event1 = lyxaxis.interface.parseLog(receipt1?.logs.find(log => log.address === lyxaxisAddress)!);
-      const wallet1Address = event1?.args[0];
+      const wallet1Address = event1?.args[1];
 
       // Create second wallet
       const tx2 = await lyxaxis.createWallet("Wallet 2", 1, [owner.address, addr1.address], 2);
       const receipt2 = await tx2.wait();
       const event2 = lyxaxis.interface.parseLog(receipt2?.logs.find(log => log.address === lyxaxisAddress)!);
-      const wallet2Address = event2?.args[0];
+      const wallet2Address = event2?.args[1];
 
       const createdMultisigs = await lyxaxis.getMultisigs();
 

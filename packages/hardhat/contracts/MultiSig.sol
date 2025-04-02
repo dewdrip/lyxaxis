@@ -1,18 +1,14 @@
 // SPDX-License-Identifier: MIT
 
-// Off-chain signature gathering multisig that streams funds - @austingriffith
-//
-// started from 🏗 scaffold-eth - meta-multi-sig-wallet example https://github.com/austintgriffith/scaffold-eth/tree/meta-multi-sig
-// (off-chain signature based multi-sig)
+// Off-chain signature gathering multisig that streams funds
 // added a very simple streaming mechanism where `onlySelf` can open a withdraw-based stream
-//
 
-pragma solidity >=0.8.0 <0.9.0;
+pragma solidity 0.8.27;
 
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 
-contract MetaMultiSigWallet {
+contract MultiSig {
     using MessageHashUtils for bytes32;
 
     event Deposit(address indexed sender, uint amount, uint balance);
@@ -30,9 +26,9 @@ contract MetaMultiSigWallet {
     uint public signaturesRequired;
     uint public nonce;
     uint public chainId;
+    string public name;
 
-    constructor(uint256 _chainId, address[] memory _owners, uint _signaturesRequired) {
-        require(_signaturesRequired > 0, "constructor: must be non-zero sigs required");
+    constructor(string memory _name, uint256 _chainId, address[] memory _owners, uint _signaturesRequired) {
         signaturesRequired = _signaturesRequired;
         for (uint i = 0; i < _owners.length; i++) {
             address owner = _owners[i];
@@ -42,6 +38,7 @@ contract MetaMultiSigWallet {
             emit Owner(owner, isOwner[owner]);
         }
         chainId = _chainId;
+        name = _name;
     }
 
     modifier onlySelf() {

@@ -12,7 +12,6 @@ import "hardhat-deploy-ethers";
 import { task } from "hardhat/config";
 import generateTsAbis from "./scripts/generateTsAbis";
 
-
 // If not set, it uses ours Alchemy's default API key.
 // You can get your own at https://dashboard.alchemyapi.io
 const providerApiKey = process.env.ALCHEMY_API_KEY || "oKxs-03sij-U_N0iOlrSsZFr29-IqbuF";
@@ -28,17 +27,17 @@ const basescanApiKey = process.env.BASESCAN_API_KEY || "ZZZEIPMT1MNJ8526VV2Y744C
 const config: HardhatUserConfig = {
   solidity: {
     compilers: [
-  {
-    version: "0.8.20",
-    settings: {
-      optimizer: {
-        enabled: true,
-        // https://docs.soliditylang.org/en/latest/using-the-compiler.html#optimizer-options
-        runs: 200,
+      {
+        version: "0.8.20",
+        settings: {
+          optimizer: {
+            enabled: true,
+            // https://docs.soliditylang.org/en/latest/using-the-compiler.html#optimizer-options
+            runs: 200,
+          },
+        },
       },
-    },
-  },
-]
+    ],
   },
   defaultNetwork: "localhost",
   namedAccounts: {
@@ -48,7 +47,6 @@ const config: HardhatUserConfig = {
     },
   },
   networks: {
-    
     // View the networks that are pre-configured.
     // If the network you are looking for is not here you can add new network settings
     hardhat: {

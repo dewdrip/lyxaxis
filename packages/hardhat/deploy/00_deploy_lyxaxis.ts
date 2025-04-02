@@ -2,11 +2,11 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
 
 /**
- * Deploys a "MetaMultiSigWallet" contract
+ * Deploys a "Lyxaxis" contract
  *
  * @param hre HardhatRuntimeEnvironment object.
  */
-const deployMetaMultiSigWallet: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
+const deployLyxaxis: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   /*
     On localhost, the deployer account is the one that comes with Hardhat, which is already funded.
 
@@ -20,10 +20,8 @@ const deployMetaMultiSigWallet: DeployFunction = async function (hre: HardhatRun
   const { deployer } = await hre.getNamedAccounts();
   const { deploy } = hre.deployments;
 
-  await deploy("MetaMultiSigWallet", {
+  await deploy("Lyxaxis", {
     from: deployer,
-    // Contract constructor arguments
-    args: [31337, ["0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"], 1],
     log: true,
     // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
     // automatically mining the contract deployment transaction. There is no effect on live networks.
@@ -31,11 +29,11 @@ const deployMetaMultiSigWallet: DeployFunction = async function (hre: HardhatRun
   });
 
   // Get the deployed contract
-  // const metaMultiSigWallet = await hre.ethers.getContract("MetaMultiSigWallet", deployer);
+  // const Lyxaxis = await hre.ethers.getContract("Lyxaxis", deployer);
 };
 
-export default deployMetaMultiSigWallet;
+export default deployLyxaxis;
 
 // Tags are useful if you have multiple deploy files and only want to run one of them.
-// e.g. yarn deploy --tags MetaMultiSigWallet
-deployMetaMultiSigWallet.tags = ["MetaMultiSigWallet"];
+// e.g. yarn deploy --tags Lyxaxis
+deployLyxaxis.tags = ["Lyxaxis"];

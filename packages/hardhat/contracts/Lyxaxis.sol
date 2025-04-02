@@ -9,7 +9,7 @@ error Lyxaxis__NoRequiredSignatures();
 error Lyxaxis__NoOwners();
 
 contract Lyxaxis is ILyxaxis {
-    address[] public s_multisigs;
+    address[] private s_multisigs;
 
     function createWallet(
         string calldata _name,
@@ -17,15 +17,23 @@ contract Lyxaxis is ILyxaxis {
         address[] calldata _owners,
         uint256 _signaturesRequired
     ) external returns (address) {
-        require(_signaturesRequired, Lyxaxis__NoRequiredSignatures());
+        require(_signaturesRequired != 0, Lyxaxis__NoRequiredSignatures());
         require(_owners.length > 0, Lyxaxis__NoOwners());
 
         MultiSig multisig = new MultiSig(_name, _chainId, _owners, _signaturesRequired);
 
-        s_multisigs.push(multisig);
+        s_multisigs.push(address(multisig));
 
-        emit CreatedMultisig(multisig);
+        emit CreatedMultisig(address(multisig));
 
-        return multisig;
+        return address(multisig);
+    }
+
+    function getMultisig(uint256 _index) external view returns (address) {
+        return s_multisigs[_index];
+    }
+
+    function getMultisigs() external view returns (address[] memory) {
+        return s_multisigs;
     }
 }

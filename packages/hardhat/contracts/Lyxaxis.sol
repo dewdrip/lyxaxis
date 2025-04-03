@@ -2,14 +2,18 @@
 pragma solidity 0.8.27;
 
 import { MultiSig } from "./MultiSig.sol";
-
+import { MultiSigRegistry } from "./MultiSigRegistry.sol";
 import { ILyxaxis } from "./interfaces/ILyxaxis.sol";
 
 error Lyxaxis__NoRequiredSignatures();
 error Lyxaxis__NoOwners();
 
 contract Lyxaxis is ILyxaxis {
-    address[] private s_multisigs;
+    MultiSigRegistry private immutable i_registry;
+
+    constructor() {
+        i_registry = new MultiSigRegistry(address(this));
+    }
 
     function createWallet(
         string calldata _name,
@@ -20,20 +24,18 @@ contract Lyxaxis is ILyxaxis {
         require(_signaturesRequired != 0, Lyxaxis__NoRequiredSignatures());
         require(_owners.length > 0, Lyxaxis__NoOwners());
 
-        MultiSig multisig = new MultiSig(_name, _chainId, _owners, _signaturesRequired);
+        MultiSig multisig = new MultiSig(_name, _chainId, _owners, _signaturesRequired, i_registry);
+        address multisigAddress = address(multisig);
 
-        s_multisigs.push(address(multisig));
+        // Register the new multisig with its owners in the registry
+        i_registry.registerMultisig(multisigAddress, _owners);
 
-        emit CreatedMultisig(msg.sender, address(multisig));
+        emit CreatedMultisig(multisigAddress);
 
-        return address(multisig);
+        return multisigAddress;
     }
 
-    function getMultisig(uint256 _index) external view returns (address) {
-        return s_multisigs[_index];
-    }
-
-    function getMultisigs() external view returns (address[] memory) {
-        return s_multisigs;
+    function getRegistry() external view returns (address) {
+        return address(i_registry);
     }
 }

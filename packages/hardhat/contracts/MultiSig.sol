@@ -7,6 +7,7 @@ pragma solidity 0.8.27;
 
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
+import "./MultiSigRegistry.sol";
 
 contract MultiSig {
     using MessageHashUtils for bytes32;
@@ -27,10 +28,18 @@ contract MultiSig {
     uint public nonce;
     uint public chainId;
     string public name;
+    MultiSigRegistry private immutable i_registry;
 
-    constructor(string memory _name, uint256 _chainId, address[] memory _owners, uint _signaturesRequired) {
+    constructor(
+        string memory _name,
+        uint256 _chainId,
+        address[] memory _owners,
+        uint _signaturesRequired,
+        MultiSigRegistry _registry
+    ) {
         signaturesRequired = _signaturesRequired;
-        for (uint i = 0; i < _owners.length; i++) {
+        uint256 numOfOwners = _owners.length;
+        for (uint i = 0; i < numOfOwners; i++) {
             address owner = _owners[i];
             require(owner != address(0), "constructor: zero address");
             require(!isOwner[owner], "constructor: owner not unique");
@@ -39,6 +48,7 @@ contract MultiSig {
         }
         chainId = _chainId;
         name = _name;
+        i_registry = _registry;
     }
 
     modifier onlySelf() {
@@ -53,6 +63,9 @@ contract MultiSig {
         isOwner[newSigner] = true;
         signaturesRequired = newSignaturesRequired;
         emit Owner(newSigner, isOwner[newSigner]);
+
+        // Update registry
+        i_registry.addSigner(newSigner);
     }
 
     function removeSigner(address oldSigner, uint256 newSignaturesRequired) public onlySelf {
@@ -61,6 +74,9 @@ contract MultiSig {
         isOwner[oldSigner] = false;
         signaturesRequired = newSignaturesRequired;
         emit Owner(oldSigner, isOwner[oldSigner]);
+
+        // Update registry
+        i_registry.removeSigner(oldSigner);
     }
 
     function updateSignaturesRequired(uint256 newSignaturesRequired) public onlySelf {

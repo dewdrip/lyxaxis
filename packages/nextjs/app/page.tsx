@@ -1,12 +1,73 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { NextPage } from "next";
-import { useAccount } from "wagmi";
+import { useAccount, usePublicClient } from "wagmi";
 import { MultisigCard } from "~~/components/cards/MultisigCard";
+import { useDeployedContractInfo } from "~~/hooks/scaffold-eth";
 
 const Home: NextPage = () => {
   const { address: connectedAddress } = useAccount();
+  const publicClient = usePublicClient();
+  const { data: lyxaxisContract } = useDeployedContractInfo("Lyxaxis");
+  const [registryAddress, setRegistryAddress] = useState<string>();
+  const [multisigs, setMultisigs] = useState<string[]>([]);
+
+  useEffect(() => {
+    const getRegistryAddress = async () => {
+      if (!publicClient || !lyxaxisContract?.address) return;
+
+      try {
+        const data = await publicClient.readContract({
+          address: lyxaxisContract.address,
+          abi: [
+            {
+              inputs: [],
+              name: "getRegistry",
+              outputs: [{ internalType: "address", name: "", type: "address" }],
+              stateMutability: "view",
+              type: "function",
+            },
+          ],
+          functionName: "getRegistry",
+        });
+        setRegistryAddress(data as string);
+      } catch (error) {
+        console.error("Error fetching registry address:", error);
+      }
+    };
+
+    getRegistryAddress();
+  }, [publicClient, lyxaxisContract?.address]);
+
+  useEffect(() => {
+    const getMultisigs = async () => {
+      if (!publicClient || !registryAddress || !connectedAddress) return;
+
+      try {
+        const data = await publicClient.readContract({
+          address: registryAddress,
+          abi: [
+            {
+              inputs: [{ internalType: "address", name: "_signer", type: "address" }],
+              name: "getSignerMultisigs",
+              outputs: [{ internalType: "address[]", name: "", type: "address[]" }],
+              stateMutability: "view",
+              type: "function",
+            },
+          ],
+          functionName: "getSignerMultisigs",
+          args: [connectedAddress],
+        });
+        setMultisigs(data as string[]);
+      } catch (error) {
+        console.error("Error fetching multisigs:", error);
+      }
+    };
+
+    getMultisigs();
+  }, [publicClient, registryAddress, connectedAddress]);
 
   return (
     <div className="flex items-center flex-col flex-grow pt-10">
@@ -21,7 +82,7 @@ const Home: NextPage = () => {
           />
         </div>
 
-        <div className="flex flex-col gap-y-3">
+        <div className="flex flex-col gap-y-3 w-full">
           <div className="flex items-center justify-between">
             <h6 className="text-2xl text-left">My Multisigs</h6>
             <Link
@@ -30,8 +91,10 @@ const Home: NextPage = () => {
             />
           </div>
           <div className="flex flex-col gap-y-2">
-            <MultisigCard multisigAddress={connectedAddress ? connectedAddress : ""} />
-            <MultisigCard multisigAddress={connectedAddress ? connectedAddress : ""} />
+            {multisigs?.map((multisigAddress: string) => (
+              <MultisigCard key={multisigAddress} multisigAddress={multisigAddress} />
+            ))}
+            {(!multisigs || multisigs.length === 0) && <p className="text-center text-gray-500">No multisigs found</p>}
           </div>
         </div>
       </div>

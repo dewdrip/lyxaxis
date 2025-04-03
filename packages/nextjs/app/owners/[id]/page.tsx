@@ -4,6 +4,7 @@ import { type FC, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useIsMounted, useLocalStorage } from "usehooks-ts";
 import { Abi, encodeFunctionData } from "viem";
+import { MultiSigNav } from "~~/components/Navbar";
 import { Address, AddressInput, IntegerInput } from "~~/components/scaffold-eth";
 import { useDeployedContractInfo, useScaffoldEventHistory, useScaffoldReadContract } from "~~/hooks/scaffold-eth";
 import { DEFAULT_TX_DATA, Method, OWNERS_METHODS, PredefinedTxData } from "~~/utils/methods";
@@ -38,9 +39,10 @@ const Owners: FC = () => {
   }, [predefinedTxData.methodName, setPredefinedTxData]);
 
   return isMounted() ? (
-    <div className="flex flex-col flex-1 items-center my-20 gap-8">
-      <div className="flex items-center flex-col flex-grow w-full max-w-lg">
-        <div className="flex flex-col items-center bg-base-100 shadow-lg shadow-secondary border-8 border-secondary rounded-xl p-6 w-full">
+    <div className="flex flex-col flex-1 items-center  gap-8">
+      <MultiSigNav />
+      <div className="flex items-center flex-col flex-grow w-full max-w-lg px-4">
+        <div className="flex flex-col items-center bg-base-100 shadow shadow-secondary border-gray rounded-xl p-6 w-full">
           <div className="max-w-full">Signatures required: {String(signaturesRequired)}</div>
 
           <div className="mt-6 w-full space-y-3">

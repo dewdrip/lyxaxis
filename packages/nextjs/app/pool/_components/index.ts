@@ -1,1 +1,1 @@
-export * from "./TransactionItem";
+export * from "../../multisig/_components/TransactionItem";

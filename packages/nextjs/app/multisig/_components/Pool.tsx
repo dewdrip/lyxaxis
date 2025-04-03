@@ -1,8 +1,8 @@
 import { type FC, useMemo, useState } from "react";
-import { TransactionData } from "../create/page";
-import { TransactionItem } from "./_components";
+import { TransactionItem } from "./TransactionItem";
 import { useInterval } from "usehooks-ts";
 import { useChainId } from "wagmi";
+import { TransactionData } from "~~/app/create/page";
 import {
   useDeployedContractInfo,
   useScaffoldContract,
@@ -84,9 +84,9 @@ export const Pool: FC = () => {
   );
 
   return (
-    <div className="flex flex-col flex-1 items-center my-20 gap-8">
+    <div className="flex flex-col flex-1 items-center gap-8">
       <div className="flex items-center flex-col flex-grow w-full max-w-2xl">
-        <div className="flex flex-col items-center bg-base-100 shadow-lg shadow-secondary border-8 border-secondary rounded-xl p-6 w-full">
+        <div className="flex flex-col items-center bg-base-100 border border-gray rounded-xl p-6 w-full">
           <div className="text-xl font-bold">Pool</div>
 
           <div>Nonce: {nonce !== undefined ? `#${nonce}` : "Loading..."}</div>

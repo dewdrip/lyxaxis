@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Navbar } from "./Navbar";
 import { RainbowKitProvider, darkTheme, lightTheme } from "@rainbow-me/rainbowkit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AppProgressBar as ProgressBar } from "next-nprogress-bar";
@@ -13,15 +14,15 @@ import { BlockieAvatar } from "~~/components/scaffold-eth";
 import { useInitializeNativeCurrencyPrice } from "~~/hooks/scaffold-eth";
 import { wagmiConfig } from "~~/services/web3/wagmiConfig";
 
-
 const ScaffoldEthApp = ({ children }: { children: React.ReactNode }) => {
   useInitializeNativeCurrencyPrice();
 
   return (
     <>
-      <div className={`flex flex-col min-h-screen font-space-grotesk`}>
-        <Header />
-        <main className="relative flex flex-col flex-1">{children}</main>
+      <div className={`flex flex-col min-h-screen  font-space-grotesk`}>
+        <main className="relative flex flex-col w-[432px] mx-auto  flex-1 bg-base-300">
+          <Navbar /> {children}
+        </main>
         <Footer />
       </div>
       <Toaster />
@@ -36,8 +37,6 @@ export const queryClient = new QueryClient({
     },
   },
 });
-
-
 
 export const ScaffoldEthAppWithProviders = ({ children }: { children: React.ReactNode }) => {
   const { resolvedTheme } = useTheme();
@@ -56,9 +55,7 @@ export const ScaffoldEthAppWithProviders = ({ children }: { children: React.Reac
           avatar={BlockieAvatar}
           theme={mounted ? (isDarkMode ? darkTheme() : lightTheme()) : lightTheme()}
         >
-          
           <ScaffoldEthApp>{children}</ScaffoldEthApp>
-          
         </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>

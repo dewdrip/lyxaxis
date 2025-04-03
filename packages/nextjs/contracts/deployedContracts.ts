@@ -11,6 +11,11 @@ const deployedContracts = {
       abi: [
         {
           inputs: [],
+          stateMutability: "nonpayable",
+          type: "constructor",
+        },
+        {
+          inputs: [],
           name: "Lyxaxis__NoOwners",
           type: "error",
         },
@@ -22,12 +27,6 @@ const deployedContracts = {
         {
           anonymous: false,
           inputs: [
-            {
-              indexed: false,
-              internalType: "address",
-              name: "deployer",
-              type: "address",
-            },
             {
               indexed: false,
               internalType: "address",
@@ -73,32 +72,13 @@ const deployedContracts = {
           type: "function",
         },
         {
-          inputs: [
-            {
-              internalType: "uint256",
-              name: "_index",
-              type: "uint256",
-            },
-          ],
-          name: "getMultisig",
+          inputs: [],
+          name: "getRegistry",
           outputs: [
             {
               internalType: "address",
               name: "",
               type: "address",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "getMultisigs",
-          outputs: [
-            {
-              internalType: "address[]",
-              name: "",
-              type: "address[]",
             },
           ],
           stateMutability: "view",

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Navbar } from "./Navbar";
 import { RainbowKitProvider, darkTheme, lightTheme } from "@rainbow-me/rainbowkit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AppProgressBar as ProgressBar } from "next-nprogress-bar";
@@ -18,9 +19,10 @@ const ScaffoldEthApp = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <>
-      <div className={`flex flex-col min-h-screen font-space-grotesk`}>
-        <Header />
-        <main className="relative flex flex-col flex-1">{children}</main>
+      <div className={`flex flex-col min-h-screen  font-space-grotesk`}>
+        <main className="relative flex flex-col w-[432px] mx-auto  flex-1 bg-base-300">
+          <Navbar /> {children}
+        </main>
         <Footer />
       </div>
       <Toaster />

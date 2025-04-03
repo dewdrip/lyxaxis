@@ -138,7 +138,7 @@ const CreatePage: FC = () => {
   return isMounted() ? (
     <div className="flex flex-col flex-1 items-center my-20 gap-8">
       <div className="flex items-center flex-col flex-grow w-full max-w-lg">
-        <div className="flex flex-col bg-base-100 shadow-lg shadow-secondary border-8 border-secondary rounded-xl w-full p-6">
+        <div className="flex flex-col bg-base-200 border border-gray rounded-xl w-full p-6">
           <div>
             <label className="label">
               <span className="label-text">Nonce</span>

@@ -74,6 +74,7 @@ export const useScaffoldEventHistory = <
   TReceiptData extends boolean = false,
 >({
   contractName,
+  contractAddress,
   eventName,
   fromBlock,
   chainId,
@@ -109,7 +110,7 @@ export const useScaffoldEventHistory = <
       "eventHistory",
       {
         contractName,
-        address: deployedContractData?.address,
+        address: contractAddress ? contractAddress : deployedContractData?.address,
         eventName,
         fromBlock: fromBlock.toString(),
         chainId: selectedNetwork.id,

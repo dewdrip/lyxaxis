@@ -19,10 +19,12 @@ export const useScaffoldContract = <
   TWalletClient extends Exclude<GetWalletClientReturnType, null> | undefined,
 >({
   contractName,
+  contractAddress,
   walletClient,
   chainId,
 }: {
   contractName: TContractName;
+  contractAddress?: Address;
   walletClient?: TWalletClient | null;
   chainId?: AllowedChainIds;
 }) => {
@@ -49,7 +51,7 @@ export const useScaffoldContract = <
       Chain,
       Account
     >({
-      address: deployedContractData.address,
+      address: contractAddress ? contractAddress : deployedContractData.address,
       abi: deployedContractData.abi as Contract<TContractName>["abi"],
       client: {
         public: publicClient,

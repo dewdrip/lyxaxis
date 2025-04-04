@@ -1,3 +1,5 @@
+"use client";
+
 import { type FC, useMemo, useState } from "react";
 import { TransactionData } from "../create/[id]/page";
 import { TransactionItem } from "./_components";
@@ -18,22 +20,22 @@ export const Pool: FC = () => {
   // const [subscriptionEventsHashes, setSubscriptionEventsHashes] = useState<`0x${string}`[]>([]);
   const { targetNetwork } = useTargetNetwork();
   const poolServerUrl = getPoolServerUrl(targetNetwork.id);
-  const { data: contractInfo } = useDeployedContractInfo("MetaMultiSigWallet");
+  const { data: contractInfo } = useDeployedContractInfo("MultiSig");
   const chainId = useChainId();
   const { data: nonce } = useScaffoldReadContract({
-    contractName: "MetaMultiSigWallet",
+    contractName: "MultiSig",
     functionName: "nonce",
   });
 
   const { data: eventsHistory } = useScaffoldEventHistory({
-    contractName: "MetaMultiSigWallet",
+    contractName: "MultiSig",
     eventName: "ExecuteTransaction",
     fromBlock: 0n,
     watch: true,
   });
 
   const { data: metaMultiSigWallet } = useScaffoldContract({
-    contractName: "MetaMultiSigWallet",
+    contractName: "MultiSig",
   });
 
   const historyHashes = useMemo(() => eventsHistory?.map(ev => ev.args.hash) || [], [eventsHistory]);

@@ -1,7 +1,7 @@
 "use client";
 
 import { type FC, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useIsMounted, useLocalStorage } from "usehooks-ts";
 import { Abi, encodeFunctionData } from "viem";
 import { MultiSigNav } from "~~/components/Navbar";
@@ -11,6 +11,8 @@ import { DEFAULT_TX_DATA, Method, OWNERS_METHODS, PredefinedTxData } from "~~/ut
 
 const Owners: FC = () => {
   const isMounted = useIsMounted();
+  let { id: multisigAddress } = useParams();
+  multisigAddress = multisigAddress as `0x${string}`;
 
   const router = useRouter();
 
@@ -19,15 +21,15 @@ const Owners: FC = () => {
     DEFAULT_TX_DATA,
   );
 
-  const { data: contractInfo } = useDeployedContractInfo("MetaMultiSigWallet");
+  const { data: contractInfo } = useDeployedContractInfo("MultiSig");
 
   const { data: signaturesRequired } = useScaffoldReadContract({
-    contractName: "MetaMultiSigWallet",
+    contractName: "MultiSig",
     functionName: "signaturesRequired",
   });
 
   const { data: ownerEventsHistory } = useScaffoldEventHistory({
-    contractName: "MetaMultiSigWallet",
+    contractName: "MultiSig",
     eventName: "Owner",
     fromBlock: 0n,
   });
@@ -40,7 +42,7 @@ const Owners: FC = () => {
 
   return isMounted() ? (
     <div className="flex flex-col flex-1 items-center  gap-8">
-      <MultiSigNav />
+      <MultiSigNav multisigAddress={multisigAddress} />
       <div className="flex items-center flex-col flex-grow w-full max-w-lg px-4">
         <div className="flex flex-col items-center bg-base-100 shadow shadow-secondary border-gray rounded-xl p-6 w-full">
           <div className="max-w-full">Signatures required: {String(signaturesRequired)}</div>
@@ -100,7 +102,7 @@ const Owners: FC = () => {
                   ...predefinedTxData,
                   callData,
                   amount: "0",
-                  to: contractInfo?.address,
+                  to: multisigAddress,
                 });
 
                 setTimeout(() => {

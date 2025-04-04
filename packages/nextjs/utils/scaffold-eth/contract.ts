@@ -189,6 +189,7 @@ export type UseScaffoldReadConfig<
   Partial<UseReadContractParameters>,
   {
     functionName: TFunctionName;
+    contractAddress?: Address;
   } & UseScaffoldArgsParam<TContractName, TFunctionName> &
     Omit<UseReadContractParameters, "chainId" | "abi" | "address" | "functionName" | "args">
 >;
@@ -287,6 +288,7 @@ export type UseScaffoldEventHistoryConfig<
   TReceiptData extends boolean = false,
 > = {
   contractName: TContractName;
+  contractAddress?: Address;
   eventName: IsContractDeclarationMissing<string, TEventName>;
   fromBlock: bigint;
   chainId?: AllowedChainIds;

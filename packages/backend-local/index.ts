@@ -19,74 +19,90 @@ type Transaction = {
 
 const app = express();
 
-const transactions: { [key: string]: Transaction } = {};
+// const transactions: { [key: string]: Transaction } = {};
 
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.get("/:key", async (req, res) => {
-  const { key } = req.params;
-  console.log("Get /", key);
-  res.status(200).send(transactions[key] || {});
+  try {
+    const { key: address } = req.params;
+
+    // Fetch transactions filtered by address
+    const transactions = await Transaction.find({ address: address });
+
+    console.log("Fetched transactions for address:", address, transactions);
+
+    if (transactions.length === 0) {
+      return res
+        .status(404)
+        .json({ status: "error", message: "ITEM_NOT_FOUND" });
+    }
+
+    return res.status(200).json({
+      status: "success",
+      message: "Data retrieved successfully",
+      transactions,
+    });
+  } catch (err) {
+    console.error("Error fetching transactions:", err);
+    return res.status(500).json({
+      status: "error",
+      message: "Failed to retrieve data",
+      error: err.message,
+    });
+  }
 });
 
-// Function to add a new multisig wallet
-const addMultisig = async (address: string) => {
-  const existingMultisig = await Multisig.findOne({ address });
-
-  if (!existingMultisig) {
-    await Multisig.create({ address });
-    console.log("Multisig address created:", address);
-  } else {
-    console.log("Multisig address already exists.");
-  }
-};
-
-// Function to add or update a transaction
 const addTransaction = async (txData: ITransaction) => {
-  const { multisigAddress, hash } = txData;
+  const { address, hash } = txData;
 
-  // Ensure the multisig address exists
-  const existingMultisig = await Multisig.findOne({ address: multisigAddress });
-  if (!existingMultisig) {
-    console.log("Multisig address does not exist. Create it first.");
-    return;
-  }
+  // Ensure the multisig entry exists (create if not)
+  const existingMultisig = await Multisig.findOneAndUpdate(
+    { address },
+    { $setOnInsert: { address } },
+    { upsert: true, new: true }
+  );
 
-  // Check if a transaction with the same hash exists
-  const existingTransaction = await Transaction.findOne({
-    multisigAddress,
-    hash,
-  });
+  console.log("Multisig entry ensured:", existingMultisig.address);
 
-  if (existingTransaction) {
-    // Update the existing transaction with new details
-    await Transaction.updateOne({ multisigAddress, hash }, { $set: txData });
-    console.log("Transaction updated for hash:", hash);
-  } else {
-    // Insert a new transaction if no matching hash is found
-    await Transaction.create(txData);
-    console.log("New transaction added for multisig:", multisigAddress);
-  }
+  // Upsert transaction: update if exists, insert if not
+  const transaction = await Transaction.findOneAndUpdate(
+    { address, hash },
+    { $set: txData },
+    { upsert: true, new: true }
+  );
+
+  console.log(
+    transaction ? "Transaction upserted:" : "Transaction added:",
+    hash
+  );
+  return transaction;
 };
 
-// app.post("/", async (req, res) => {
-//   console.log("Post /", req.body);
-//   res.send(req.body);
-//   const key = `${req.body.address}_${req.body.chainId}`;
-//   console.log("key:", key);
-//   if (!transactions[key]) {
-//     transactions[key] = {};
-//   }
-//   transactions[key][req.body.hash] = req.body;
-//   console.log("transactions", transactions);
-// });
-
+// Express route to add a transaction
 app.post("/", async (req, res) => {
-  console.log("Post /", req.body);
-  await addMultisig(req.body.address);
-  await addTransaction(req.body);
+  console.log("POST /", req.body);
+
+  try {
+    const response = await addTransaction(req.body);
+
+    if (!response) {
+      return res.status(500).json({ message: "ITEM_NOT_FOUND" });
+    }
+
+    return res
+      .status(200)
+      .json({ message: "Transaction added successfully", data: response });
+  } catch (error) {
+    console.error("Transaction Error:", error);
+    return res.status(500).json({
+      status: "error",
+      message: "Failed to update data",
+      error: error.message,
+    });
+  }
 });
 
 const PORT = process.env.PORT || 49832;

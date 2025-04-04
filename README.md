@@ -79,7 +79,7 @@ At a high-level, the contract core functions are carried out as follows:
 
 - `bytes[] memory signatures` is then passed into `executeTransaction` as well as the necessary info to use `recover()` to obtain the public address that ought to line up with one of the signers of the wallet.
   - This method, plus some conditional logic to avoid any duplicate entries from a single signer, is how votes for a specific transaction (hashed tx) are assessed.
-- If it's a success, the tx is passed to the `call(){}` function of the deployed MetaMultiSigWallet contract (this contract), thereby passing the `onlySelf` modifier for any possible calls to internal txs such as (`addSigner()`,`removeSigner()`,`transferFunds()`,`updateSignaturesRequired()`).
+- If it's a success, the tx is passed to the `call(){}` function of the deployed MultiSig contract (this contract), thereby passing the `onlySelf` modifier for any possible calls to internal txs such as (`addSigner()`,`removeSigner()`,`transferFunds()`,`updateSignaturesRequired()`).
 
 **Cool Stuff that is Showcased: 😎**
 
@@ -124,7 +124,7 @@ When deployed to any other chain, it will automatically use our deployed backend
 
 > 👩‍💻 Rerun `yarn deploy --reset` whenever you want to deploy new contracts to the frontend, update your current contracts with changes, or re-deploy it to get a fresh contract address.
 
-🔏 Now you are ready to edit your smart contract `MetaMultiSigWallet.sol` in `packages/hardhat/contracts`
+🔏 Now you are ready to edit your smart contract `MultiSig.sol` in `packages/hardhat/contracts`
 
 ---
 

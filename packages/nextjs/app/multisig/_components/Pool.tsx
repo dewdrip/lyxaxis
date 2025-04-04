@@ -2,7 +2,7 @@ import { type FC, useMemo, useState } from "react";
 import { TransactionItem } from "./TransactionItem";
 import { useInterval } from "usehooks-ts";
 import { useChainId } from "wagmi";
-import { TransactionData } from "~~/app/create/page";
+import { TransactionData } from "~~/app/create/[id]/page";
 import {
   useDeployedContractInfo,
   useScaffoldContract,
@@ -18,22 +18,22 @@ export const Pool: FC = () => {
   // const [subscriptionEventsHashes, setSubscriptionEventsHashes] = useState<`0x${string}`[]>([]);
   const { targetNetwork } = useTargetNetwork();
   const poolServerUrl = getPoolServerUrl(targetNetwork.id);
-  const { data: contractInfo } = useDeployedContractInfo("MetaMultiSigWallet");
+  const { data: contractInfo } = useDeployedContractInfo("MultiSig");
   const chainId = useChainId();
   const { data: nonce } = useScaffoldReadContract({
-    contractName: "MetaMultiSigWallet",
+    contractName: "MultiSig",
     functionName: "nonce",
   });
 
   const { data: eventsHistory } = useScaffoldEventHistory({
-    contractName: "MetaMultiSigWallet",
+    contractName: "MultiSig",
     eventName: "ExecuteTransaction",
     fromBlock: 0n,
     watch: true,
   });
 
-  const { data: metaMultiSigWallet } = useScaffoldContract({
-    contractName: "MetaMultiSigWallet",
+  const { data: MultiSig } = useScaffoldContract({
+    contractName: "MultiSig",
   });
 
   const historyHashes = useMemo(() => eventsHistory?.map(ev => ev.args.hash) || [], [eventsHistory]);
@@ -51,12 +51,12 @@ export const Pool: FC = () => {
           const validSignatures = [];
           // eslint-disable-next-line guard-for-in, no-restricted-syntax
           for (const s in res[i].signatures) {
-            const signer = (await metaMultiSigWallet?.read.recover([
+            const signer = (await MultiSig?.read.recover([
               res[i].hash as `0x${string}`,
               res[i].signatures[s],
             ])) as `0x${string}`;
 
-            const isOwner = await metaMultiSigWallet?.read.isOwner([signer as string]);
+            const isOwner = await MultiSig?.read.isOwner([signer as string]);
 
             if (signer && isOwner) {
               validSignatures.push({ signer, signature: res[i].signatures[s] });

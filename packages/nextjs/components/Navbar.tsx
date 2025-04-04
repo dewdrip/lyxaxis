@@ -39,6 +39,7 @@ export const MultiSigNav = () => {
   return (
     <div className=" w-full flex gap-x-3  border-b border-gray py-4  px-2">
       <NavButton link="/multisig/3820390420" title="Wallet" />
+      <NavButton link="/create/34781823989141" title="Create" />
       <NavButton link="/owners/34781823989141" title="Signers" />
       <NavButton link="/events/4274893298980943" title="Event" />
     </div>

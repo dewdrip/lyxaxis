@@ -7,12 +7,12 @@ import { Address, Balance } from "~~/components/scaffold-eth";
 import { useDeployedContractInfo, useScaffoldEventHistory } from "~~/hooks/scaffold-eth";
 
 const Multisig: FC = () => {
-  const { data: contractInfo } = useDeployedContractInfo("MetaMultiSigWallet");
+  const { data: contractInfo } = useDeployedContractInfo("MultiSig");
 
   const contractAddress = contractInfo?.address;
 
   const { data: executeTransactionEvents } = useScaffoldEventHistory({
-    contractName: "MetaMultiSigWallet",
+    contractName: "MultiSig",
     eventName: "ExecuteTransaction",
     fromBlock: 0n,
   });

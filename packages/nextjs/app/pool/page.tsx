@@ -1,5 +1,5 @@
 import { type FC, useMemo, useState } from "react";
-import { TransactionData } from "../create/page";
+import { TransactionData } from "../create/[id]/page";
 import { TransactionItem } from "./_components";
 import { useInterval } from "usehooks-ts";
 import { useChainId } from "wagmi";

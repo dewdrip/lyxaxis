@@ -2,7 +2,7 @@ import { type FC } from "react";
 import { Address, BlockieAvatar } from "../../../components/scaffold-eth";
 import { Abi, DecodeFunctionDataReturnType, decodeFunctionData, formatEther } from "viem";
 import { useAccount, useWalletClient } from "wagmi";
-import { TransactionData } from "~~/app/create/page";
+import { TransactionData } from "~~/app/create/[id]/page";
 import {
   useDeployedContractInfo,
   useScaffoldContract,

@@ -3,8 +3,13 @@ import cors from "cors";
 import bodyParser from "body-parser";
 import dotenv from "dotenv";
 import { AddressInfo } from "net";
+import { connectToDatabase } from "./db.js";
+import Multisig from "./models/Multisig.js";
+import Transaction, { ITransaction } from "./models/Transaction.js";
 
 dotenv.config();
+
+connectToDatabase();
 
 type Transaction = {
   // [TransactionData type from next app]. Didn't add it since not in use
@@ -14,28 +19,90 @@ type Transaction = {
 
 const app = express();
 
-const transactions: { [key: string]: Transaction } = {};
+// const transactions: { [key: string]: Transaction } = {};
 
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.get("/:key", async (req, res) => {
-  const { key } = req.params;
-  console.log("Get /", key);
-  res.status(200).send(transactions[key] || {});
+  try {
+    const { key: address } = req.params;
+
+    // Fetch transactions filtered by address
+    const transactions = await Transaction.find({ address: address });
+
+    console.log("Fetched transactions for address:", address, transactions);
+
+    if (transactions.length === 0) {
+      return res
+        .status(404)
+        .json({ status: "error", message: "ITEM_NOT_FOUND" });
+    }
+
+    return res.status(200).json({
+      status: "success",
+      message: "Data retrieved successfully",
+      transactions,
+    });
+  } catch (err) {
+    console.error("Error fetching transactions:", err);
+    return res.status(500).json({
+      status: "error",
+      message: "Failed to retrieve data",
+      error: err.message,
+    });
+  }
 });
 
+const addTransaction = async (txData: ITransaction) => {
+  const { address, hash } = txData;
+
+  // Ensure the multisig entry exists (create if not)
+  const existingMultisig = await Multisig.findOneAndUpdate(
+    { address },
+    { $setOnInsert: { address } },
+    { upsert: true, new: true }
+  );
+
+  console.log("Multisig entry ensured:", existingMultisig.address);
+
+  // Upsert transaction: update if exists, insert if not
+  const transaction = await Transaction.findOneAndUpdate(
+    { address, hash },
+    { $set: txData },
+    { upsert: true, new: true }
+  );
+
+  console.log(
+    transaction ? "Transaction upserted:" : "Transaction added:",
+    hash
+  );
+  return transaction;
+};
+
+// Express route to add a transaction
 app.post("/", async (req, res) => {
-  console.log("Post /", req.body);
-  res.send(req.body);
-  const key = `${req.body.address}_${req.body.chainId}`;
-  console.log("key:", key);
-  if (!transactions[key]) {
-    transactions[key] = {};
+  console.log("POST /", req.body);
+
+  try {
+    const response = await addTransaction(req.body);
+
+    if (!response) {
+      return res.status(500).json({ message: "ITEM_NOT_FOUND" });
+    }
+
+    return res
+      .status(200)
+      .json({ message: "Transaction added successfully", data: response });
+  } catch (error) {
+    console.error("Transaction Error:", error);
+    return res.status(500).json({
+      status: "error",
+      message: "Failed to update data",
+      error: error.message,
+    });
   }
-  transactions[key][req.body.hash] = req.body;
-  console.log("transactions", transactions);
 });
 
 const PORT = process.env.PORT || 49832;

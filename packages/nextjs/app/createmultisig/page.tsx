@@ -85,7 +85,7 @@ const CreateMultiSig: NextPage = () => {
   };
 
   return useIsMounted() ? (
-    <div className="flex flex-col flex-1 items-center my-20 gap-8 px-2">
+    <div className="flex flex-col flex-1 items-center my-20 gap-8 px-4">
       <div className="flex items-center flex-col flex-grow w-full max-w-lg">
         <div className="flex flex-col gap-y-6 bg-base-200 border border-gray rounded-xl w-full p-6">
           <div>

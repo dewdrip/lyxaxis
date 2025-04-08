@@ -1,8 +1,10 @@
 import { type FC, useMemo, useState } from "react";
 import { TransactionItem } from "./TransactionItem";
+import { useQuery } from "@tanstack/react-query";
 import { useInterval } from "usehooks-ts";
+import { Address } from "viem";
 import { useChainId } from "wagmi";
-import { TransactionData } from "~~/app/create/page";
+import { TransactionData } from "~~/app/create/[id]/page";
 import {
   useDeployedContractInfo,
   useScaffoldContract,
@@ -13,67 +15,76 @@ import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
 import { getPoolServerUrl } from "~~/utils/getPoolServerUrl";
 import { notification } from "~~/utils/scaffold-eth";
 
-export const Pool: FC = () => {
+export const Pool = ({ multisigAddress }: { multisigAddress: Address }) => {
   const [transactions, setTransactions] = useState<TransactionData[]>();
   // const [subscriptionEventsHashes, setSubscriptionEventsHashes] = useState<`0x${string}`[]>([]);
   const { targetNetwork } = useTargetNetwork();
   const poolServerUrl = getPoolServerUrl(targetNetwork.id);
-  const { data: contractInfo } = useDeployedContractInfo("MetaMultiSigWallet");
   const chainId = useChainId();
   const { data: nonce } = useScaffoldReadContract({
-    contractName: "MetaMultiSigWallet",
+    contractName: "MultiSig",
+    contractAddress: multisigAddress,
     functionName: "nonce",
   });
 
   const { data: eventsHistory } = useScaffoldEventHistory({
-    contractName: "MetaMultiSigWallet",
+    contractName: "MultiSig",
     eventName: "ExecuteTransaction",
+    contractAddress: multisigAddress,
     fromBlock: 0n,
     watch: true,
   });
 
-  const { data: metaMultiSigWallet } = useScaffoldContract({
-    contractName: "MetaMultiSigWallet",
+  const { data: MultiSig } = useScaffoldContract({
+    contractName: "MultiSig",
+    contractAddress: multisigAddress,
   });
 
   const historyHashes = useMemo(() => eventsHistory?.map(ev => ev.args.hash) || [], [eventsHistory]);
 
-  useInterval(() => {
-    const getTransactions = async () => {
-      try {
-        const res: { [key: string]: TransactionData } = await (
-          await fetch(`${poolServerUrl}${contractInfo?.address}_${chainId}`)
-        ).json();
+  const fetchTransactionData = async (id?: string) => {
+    try {
+      const response = await fetch(`${poolServerUrl}${multisigAddress}`);
+      const res = await response.json();
 
-        const newTransactions: TransactionData[] = [];
-        // eslint-disable-next-line no-restricted-syntax, guard-for-in
-        for (const i in res) {
+      if (!res.transactions) {
+        console.error("No transactions found in response:", res);
+        return;
+      }
+
+      const newTransactions: TransactionData[] = await Promise.all(
+        res.transactions.map(async (tx: TransactionData) => {
           const validSignatures = [];
-          // eslint-disable-next-line guard-for-in, no-restricted-syntax
-          for (const s in res[i].signatures) {
-            const signer = (await metaMultiSigWallet?.read.recover([
-              res[i].hash as `0x${string}`,
-              res[i].signatures[s],
-            ])) as `0x${string}`;
 
-            const isOwner = await metaMultiSigWallet?.read.isOwner([signer as string]);
+          for (const sig of tx.signatures || []) {
+            const signer = (await MultiSig?.read.recover([tx.hash as `0x${string}`, sig])) as `0x${string}`;
+
+            const isOwner = await MultiSig?.read.isOwner([signer as string]);
 
             if (signer && isOwner) {
-              validSignatures.push({ signer, signature: res[i].signatures[s] });
+              validSignatures.push({ signer, signature: sig });
             }
           }
-          const update: TransactionData = { ...res[i], validSignatures };
-          newTransactions.push(update);
-        }
-        setTransactions(newTransactions);
-      } catch (e) {
-        notification.error("Error fetching transactions");
-        console.log(e);
-      }
-    };
 
-    getTransactions();
-  }, 3777);
+          return { ...tx, validSignatures };
+        }),
+      );
+
+      setTransactions(newTransactions);
+
+      return newTransactions;
+    } catch (error) {
+      console.error("Error fetching transaction data:", error);
+    }
+  };
+
+  useQuery({
+    queryKey: ["campaign", multisigAddress],
+    queryFn: () => fetchTransactionData(),
+    enabled: !!multisigAddress, // Prevents execution if ID is missing
+    refetchOnMount: true, // Always refetch when the component mounts
+    refetchOnWindowFocus: true,
+  });
 
   const lastTx = useMemo(
     () =>

@@ -8,7 +8,6 @@ import { useReadContract } from "wagmi";
 import { MultiSigNav } from "~~/components/Navbar";
 import { Address, AddressInput, IntegerInput } from "~~/components/scaffold-eth";
 import { useMultiSigRegistry } from "~~/hooks/contract/useMultiSigRegistry";
-import { useDeployedContractInfo, useScaffoldEventHistory, useScaffoldReadContract } from "~~/hooks/scaffold-eth";
 import MultiSigABI from "~~/utils/abis/MultiSigABI.json";
 import { DEFAULT_TX_DATA, Method, OWNERS_METHODS, PredefinedTxData } from "~~/utils/methods";
 

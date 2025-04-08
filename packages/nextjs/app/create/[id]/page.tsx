@@ -4,13 +4,13 @@ import { type FC, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useIsMounted, useLocalStorage } from "usehooks-ts";
 import { Address, parseEther } from "viem";
-import { useChainId, useWalletClient } from "wagmi";
+import { useChainId, usePublicClient, useReadContract, useWalletClient } from "wagmi";
 import { MultiSigNav } from "~~/components/Navbar";
 import { AddressInput, EtherInput, InputBase } from "~~/components/scaffold-eth";
-import { useDeployedContractInfo, useScaffoldContract, useScaffoldReadContract } from "~~/hooks/scaffold-eth";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
+import MultiSigABI from "~~/utils/abis/MultiSigABI.json";
 import { getPoolServerUrl } from "~~/utils/getPoolServerUrl";
-import { DEFAULT_TX_DATA, METHODS, Method, PredefinedTxData } from "~~/utils/methods";
+import { DEFAULT_TX_DATA, Method, PredefinedTxData } from "~~/utils/methods";
 import { notification } from "~~/utils/scaffold-eth";
 
 export type TransactionData = {
@@ -41,7 +41,6 @@ const CreatePage: FC = () => {
   const poolServerUrl = getPoolServerUrl(targetNetwork.id);
 
   const [ethValue, setEthValue] = useState("");
-  const { data: contractInfo } = useDeployedContractInfo("MultiSig");
 
   const [predefinedTxData, setPredefinedTxData] = useLocalStorage<PredefinedTxData>("predefined-tx-data", {
     methodName: "transferFunds",
@@ -50,25 +49,21 @@ const CreatePage: FC = () => {
     amount: "0",
   });
 
-  const { data: nonce } = useScaffoldReadContract({
-    contractName: "MultiSig",
-    contractAddress: multisigAddress,
+  const { data: nonce } = useReadContract({
+    address: multisigAddress,
+    abi: MultiSigABI,
     functionName: "nonce",
   });
 
-  console.log("nonce", nonce);
-
-  const { data: signaturesRequired } = useScaffoldReadContract({
-    contractName: "MultiSig",
+  const { data: signaturesRequired } = useReadContract({
+    address: multisigAddress,
+    abi: MultiSigABI,
     functionName: "signaturesRequired",
   });
 
   const txTo = predefinedTxData.methodName === "transferFunds" ? predefinedTxData.signer : multisigAddress;
 
-  const { data: metaMultiSigWallet } = useScaffoldContract({
-    contractName: "MultiSig",
-    contractAddress: multisigAddress,
-  });
+  const publicClient = usePublicClient();
 
   const handleCreate = async () => {
     try {
@@ -77,20 +72,35 @@ const CreatePage: FC = () => {
         return;
       }
 
-      const newHash = (await metaMultiSigWallet?.read.getTransactionHash([
-        nonce as bigint,
-        String(txTo),
-        BigInt(predefinedTxData.amount as string),
-        predefinedTxData.callData as `0x${string}`,
-      ])) as `0x${string}`;
+      const newHash = (await publicClient?.readContract({
+        address: multisigAddress,
+        abi: MultiSigABI,
+        functionName: "getTransactionHash",
+        args: [
+          nonce as bigint,
+          String(txTo),
+          BigInt(predefinedTxData.amount as string),
+          predefinedTxData.callData as `0x${string}`,
+        ],
+      })) as `0x${string}`;
 
       const signature = await walletClient.signMessage({
         message: { raw: newHash },
       });
 
-      const recover = (await metaMultiSigWallet?.read.recover([newHash, signature])) as Address;
+      const recover = (await publicClient?.readContract({
+        address: multisigAddress,
+        abi: MultiSigABI,
+        functionName: "recover",
+        args: [newHash, signature],
+      })) as Address;
 
-      const isOwner = await metaMultiSigWallet?.read.isOwner([recover]);
+      const isOwner = await publicClient?.readContract({
+        address: multisigAddress,
+        abi: MultiSigABI,
+        functionName: "isOwner",
+        args: [recover],
+      });
 
       if (isOwner) {
         if (!multisigAddress || !predefinedTxData.amount || !txTo) {
@@ -100,14 +110,14 @@ const CreatePage: FC = () => {
         const txData: TransactionData = {
           chainId: chainId,
           address: multisigAddress,
-          nonce: nonce || 0n,
+          nonce: (nonce as bigint) || 0n,
           to: txTo,
           amount: predefinedTxData.amount,
           data: predefinedTxData.callData as `0x${string}`,
           hash: newHash,
           signatures: [signature],
           signers: [recover],
-          requiredApprovals: signaturesRequired || 0n,
+          requiredApprovals: (signaturesRequired as bigint) || 0n,
         };
 
         await fetch(poolServerUrl, {

@@ -3,13 +3,17 @@
 import { type FC, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useIsMounted, useLocalStorage } from "usehooks-ts";
-import { Abi, encodeFunctionData } from "viem";
-import { useReadContract } from "wagmi";
+import { Abi, Address as AddressType, encodeFunctionData } from "viem";
+import { useChainId, usePublicClient, useReadContract, useWalletClient } from "wagmi";
+import { TransactionData } from "~~/app/create/[id]/page";
 import { MultiSigNav } from "~~/components/Navbar";
 import { Address, AddressInput, IntegerInput } from "~~/components/scaffold-eth";
 import { useMultiSigRegistry } from "~~/hooks/contract/useMultiSigRegistry";
+import { useTargetNetwork } from "~~/hooks/scaffold-eth";
 import MultiSigABI from "~~/utils/abis/MultiSigABI.json";
+import { getPoolServerUrl } from "~~/utils/getPoolServerUrl";
 import { DEFAULT_TX_DATA, Method, OWNERS_METHODS, PredefinedTxData } from "~~/utils/methods";
+import { notification } from "~~/utils/scaffold-eth";
 
 const Owners: FC = () => {
   const isMounted = useIsMounted();
@@ -33,6 +37,110 @@ const Owners: FC = () => {
     functionName: "getMultisigOwners",
     args: [multisigAddress],
   });
+
+  const publicClient = usePublicClient();
+  const { data: walletClient } = useWalletClient();
+
+  const { targetNetwork } = useTargetNetwork();
+  const chainId = useChainId();
+
+  const poolServerUrl = getPoolServerUrl(targetNetwork.id);
+
+  const { data: nonce } = useReadContract({
+    address: multisigAddress,
+    abi: MultiSigABI,
+    functionName: "nonce",
+  });
+
+  const handleCreate = async () => {
+    try {
+      if (!walletClient) {
+        console.log("No wallet client!");
+        return;
+      }
+
+      const callData = encodeFunctionData({
+        abi: MultiSigABI as Abi,
+        functionName: predefinedTxData.methodName,
+        args: [predefinedTxData.signer, predefinedTxData.newSignaturesNumber],
+      });
+
+      const newHash = (await publicClient?.readContract({
+        address: multisigAddress,
+        abi: MultiSigABI,
+        functionName: "getTransactionHash",
+        args: [
+          nonce as bigint,
+          String(multisigAddress),
+          BigInt(predefinedTxData.amount as string),
+          callData as `0x${string}`,
+        ],
+      })) as `0x${string}`;
+
+      const signature = await walletClient.signMessage({
+        message: { raw: newHash },
+      });
+
+      const recover = (await publicClient?.readContract({
+        address: multisigAddress,
+        abi: MultiSigABI,
+        functionName: "recover",
+        args: [newHash, signature],
+      })) as AddressType;
+
+      const isOwner = await publicClient?.readContract({
+        address: multisigAddress,
+        abi: MultiSigABI,
+        functionName: "isOwner",
+        args: [recover],
+      });
+
+      if (isOwner) {
+        if (!multisigAddress || !predefinedTxData.amount || !multisigAddress) {
+          return;
+        }
+
+        const txData: TransactionData = {
+          chainId: chainId,
+          address: multisigAddress,
+          nonce: (nonce as bigint) || 0n,
+          to: multisigAddress,
+          amount: predefinedTxData.amount,
+          data: callData as `0x${string}`,
+          hash: newHash,
+          signatures: [signature],
+          signers: [recover],
+          requiredApprovals: (signaturesRequired as bigint) || 0n,
+        };
+
+        await fetch(poolServerUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(
+            txData,
+            // stringifying bigint
+            (key, value) => (typeof value === "bigint" ? value.toString() : value),
+          ),
+        });
+
+        setPredefinedTxData({
+          ...predefinedTxData,
+          callData,
+          amount: "0",
+          to: multisigAddress,
+        });
+
+        setTimeout(() => {
+          router.push(`/multisig/${multisigAddress}`);
+        }, 777);
+      } else {
+        notification.info("Only owners can propose transactions");
+      }
+    } catch (e) {
+      notification.error("Error while proposing transaction");
+      console.log(e);
+    }
+  };
 
   useEffect(() => {
     if (predefinedTxData.methodName === "transferFunds") {
@@ -89,27 +197,7 @@ const Owners: FC = () => {
               disableMultiplyBy1e18
             />
 
-            <button
-              className="btn btn-secondary btn-sm"
-              onClick={() => {
-                const callData = encodeFunctionData({
-                  abi: MultiSigABI as Abi,
-                  functionName: predefinedTxData.methodName,
-                  args: [predefinedTxData.signer, predefinedTxData.newSignaturesNumber],
-                });
-
-                setPredefinedTxData({
-                  ...predefinedTxData,
-                  callData,
-                  amount: "0",
-                  to: multisigAddress,
-                });
-
-                setTimeout(() => {
-                  router.push(`/create/${multisigAddress}`);
-                }, 777);
-              }}
-            >
+            <button className="btn btn-secondary btn-sm" onClick={handleCreate}>
               Create Tx
             </button>
           </div>

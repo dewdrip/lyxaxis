@@ -107,7 +107,7 @@ const Owners: FC = () => {
                 });
 
                 setTimeout(() => {
-                  router.push("/create");
+                  router.push(`/create/${multisigAddress}`);
                 }, 777);
               }}
             >

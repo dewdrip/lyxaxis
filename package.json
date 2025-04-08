@@ -47,7 +47,8 @@
     "vercel": "yarn workspace @se-2/nextjs vercel",
     "vercel:login": "yarn workspace @se-2/nextjs vercel:login",
     "vercel:yolo": "yarn workspace @se-2/nextjs vercel:yolo",
-    "verify": "yarn hardhat:verify"
+    "verify": "yarn hardhat:verify",
+    "add:backend": "yarn workspace backend-local add"
   },
   "devDependencies": {
     "husky": "~8.0.3",

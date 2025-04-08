@@ -4,9 +4,12 @@ import { type FC, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useIsMounted, useLocalStorage } from "usehooks-ts";
 import { Abi, encodeFunctionData } from "viem";
+import { useReadContract } from "wagmi";
 import { MultiSigNav } from "~~/components/Navbar";
 import { Address, AddressInput, IntegerInput } from "~~/components/scaffold-eth";
+import { useMultiSigRegistry } from "~~/hooks/contract/useMultiSigRegistry";
 import { useDeployedContractInfo, useScaffoldEventHistory, useScaffoldReadContract } from "~~/hooks/scaffold-eth";
+import MultiSigABI from "~~/utils/abis/MultiSigABI.json";
 import { DEFAULT_TX_DATA, Method, OWNERS_METHODS, PredefinedTxData } from "~~/utils/methods";
 
 const Owners: FC = () => {
@@ -21,17 +24,15 @@ const Owners: FC = () => {
     DEFAULT_TX_DATA,
   );
 
-  const { data: contractInfo } = useDeployedContractInfo("MultiSig");
-
-  const { data: signaturesRequired } = useScaffoldReadContract({
-    contractName: "MultiSig",
+  const { data: signaturesRequired } = useReadContract({
+    address: multisigAddress,
+    abi: MultiSigABI,
     functionName: "signaturesRequired",
   });
 
-  const { data: ownerEventsHistory } = useScaffoldEventHistory({
-    contractName: "MultiSig",
-    eventName: "Owner",
-    fromBlock: 0n,
+  const { data: owners } = useMultiSigRegistry({
+    functionName: "getMultisigOwners",
+    args: [multisigAddress],
   });
 
   useEffect(() => {
@@ -48,10 +49,10 @@ const Owners: FC = () => {
           <div className="max-w-full">Signatures required: {String(signaturesRequired)}</div>
 
           <div className="mt-6 w-full space-y-3">
-            {ownerEventsHistory?.map((event, i) => (
+            {owners?.map((owner: string, i: number) => (
               <div key={i} className="flex justify-between">
-                <Address address={event.args.owner} />
-                <span>{event.args.added ? "Added 👍" : "Removed 👎"}</span>
+                <Address address={owner} />
+                <span>Owner</span>
               </div>
             ))}
           </div>
@@ -93,7 +94,7 @@ const Owners: FC = () => {
               className="btn btn-secondary btn-sm"
               onClick={() => {
                 const callData = encodeFunctionData({
-                  abi: contractInfo?.abi as Abi,
+                  abi: MultiSigABI as Abi,
                   functionName: predefinedTxData.methodName,
                   args: [predefinedTxData.signer, predefinedTxData.newSignaturesNumber],
                 });

@@ -8,12 +8,12 @@ import { useChainId, usePublicClient, useReadContract, useWalletClient } from "w
 import { TransactionData } from "~~/app/create/[id]/page";
 import { MultiSigNav } from "~~/components/Navbar";
 import { Address, AddressInput, IntegerInput } from "~~/components/scaffold-eth";
+import { toaster } from "~~/components/ui/toaster";
 import { useMultiSigRegistry } from "~~/hooks/contract/useMultiSigRegistry";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
 import MultiSigABI from "~~/utils/abis/MultiSigABI.json";
 import { getPoolServerUrl } from "~~/utils/getPoolServerUrl";
 import { DEFAULT_TX_DATA, Method, OWNERS_METHODS, PredefinedTxData } from "~~/utils/methods";
-import { notification } from "~~/utils/scaffold-eth";
 
 const Owners: FC = () => {
   const isMounted = useIsMounted();
@@ -134,10 +134,16 @@ const Owners: FC = () => {
           router.push(`/multisig/${multisigAddress}`);
         }, 777);
       } else {
-        notification.info("Only owners can propose transactions");
+        toaster.create({
+          title: "Only owners can propose transactions",
+          type: "info",
+        });
       }
     } catch (e) {
-      notification.error("Error while proposing transaction");
+      toaster.create({
+        title: "Error while proposing transaction",
+        type: "error",
+      });
       console.log(e);
     }
   };

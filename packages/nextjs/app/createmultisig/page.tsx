@@ -6,8 +6,8 @@ import { useIsMounted } from "usehooks-ts";
 import { useAccount, useWalletClient } from "wagmi";
 import { PlusCircleIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { Address, AddressInput, InputBase } from "~~/components/scaffold-eth";
+import { toaster } from "~~/components/ui/toaster";
 import { useCreateWallet } from "~~/hooks/contract/useCreateWallet";
-import { notification } from "~~/utils/scaffold-eth";
 
 const CreateMultiSig: NextPage = () => {
   const { data: walletClient } = useWalletClient();
@@ -45,18 +45,27 @@ const CreateMultiSig: NextPage = () => {
 
   const handleCreate = async () => {
     if (!name) {
-      notification.error("Please enter a name for the multisig");
+      toaster.create({
+        title: "Please enter a name for the multisig",
+        type: "error",
+      });
       return;
     }
 
     if (signers.length < 2) {
-      notification.error("Please add at least 2 signers");
+      toaster.create({
+        title: "Please add at least 2 signers",
+        type: "error",
+      });
       return;
     }
 
     const reqSigs = parseInt(requiredSignatures);
     if (isNaN(reqSigs) || reqSigs < 1 || reqSigs > signers.length) {
-      notification.error("Invalid number of required signatures");
+      toaster.create({
+        title: "Invalid number of required signatures",
+        type: "error",
+      });
       return;
     }
 
@@ -72,7 +81,10 @@ const CreateMultiSig: NextPage = () => {
         throw error;
       }
 
-      notification.success("Multisig created successfully!");
+      toaster.create({
+        title: "Multisig created successfully!",
+        type: "success",
+      });
 
       setName("");
       setSigners(ownerAddress ? [ownerAddress] : []);
@@ -80,7 +92,10 @@ const CreateMultiSig: NextPage = () => {
       setRequiredSignatures("");
     } catch (error) {
       console.error("Error creating multisig:", error);
-      notification.error("Error creating multisig");
+      toaster.create({
+        title: "Error creating multisigs",
+        type: "error",
+      });
     }
   };
 

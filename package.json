@@ -49,7 +49,8 @@
     "vercel:yolo": "yarn workspace @se-2/nextjs vercel:yolo",
     "verify": "yarn hardhat:verify",
     "add:backend": "yarn workspace backend-local add",
-    "add:nextjs": "yarn workspace @se-2/nextjs add"
+    "add:nextjs": "yarn workspace @se-2/nextjs add",
+    "add:hardhat": "yarn workspace @se-2/hardhat add"
   },
   "devDependencies": {
     "husky": "~8.0.3",

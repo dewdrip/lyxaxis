@@ -2,6 +2,8 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { Lyxaxis } from "../typechain-types";
 import { MultiSigRegistry } from "../typechain-types";
+import { MultiSig } from "../typechain-types";
+import { LSP0ERC725Account } from "../typechain-types";
 
 describe("Lyxaxis", function () {
   let lyxaxis: Lyxaxis;
@@ -44,6 +46,19 @@ describe("Lyxaxis", function () {
 
       // Verify the multisig is registered in the registry
       expect(await registry.isValidMultisig(multisigAddress)).to.be.true;
+
+      // Get the multisig contract
+      const multisig = await ethers.getContractAt("MultiSig", multisigAddress);
+
+      // Verify the universal profile was created
+      const universalProfileAddress = await multisig.universalProfile();
+      expect(universalProfileAddress).to.not.equal(ethers.ZeroAddress);
+
+      // Get the universal profile contract
+      const universalProfile = await ethers.getContractAt("LSP0ERC725Account", universalProfileAddress);
+
+      // Verify the universal profile is owned by the multisig
+      expect(await universalProfile.owner()).to.equal(multisigAddress);
     });
 
     it("Should revert if no signatures required", async function () {

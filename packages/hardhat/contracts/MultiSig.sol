@@ -1,17 +1,15 @@
 // SPDX-License-Identifier: MIT
 
 // Off-chain signature gathering multisig that streams funds
-// added a very simple streaming mechanism where `onlySelf` can open a withdraw-based stream
+// added a very simple streaming mechanism where `onlyUP` can open a withdraw-based stream
 
-pragma solidity 0.8.27;
+pragma solidity 0.8.29;
 
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import "./MultiSigRegistry.sol";
+import { LSP0ERC725Account } from "@lukso/lsp-smart-contracts/contracts/LSP0ERC725Account/LSP0ERC725Account.sol";
 
 contract MultiSig {
-    using MessageHashUtils for bytes32;
-
     event Deposit(address indexed sender, uint amount, uint balance);
     event ExecuteTransaction(
         address indexed owner,
@@ -29,6 +27,7 @@ contract MultiSig {
     uint public chainId;
     string public name;
     MultiSigRegistry private immutable i_registry;
+    LSP0ERC725Account public universalProfile;
 
     constructor(
         string memory _name,
@@ -49,14 +48,16 @@ contract MultiSig {
         chainId = _chainId;
         name = _name;
         i_registry = _registry;
+
+        universalProfile = new LSP0ERC725Account(address(this));
     }
 
-    modifier onlySelf() {
-        require(msg.sender == address(this), "Not Self");
+    modifier onlyUP() {
+        require(msg.sender == address(universalProfile), "Not Universal Profile");
         _;
     }
 
-    function addSigner(address newSigner, uint256 newSignaturesRequired) public onlySelf {
+    function addSigner(address newSigner, uint256 newSignaturesRequired) public onlyUP {
         require(newSigner != address(0), "addSigner: zero address");
         require(!isOwner[newSigner], "addSigner: owner not unique");
         require(newSignaturesRequired > 0, "addSigner: must be non-zero sigs required");
@@ -68,7 +69,7 @@ contract MultiSig {
         i_registry.addSigner(newSigner);
     }
 
-    function removeSigner(address oldSigner, uint256 newSignaturesRequired) public onlySelf {
+    function removeSigner(address oldSigner, uint256 newSignaturesRequired) public onlyUP {
         require(isOwner[oldSigner], "removeSigner: not owner");
         require(newSignaturesRequired > 0, "removeSigner: must be non-zero sigs required");
         isOwner[oldSigner] = false;
@@ -79,7 +80,7 @@ contract MultiSig {
         i_registry.removeSigner(oldSigner);
     }
 
-    function updateSignaturesRequired(uint256 newSignaturesRequired) public onlySelf {
+    function updateSignaturesRequired(uint256 newSignaturesRequired) public onlyUP {
         require(newSignaturesRequired > 0, "updateSignaturesRequired: must be non-zero sigs required");
         signaturesRequired = newSignaturesRequired;
     }
@@ -115,18 +116,14 @@ contract MultiSig {
 
         require(validSignatures >= signaturesRequired, "executeTransaction: not enough valid signatures");
 
-        (bool success, bytes memory result) = to.call{ value: value }(data);
-        require(success, "executeTransaction: tx failed");
+        // Execute transaction through UP's execute function to maintain UP context
+        bytes memory result = universalProfile.execute(0, to, value, data);
 
         emit ExecuteTransaction(msg.sender, to, value, data, nonce - 1, _hash, result);
         return result;
     }
 
     function recover(bytes32 _hash, bytes memory _signature) public pure returns (address) {
-        return ECDSA.recover(MessageHashUtils.toEthSignedMessageHash(_hash), _signature);
-    }
-
-    receive() external payable {
-        emit Deposit(msg.sender, msg.value, address(this).balance);
+        return ECDSA.recover(ECDSA.toEthSignedMessageHash(_hash), _signature);
     }
 }

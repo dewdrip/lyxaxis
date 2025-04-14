@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.27;
+pragma solidity 0.8.29;
 
 import { MultiSig } from "./MultiSig.sol";
 import { MultiSigRegistry } from "./MultiSigRegistry.sol";

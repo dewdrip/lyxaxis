@@ -8,8 +8,9 @@ pragma solidity 0.8.29;
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "./MultiSigRegistry.sol";
 import { LSP0ERC725Account } from "@lukso/lsp-smart-contracts/contracts/LSP0ERC725Account/LSP0ERC725Account.sol";
+import { ILSP20CallVerifier } from "@lukso/lsp-smart-contracts/contracts/LSP20CallVerification/ILSP20CallVerifier.sol";
 
-contract MultiSig {
+contract MultiSig is ILSP20CallVerifier {
     event Deposit(address indexed sender, uint amount, uint balance);
     event ExecuteTransaction(
         address indexed owner,
@@ -109,6 +110,7 @@ contract MultiSig {
             address recovered = recover(_hash, signatures[i]);
             require(recovered > duplicateGuard, "executeTransaction: duplicate or unordered signatures");
             duplicateGuard = recovered;
+
             if (isOwner[recovered]) {
                 validSignatures++;
             }
@@ -125,5 +127,19 @@ contract MultiSig {
 
     function recover(bytes32 _hash, bytes memory _signature) public pure returns (address) {
         return ECDSA.recover(ECDSA.toEthSignedMessageHash(_hash), _signature);
+    }
+
+    function lsp20VerifyCall(
+        address requestor,
+        address target,
+        address caller,
+        uint256 value,
+        bytes memory callData
+    ) external returns (bytes4 returnedStatus) {
+        return 0xde928f01;
+    }
+
+    function lsp20VerifyCallResult(bytes32 callHash, bytes memory callResult) external returns (bytes4) {
+        return 0xd3fc45d3;
     }
 }

@@ -2,17 +2,14 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { Lyxaxis } from "../typechain-types";
 import { MultiSigRegistry } from "../typechain-types";
-import { MultiSig } from "../typechain-types";
-import { LSP0ERC725Account } from "../typechain-types";
-import { ERC725YDataKeys } from "@lukso/lsp-smart-contracts";
-import { OPERATION_TYPES, PERMISSIONS } from "@lukso/lsp-smart-contracts";
+import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 
 describe("Lyxaxis", function () {
   let lyxaxis: Lyxaxis;
   let registry: MultiSigRegistry;
-  let owner: any;
-  let addr1: any;
-  let addr2: any;
+  let owner: SignerWithAddress;
+  let addr1: SignerWithAddress;
+  let addr2: SignerWithAddress;
 
   beforeEach(async function () {
     [owner, addr1, addr2] = await ethers.getSigners();
@@ -92,7 +89,7 @@ describe("Lyxaxis", function () {
     it("Should allow adding a new signer through UP", async function () {
       // Create initial multisig
       const name = "Test Wallet";
-      const chainId = 1;
+      const chainId = 42;
       const owners = [owner.address];
       const signaturesRequired = 1;
 
@@ -104,39 +101,20 @@ describe("Lyxaxis", function () {
       const multisigAddress = ownerMultisigs[0];
       const multisig = await ethers.getContractAt("MultiSig", multisigAddress);
 
-      // Get the universal profile
-      const universalProfileAddress = await multisig.universalProfile();
-      const universalProfile = await ethers.getContractAt("LSP0ERC725Account", universalProfileAddress);
-
-      // Set up LSP20 verification for the UP
-      const addressPermissionsKey =
-        ERC725YDataKeys.LSP6["AddressPermissions:Permissions"] + multisigAddress.substring(2);
-      const permissions = PERMISSIONS.CALL + PERMISSIONS.SUPER_CALL;
-
-      // Set permissions in ERC725Y storage
-      await multisig.executeTransaction(
-        universalProfileAddress,
-        0,
-        universalProfile.interface.encodeFunctionData("setData", [addressPermissionsKey, permissions]),
-        [],
-      );
-
       // Add a new signer
       const newSigner = addr2.address;
       const newSignaturesRequired = 2;
 
+      // Execute through UP
       const addSignerData = multisig.interface.encodeFunctionData("addSigner", [newSigner, newSignaturesRequired]);
-      await multisig.executeTransaction(
-        universalProfileAddress,
-        0,
-        universalProfile.interface.encodeFunctionData("execute", [
-          OPERATION_TYPES.CALL,
-          multisigAddress,
-          0,
-          addSignerData,
-        ]),
-        [],
-      );
+
+      const nonce = await multisig.nonce();
+      const txHash = await multisig.getTransactionHash(nonce, multisigAddress, 0n, addSignerData);
+
+      const signature = await owner.provider.send("personal_sign", [txHash, owner.address]);
+
+      const addSignerTx = await multisig.executeTransaction(multisigAddress, 0n, addSignerData, [signature]);
+      await addSignerTx.wait();
 
       // Verify new signer was added
       expect(await multisig.isOwner(newSigner)).to.be.true;
@@ -158,43 +136,28 @@ describe("Lyxaxis", function () {
       const multisigAddress = ownerMultisigs[0];
       const multisig = await ethers.getContractAt("MultiSig", multisigAddress);
 
-      // Get the universal profile
-      const universalProfileAddress = await multisig.universalProfile();
-      const universalProfile = await ethers.getContractAt("LSP0ERC725Account", universalProfileAddress);
-
-      // Set up LSP20 verification for the UP
-      const addressPermissionsKey =
-        ERC725YDataKeys.LSP6["AddressPermissions:Permissions"] + multisigAddress.substring(2);
-      const permissions = PERMISSIONS.CALL + PERMISSIONS.SUPER_CALL;
-
-      // Set permissions in ERC725Y storage
-      await multisig.executeTransaction(
-        universalProfileAddress,
-        0,
-        universalProfile.interface.encodeFunctionData("setData", [addressPermissionsKey, permissions]),
-        [],
-      );
-
       // Remove a signer
       const signerToRemove = addr2.address;
       const newSignaturesRequired = 1;
 
+      // Execute through UP
       const removeSignerData = multisig.interface.encodeFunctionData("removeSigner", [
         signerToRemove,
         newSignaturesRequired,
       ]);
 
-      await multisig.executeTransaction(
-        universalProfileAddress,
-        0,
-        universalProfile.interface.encodeFunctionData("execute", [
-          OPERATION_TYPES.CALL,
-          multisigAddress,
-          0,
-          removeSignerData,
-        ]),
-        [],
-      );
+      const nonce = await multisig.nonce();
+      const txHash = await multisig.getTransactionHash(nonce, multisigAddress, 0n, removeSignerData);
+
+      const signature1 = await owner.provider.send("personal_sign", [txHash, owner.address]);
+      const signature2 = await addr2.provider.send("personal_sign", [txHash, addr2.address]);
+
+      // Signatures must be in ascending order
+      const removeSignerTx = await multisig.executeTransaction(multisigAddress, 0n, removeSignerData, [
+        signature2,
+        signature1,
+      ]);
+      await removeSignerTx.wait();
 
       // Verify signer was removed
       expect(await multisig.isOwner(signerToRemove)).to.be.false;

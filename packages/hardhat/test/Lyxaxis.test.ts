@@ -50,7 +50,7 @@ describe("Lyxaxis", function () {
       const multisig = await ethers.getContractAt("MultiSig", multisigAddress);
 
       // Verify the universal profile was created
-      const universalProfileAddress = await multisig.universalProfile();
+      const universalProfileAddress = await multisig.getUniversalProfile();
       expect(universalProfileAddress).to.not.equal(ethers.ZeroAddress);
 
       // Get the universal profile contract

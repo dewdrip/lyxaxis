@@ -28,7 +28,7 @@ contract MultiSig is ILSP20CallVerifier {
     uint public chainId;
     string public name;
     MultiSigRegistry private immutable i_registry;
-    LSP0ERC725Account public universalProfile;
+    LSP0ERC725Account private immutable i_universalProfile;
 
     constructor(
         string memory _name,
@@ -50,11 +50,11 @@ contract MultiSig is ILSP20CallVerifier {
         name = _name;
         i_registry = _registry;
 
-        universalProfile = new LSP0ERC725Account(address(this));
+        i_universalProfile = new LSP0ERC725Account(address(this));
     }
 
     modifier onlyUP() {
-        require(msg.sender == address(universalProfile), "Not Universal Profile");
+        require(msg.sender == address(i_universalProfile), "Not Universal Profile");
         _;
     }
 
@@ -119,7 +119,7 @@ contract MultiSig is ILSP20CallVerifier {
         require(validSignatures >= signaturesRequired, "executeTransaction: not enough valid signatures");
 
         // Execute transaction through UP's execute function to maintain UP context
-        bytes memory result = universalProfile.execute(0, to, value, data);
+        bytes memory result = i_universalProfile.execute(0, to, value, data);
 
         emit ExecuteTransaction(msg.sender, to, value, data, nonce - 1, _hash, result);
         return result;
@@ -127,6 +127,10 @@ contract MultiSig is ILSP20CallVerifier {
 
     function recover(bytes32 _hash, bytes memory _signature) public pure returns (address) {
         return ECDSA.recover(ECDSA.toEthSignedMessageHash(_hash), _signature);
+    }
+
+    function getUniversalProfile() external view returns (address) {
+        return address(i_universalProfile);
     }
 
     function lsp20VerifyCall(

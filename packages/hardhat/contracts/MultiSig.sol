@@ -140,6 +140,7 @@ contract MultiSig is ILSP20CallVerifier {
         uint256 value,
         bytes memory callData
     ) external returns (bytes4 returnedStatus) {
+        require(caller == address(this), "Caller not UP owner");
         return 0xde928f01;
     }
 

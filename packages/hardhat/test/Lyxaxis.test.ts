@@ -186,4 +186,61 @@ describe("Lyxaxis", function () {
       await expect(multisig.addSigner(newSigner, newSignaturesRequired)).to.be.revertedWith("Not Universal Profile");
     });
   });
+
+  describe("Fund Transfer", function () {
+    it("Should allow transferring funds through UP", async function () {
+      // Create initial multisig
+      const name = "Test Wallet";
+      const chainId = 1;
+      const owners = [owner.address, addr1.address];
+      const signaturesRequired = 2;
+
+      const tx = await lyxaxis.createWallet(name, chainId, owners, signaturesRequired);
+      await tx.wait();
+
+      // Get the multisig address
+      const ownerMultisigs = await registry.getSignerMultisigs(owner.address);
+      const multisigAddress = ownerMultisigs[0];
+      const multisig = await ethers.getContractAt("MultiSig", multisigAddress);
+
+      // Get the universal profile address
+      const universalProfileAddress = await multisig.getUniversalProfile();
+
+      // Fund the universal profile
+      const amount = ethers.parseEther("1.0");
+      await owner.sendTransaction({
+        to: universalProfileAddress,
+        value: amount,
+      });
+
+      // Verify the UP received the funds
+      expect(await ethers.provider.getBalance(universalProfileAddress)).to.equal(amount);
+
+      // Transfer funds to addr2
+      const recipient = addr2;
+      const transferAmount = ethers.parseEther("0.5");
+      const transferData = "0x";
+
+      const nonce = await multisig.nonce();
+      const txHash = await multisig.getTransactionHash(nonce, recipient.address, transferAmount, transferData);
+
+      // Sign transaction
+      const signature1 = await owner.provider.send("personal_sign", [txHash, owner.address]);
+      const signature2 = await addr1.provider.send("personal_sign", [txHash, addr1.address]);
+
+      const oldRecipientBalance = await ethers.provider.getBalance(recipient.address);
+
+      // Signatures must be in ascending order
+      const transferTx = await multisig.executeTransaction(recipient.address, transferAmount, transferData, [
+        signature2,
+        signature1,
+      ]);
+      await transferTx.wait();
+
+      const newRecipientBalance = await ethers.provider.getBalance(recipient.address);
+
+      expect(newRecipientBalance).to.eq(oldRecipientBalance + transferAmount);
+      expect(await ethers.provider.getBalance(universalProfileAddress)).to.equal(amount - transferAmount);
+    });
+  });
 });

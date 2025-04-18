@@ -26,12 +26,11 @@ contract MultiSig is ILSP20CallVerifier {
     uint public signaturesRequired;
     uint public nonce;
     uint public chainId;
-    string public name;
     MultiSigRegistry private immutable i_registry;
     LSP0ERC725Account private immutable i_universalProfile;
 
     constructor(
-        string memory _name,
+        bytes memory profileMetadata,
         uint256 _chainId,
         address[] memory _owners,
         uint _signaturesRequired,
@@ -47,10 +46,13 @@ contract MultiSig is ILSP20CallVerifier {
             emit Owner(owner, isOwner[owner]);
         }
         chainId = _chainId;
-        name = _name;
         i_registry = _registry;
 
         i_universalProfile = new LSP0ERC725Account(address(this));
+
+        // Set the profile metadata
+        bytes32 LSP3ProfileKey = 0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5;
+        i_universalProfile.setData(LSP3ProfileKey, profileMetadata);
     }
 
     modifier onlyUP() {

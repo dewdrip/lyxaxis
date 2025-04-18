@@ -40,9 +40,9 @@ const deployedContracts = {
         {
           inputs: [
             {
-              internalType: "string",
-              name: "_name",
-              type: "string",
+              internalType: "bytes",
+              name: "profileMetadata",
+              type: "bytes",
             },
             {
               internalType: "uint256",

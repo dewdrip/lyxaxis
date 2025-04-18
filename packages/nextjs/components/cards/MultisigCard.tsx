@@ -3,19 +3,23 @@ import Link from "next/link";
 import { Address, Balance } from "../scaffold-eth";
 import { usePublicClient } from "wagmi";
 import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
+import { useProfileMetadata } from "~~/hooks/useProfileMetadata";
 import MultiSigABI from "~~/utils/abis/MultiSigABI.json";
 
 export const MultisigCard = ({ multisigAddress }: { multisigAddress: string }) => {
   const publicClient = usePublicClient();
-  const [universalProfileAddress, setUniversalProfileAddress] = useState("");
+
   const [name, setName] = useState<string>();
   const [signaturesRequired, setSignaturesRequired] = useState<bigint>();
+  const [universalProfileAddress, setUniversalProfileAddress] = useState("");
 
   const { data: owners } = useScaffoldReadContract({
     contractName: "MultiSigRegistry",
     functionName: "getMultisigOwners",
     args: [multisigAddress],
   });
+
+  const { profile, fetchProfile } = useProfileMetadata();
 
   useEffect(() => {
     const getMultisigData = async () => {
@@ -43,6 +47,8 @@ export const MultisigCard = ({ multisigAddress }: { multisigAddress: string }) =
         setName(nameResult as string);
         setSignaturesRequired(signaturesRequiredResult as bigint);
         setUniversalProfileAddress(universalProfileAddress as `0x${string}`);
+
+        await fetchProfile(universalProfileAddress as `0x${string}`);
       } catch (error) {
         console.error("Error fetching multisig data:", error);
       }

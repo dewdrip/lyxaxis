@@ -39,7 +39,7 @@ const CreateMultiSig: NextPage = () => {
 
   const handleKeyPressOnAddSigner = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
-      // Add Signer
+      addSigner();
     }
   };
 
@@ -70,11 +70,20 @@ const CreateMultiSig: NextPage = () => {
     }
 
     try {
-      await createWallet({
+      const profileMetadata = {
         name,
+        description: "",
+        links: [] as any,
+        tags: [] as any,
+        profileImage: [] as any,
+        backgroundImage: [] as any,
+      };
+
+      await createWallet({
         chainId: 31337n,
         owners: signers as `0x${string}`[],
         signaturesRequired: BigInt(requiredSignatures || "0"),
+        profileMetadata,
       });
 
       if (error) {

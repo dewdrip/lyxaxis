@@ -1,5 +1,6 @@
-import { type FC } from "react";
+import { type FC, useState } from "react";
 import { Address, BlockieAvatar } from "../../../components/scaffold-eth";
+import { IoIosInformationCircleOutline } from "react-icons/io";
 import { Abi, DecodeFunctionDataReturnType, decodeFunctionData, formatEther } from "viem";
 import { useAccount, useWalletClient } from "wagmi";
 import { TransactionData } from "~~/app/create/[id]/page";
@@ -22,6 +23,9 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
   const { targetNetwork } = useTargetNetwork();
   const poolServerUrl = getPoolServerUrl(targetNetwork.id);
 
+  const [isExecuting, setIsExecuting] = useState(false);
+  const [isSigning, setIsSigning] = useState(false);
+
   const { data: signaturesRequired } = useScaffoldReadContract({
     contractName: "MultiSig",
     contractAddress: tx.address,
@@ -40,7 +44,9 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
     walletClient,
   });
 
-  const { data: contractInfo } = useDeployedContractInfo("MultiSig");
+  const { data: contractInfo } = useDeployedContractInfo({
+    contractName: "MultiSig",
+  });
 
   const txnData =
     contractInfo?.abi && tx.data
@@ -78,11 +84,90 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
     return [finalSigList, finalSigners];
   };
 
+  const executeTransaction = async () => {
+    try {
+      setIsExecuting(true);
+      if (!contractInfo || !metaMultiSigWallet) {
+        console.log("No contract info");
+        return;
+      }
+      const newHash = (await metaMultiSigWallet.read.getTransactionHash([
+        nonce as bigint,
+        tx.to,
+        BigInt(tx.amount),
+        tx.data,
+      ])) as `0x${string}`;
+
+      const [finalSigList] = await getSortedSigList(tx.signatures, newHash);
+
+      await transactor(() =>
+        metaMultiSigWallet.write.executeTransaction([tx.to, BigInt(tx.amount), tx.data, finalSigList]),
+      );
+      setIsExecuting(false);
+    } catch (e) {
+      //notification.error("Error executing transaction");
+      console.log(e);
+      setIsExecuting(false);
+    }
+  };
+
+  const signTransaction = async () => {
+    try {
+      setIsSigning(true);
+
+      if (!walletClient) {
+        setIsSigning(false);
+        return;
+      }
+
+      const newHash = (await metaMultiSigWallet?.read.getTransactionHash([
+        nonce as bigint,
+        tx.to,
+        BigInt(tx.amount),
+        tx.data,
+      ])) as `0x${string}`;
+
+      const signature = await walletClient.signMessage({
+        message: { raw: newHash },
+      });
+
+      const signer = await metaMultiSigWallet?.read.recover([newHash, signature]);
+
+      const isOwner = await metaMultiSigWallet?.read.isOwner([signer as string]);
+
+      if (isOwner) {
+        const [finalSigList, finalSigners] = await getSortedSigList([...tx.signatures, signature], newHash);
+
+        await fetch(poolServerUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(
+            {
+              ...tx,
+              signatures: finalSigList,
+              signers: finalSigners,
+            },
+            // stringifying bigint
+            (key, value) => (typeof value === "bigint" ? value.toString() : value),
+          ),
+        });
+      } else {
+        notification.info("Only owners can sign transactions");
+      }
+
+      setIsSigning(false);
+    } catch (e) {
+      notification.error("Error signing transaction");
+      console.log(e);
+      setIsSigning(false);
+    }
+  };
+
   return (
     <>
       <input type="checkbox" id={`label-${tx.hash}`} className="modal-toggle" />
       <div className="modal" role="dialog">
-        <div className="modal-box">
+        <div className="modal-box w-[400px] mx-auto">
           <div className="flex flex-col">
             <div className="flex gap-2">
               <div className="font-bold">Function Signature:</div>
@@ -136,12 +221,12 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
           </div>
 
           <div className="flex flex-col gap-y-4">
-            <div className="flex gap-x-2">
+            <div className="flex gap-x-2 items-center">
               <div className="flex gap-1 font-bold">
                 <BlockieAvatar size={20} address={tx.hash} /> {tx.hash.slice(0, 7)}
               </div>
-              <label htmlFor={`label-${tx.hash}`} className="btn btn-primary btn-xs">
-                ...
+              <label htmlFor={`label-${tx.hash}`} className=" text-blue-500 hover:text-blue-700">
+                <IoIosInformationCircleOutline size={24} />
               </label>
             </div>
 
@@ -153,96 +238,22 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
               <div className="flex justify-center items-center gap-x-2">
                 <div className="flex" title={hasSigned ? "You have already Signed this transaction" : ""}>
                   <button
-                    className="btn btn-xs btn-primary"
+                    className="btn btn-xs w-[3.6rem] btn-primary"
                     disabled={hasSigned}
                     title={!hasEnoughSignatures ? "Not enough signers to Execute" : ""}
-                    onClick={async () => {
-                      try {
-                        if (!walletClient) {
-                          return;
-                        }
-
-                        const newHash = (await metaMultiSigWallet?.read.getTransactionHash([
-                          nonce as bigint,
-                          tx.to,
-                          BigInt(tx.amount),
-                          tx.data,
-                        ])) as `0x${string}`;
-
-                        const signature = await walletClient.signMessage({
-                          message: { raw: newHash },
-                        });
-
-                        const signer = await metaMultiSigWallet?.read.recover([newHash, signature]);
-
-                        const isOwner = await metaMultiSigWallet?.read.isOwner([signer as string]);
-
-                        if (isOwner) {
-                          const [finalSigList, finalSigners] = await getSortedSigList(
-                            [...tx.signatures, signature],
-                            newHash,
-                          );
-
-                          await fetch(poolServerUrl, {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify(
-                              {
-                                ...tx,
-                                signatures: finalSigList,
-                                signers: finalSigners,
-                              },
-                              // stringifying bigint
-                              (key, value) => (typeof value === "bigint" ? value.toString() : value),
-                            ),
-                          });
-                        } else {
-                          notification.info("Only owners can sign transactions");
-                        }
-                      } catch (e) {
-                        notification.error("Error signing transaction");
-                        console.log(e);
-                      }
-                    }}
+                    onClick={signTransaction}
                   >
-                    Sign
+                    {isSigning ? <div className="loading loading-xs" /> : "Sign"}
                   </button>
                 </div>
 
                 <div title={!hasEnoughSignatures ? "Not enough signers to Execute" : ""}>
                   <button
-                    className="btn btn-xs btn-primary"
+                    className="btn btn-xs w-[3.6rem] btn-primary "
                     disabled={!hasEnoughSignatures}
-                    onClick={async () => {
-                      try {
-                        if (!contractInfo || !metaMultiSigWallet) {
-                          console.log("No contract info");
-                          return;
-                        }
-                        const newHash = (await metaMultiSigWallet.read.getTransactionHash([
-                          nonce as bigint,
-                          tx.to,
-                          BigInt(tx.amount),
-                          tx.data,
-                        ])) as `0x${string}`;
-
-                        const [finalSigList] = await getSortedSigList(tx.signatures, newHash);
-
-                        await transactor(() =>
-                          metaMultiSigWallet.write.executeTransaction([
-                            tx.to,
-                            BigInt(tx.amount),
-                            tx.data,
-                            finalSigList,
-                          ]),
-                        );
-                      } catch (e) {
-                        notification.error("Error executing transaction");
-                        console.log(e);
-                      }
-                    }}
+                    onClick={executeTransaction}
                   >
-                    Exec
+                    {isExecuting ? <div className="loading loading-xs" /> : "Exec"}
                   </button>
                 </div>
               </div>

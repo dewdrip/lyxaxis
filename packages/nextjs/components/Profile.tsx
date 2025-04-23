@@ -17,7 +17,7 @@ export default function Profile({ address }: Props) {
 
   return (
     <div className="flex items-center">
-      <div className="w-6 aspect-square rounded-full" style={{ backgroundColor: getAddressColor(address) }}>
+      <div className="w-10 aspect-square rounded-full" style={{ backgroundColor: getAddressColor(address) }}>
         <Link href={`https://universaleverything.io/${address}`} target="_blank">
           {!profile?.profileImage || profile.profileImage.length === 0 ? (
             <BlockieAvatar
@@ -26,12 +26,12 @@ export default function Profile({ address }: Props) {
               size={"100%"}
             />
           ) : (
-            <div className="relative w-6 aspect-square rounded-full object-cover">
+            <div className="relative w-10 aspect-square rounded-full object-cover">
               <Image
                 src={profile.profileImage[0].url.replace("ipfs://", "https://api.universalprofile.cloud/ipfs/")}
                 alt="Profile"
                 fill
-                className="rounded-full"
+                className="rounded-full object-cover"
               />
             </div>
           )}

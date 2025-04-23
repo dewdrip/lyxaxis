@@ -25,6 +25,7 @@
     "@uniswap/v2-sdk": "~4.6.1",
     "axios": "^1.8.4",
     "blo": "~1.2.0",
+    "buffer": "^6.0.3",
     "burner-connector": "0.0.9",
     "daisyui": "4.12.10",
     "ethers": "^6.13.5",

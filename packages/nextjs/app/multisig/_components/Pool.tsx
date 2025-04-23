@@ -102,7 +102,7 @@ export const Pool = ({ multisigAddress }: { multisigAddress: Address }) => {
 
           <div>Nonce: {nonce !== undefined ? `#${nonce}` : "Loading..."}</div>
 
-          <div className="flex flex-col mt-8 gap-4">
+          <div className="flex flex-col mt-8 gap-4 h-[18rem] overflow-y-scroll">
             {transactions === undefined
               ? "Loading..."
               : transactions.map(tx => {

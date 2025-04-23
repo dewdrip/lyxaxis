@@ -1,0 +1,59 @@
+// src/hooks/useImageUploader.ts
+import { useRef, useState } from "react";
+
+export function useImageSetter(setFieldValue: (field: string, value: string) => void) {
+  const [file, setFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string>("");
+  const [isPreviewVisible, setIsPreviewVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const inputFileRef = useRef<HTMLInputElement>(null);
+  const [, setError] = useState<string | null>(null);
+
+  const handleImageClear = () => {
+    setFile(null);
+    setPreviewUrl("");
+    setIsPreviewVisible(false);
+    setUploadProgress(0);
+    setFieldValue("imgUrl", "");
+  };
+
+  const handleFileChange = (file: File) => {
+    setFile(file);
+    setPreviewUrl(URL.createObjectURL(file));
+    setIsPreviewVisible(true);
+    setError(null);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files?.[0];
+    if (file?.type.startsWith("image/")) {
+      handleFileChange(file);
+    } else {
+      setError("Please select a valid image file.");
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = e.target.files?.[0];
+    if (selected?.type.startsWith("image/")) {
+      handleFileChange(selected);
+    } else {
+      setError("Please select a valid image file.");
+    }
+  };
+
+  return {
+    file,
+    previewUrl,
+    isPreviewVisible,
+    inputFileRef,
+    handleInputChange,
+    handleDrop,
+    handleImageClear,
+    isLoading,
+    uploadProgress,
+    setIsLoading,
+  };
+}

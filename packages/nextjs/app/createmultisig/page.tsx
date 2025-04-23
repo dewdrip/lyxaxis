@@ -1,85 +1,69 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { OptionalForm } from "./components/OptionalForm";
+import { RequiredForm } from "./components/RequiredForm";
 import type { NextPage } from "next";
-import { useIsMounted } from "usehooks-ts";
-import { useAccount, useWalletClient } from "wagmi";
-import { PlusCircleIcon, TrashIcon } from "@heroicons/react/24/outline";
-import { Address, AddressInput, InputBase } from "~~/components/scaffold-eth";
+import { useAccount } from "wagmi";
 import { toaster } from "~~/components/ui/toaster";
 import { useCreateWallet } from "~~/hooks/contract/useCreateWallet";
+import { UploadedImageData } from "~~/hooks/useProfileMetadata";
+import { notification } from "~~/utils/scaffold-eth";
 
 const CreateMultiSig: NextPage = () => {
-  const { data: walletClient } = useWalletClient();
+  const router = useRouter();
+  const [pages, setPages] = useState<number>(0);
+
   const { address: ownerAddress } = useAccount();
+
   const [signers, setSigners] = useState<string[]>([]);
+  const [profileImage, setProfileImage] = useState<UploadedImageData[]>([]);
+  const [backgroundImage, setBackgroundImage] = useState<UploadedImageData[]>([]);
+  const [description, setDescription] = useState<string>("");
+
   const [newSigner, setNewSigner] = useState<string>("");
-  const [name, setName] = useState<string>("");
+
   const [requiredSignatures, setRequiredSignatures] = useState<string>("");
 
-  const { createWallet, isLoading, error, deployedAddress } = useCreateWallet();
+  const [name, setName] = useState<string>("");
+
+  const { createWallet, isLoading: isCreateWalletLoading, error } = useCreateWallet();
+
+  const [hasMounted, setHasMounted] = useState(false);
 
   useEffect(() => {
-    if (ownerAddress) {
-      setSigners([ownerAddress]);
-    }
-  }, [ownerAddress]);
-
-  const addSigner = () => {
-    if (newSigner && !signers.includes(newSigner)) {
-      setSigners([...signers, newSigner]);
-      setNewSigner("");
-    }
-  };
-
-  const removeSigner = (signerToRemove: string) => {
-    if (signerToRemove === ownerAddress) return;
-    setSigners(signers.filter(signer => signer !== signerToRemove));
-  };
-
-  const handleKeyPressOnAddSigner = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      addSigner();
-    }
-  };
+    setHasMounted(true);
+  }, []);
 
   const handleCreate = async () => {
     if (!name) {
-      toaster.create({
-        title: "Please enter a name for the multisig",
-        type: "error",
-      });
+      notification.error("Please enter a name for the multisig");
       return;
     }
 
     if (signers.length < 2) {
-      toaster.create({
-        title: "Please add at least 2 signers",
-        type: "error",
-      });
+      notification.error("Please add at least 2 signers");
       return;
     }
 
     const reqSigs = parseInt(requiredSignatures);
     if (isNaN(reqSigs) || reqSigs < 1 || reqSigs > signers.length) {
-      toaster.create({
-        title: "Invalid number of required signatures",
-        type: "error",
-      });
+      notification.error("Invalid number of required signatures");
       return;
     }
 
     try {
       const profileMetadata = {
         name,
-        description: "",
+        description: description,
         links: [] as any,
         tags: [] as any,
-        profileImage: [] as any,
-        backgroundImage: [] as any,
+        profileImage: profileImage,
+        backgroundImage: backgroundImage,
       };
 
-      await createWallet({
+      const newMultisigAddress = await createWallet({
         chainId: 31337n,
         owners: signers as `0x${string}`[],
         signaturesRequired: BigInt(requiredSignatures || "0"),
@@ -90,15 +74,14 @@ const CreateMultiSig: NextPage = () => {
         throw error;
       }
 
-      toaster.create({
-        title: "Multisig created successfully!",
-        type: "success",
-      });
+      if (newMultisigAddress) {
+        setName("");
+        setSigners(ownerAddress ? [ownerAddress] : []);
+        setNewSigner("");
+        setRequiredSignatures("");
 
-      setName("");
-      setSigners(ownerAddress ? [ownerAddress] : []);
-      setNewSigner("");
-      setRequiredSignatures("");
+        router.replace(`/multisig/${newMultisigAddress}`);
+      }
     } catch (error) {
       console.error("Error creating multisig:", error);
       toaster.create({
@@ -108,67 +91,36 @@ const CreateMultiSig: NextPage = () => {
     }
   };
 
-  return useIsMounted() ? (
-    <div className="flex flex-col flex-1 items-center my-20 gap-8 px-4">
-      <div className="flex items-center flex-col flex-grow w-full max-w-lg">
-        <div className="flex flex-col gap-y-6 bg-base-200 border border-gray rounded-xl w-full p-6">
-          <div>
-            <label className="label">
-              <span className="label-text">Give a name to your Multisig</span>
-            </label>
-            <InputBase value={name} placeholder={"Name of multisig"} onChange={(value: string) => setName(value)} />
-          </div>
-          <div className="flex flex-col gap-y-4">
-            <div className="flex flex-col gap-y-4">
-              <label className="label p-0">
-                <span className="label-text">Add Signers and number of confirmations</span>
-              </label>
-              <div className="flex flex-wrap gap-y-3 gap-x-5">
-                {signers.map(signer => (
-                  <div key={signer} className="flex gap-x-2 cursor-pointer">
-                    <Address address={signer} />
-                    <TrashIcon className="w-6 text-red-500 cursor-pointer" onClick={() => removeSigner(signer)} />
-                  </div>
-                ))}
-              </div>
-              <div className="flex flex-col gap-y-1">
-                <AddressInput
-                  placeholder={"Signer address"}
-                  value={newSigner}
-                  onChange={(newValue: string) => setNewSigner(newValue)}
-                  // onKeyPress={handleKeyPressOnAddSigner}
-                />
-                <div onClick={addSigner} className="flex gap-x-1 text-primary mt-2 text-sm items-center cursor-pointer">
-                  <PlusCircleIcon className=" w-6" />
-                  <span>Add Signer</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <InputBase
-            value={requiredSignatures}
-            placeholder={"Required number of signatures"}
-            onChange={(value: string) => setRequiredSignatures(value)}
-          />
-          <div className="mt-2 flex items-center">
-            <button
-              className="w-fit px-12 mx-auto btn btn-secondary btn-md"
-              disabled={!walletClient || isLoading}
-              onClick={handleCreate}
-            >
-              {isLoading ? "Creating..." : "Create"}
-            </button>
-          </div>
+  const componentArray = [
+    <RequiredForm
+      handleCreate={handleCreate}
+      setSigners={setSigners}
+      setName={setName}
+      setNewSigner={setNewSigner}
+      setRequiredSignatures={setRequiredSignatures}
+      requiredSignatures={requiredSignatures}
+      newSigner={newSigner}
+      signers={signers}
+      name={name}
+      isCreateWalletLoading={isCreateWalletLoading}
+      pages={pages}
+      setPages={setPages}
+    />,
+    <OptionalForm
+      handleCreate={handleCreate}
+      profileImage={profileImage}
+      backgroundImage={backgroundImage}
+      description={description}
+      setDescription={setDescription}
+      setProfileImage={setProfileImage}
+      setBackgroundImage={setBackgroundImage}
+      isCreateWalletLoading={isCreateWalletLoading}
+      pages={pages}
+      setPages={setPages}
+    />,
+  ];
 
-          {!!deployedAddress && (
-            <div className="flex">
-              <span className="mr-2">New Multisig:</span> <Address address={deployedAddress} />
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  ) : null;
+  return hasMounted ? componentArray[pages] : null;
 };
 
 export default CreateMultiSig;

@@ -12,6 +12,15 @@ export interface Profile {
   backgroundImage: Image[];
 }
 
+export interface ProfilePayload {
+  name: string;
+  description: string;
+  tags: string[];
+  links: Link[];
+  profileImage: UploadedImageData[];
+  backgroundImage: UploadedImageData[];
+}
+
 interface Link {
   title: string;
   url: string;
@@ -22,6 +31,16 @@ interface Image {
   height: number;
   hashFunction: string;
   hash: string;
+  url: string;
+}
+
+export interface UploadedImageData {
+  width: number;
+  height: number;
+  verification: {
+    method: string;
+    data: string;
+  };
   url: string;
 }
 

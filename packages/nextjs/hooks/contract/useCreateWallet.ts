@@ -1,17 +1,25 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import useJSONUploader from "../useJSONUploader";
-import { Profile } from "../useProfileMetadata";
+import { Profile, ProfilePayload } from "../useProfileMetadata";
 import { ERC725 } from "@erc725/erc725.js";
 import LSP3ProfileMetadataSchemas from "@erc725/erc725.js/schemas/LSP3ProfileMetadata.json";
 import { ethers } from "ethers";
 import { Address } from "viem";
-import { useScaffoldWatchContractEvent, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
+import "viem";
+import { useAccount, usePublicClient } from "wagmi";
+import {
+  useDeployedContractInfo,
+  useScaffoldReadContract,
+  useScaffoldWatchContractEvent,
+  useScaffoldWriteContract,
+} from "~~/hooks/scaffold-eth";
+import { notification } from "~~/utils/scaffold-eth";
 
 interface CreateWalletParams {
   chainId: bigint;
   owners: Address[];
   signaturesRequired: bigint;
-  profileMetadata: Profile;
+  profileMetadata: ProfilePayload;
 }
 
 export const useCreateWallet = () => {
@@ -19,27 +27,21 @@ export const useCreateWallet = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
+  const publicClient = usePublicClient();
+
+  const { address: connectedAddress } = useAccount();
+
   const { upload: uploadProfile } = useJSONUploader({ enabled: false });
+
+  const { data: multiSigRegistryData } = useDeployedContractInfo({
+    contractName: "MultiSigRegistry",
+  });
 
   const { writeContractAsync: createWallet } = useScaffoldWriteContract({
     contractName: "Lyxaxis",
   });
 
-  // Watch for the CreatedMultisig event
-  useScaffoldWatchContractEvent({
-    contractName: "Lyxaxis",
-    eventName: "CreatedMultisig",
-    onLogs: logs => {
-      // Get the most recent event's multisig address
-      const latestLog = logs[logs.length - 1];
-      if (latestLog && "multisig" in latestLog.args) {
-        setDeployedAddress(latestLog.args.multisig as Address);
-        setIsLoading(false);
-      }
-    },
-  });
-
-  const encodeProfileMetadata = async (_profile: Profile): Promise<`0x${string}`> => {
+  const encodeProfileMetadata = async (_profile: ProfilePayload): Promise<`0x${string}`> => {
     let profileMetadata = {
       LSP3Profile: _profile,
     };
@@ -75,16 +77,34 @@ export const useCreateWallet = () => {
 
   const createWalletWithParams = async (params: CreateWalletParams) => {
     try {
+      if (!publicClient) {
+        notification.error("Cannot access account");
+        return;
+      }
+
       setIsLoading(true);
       setError(null);
       setDeployedAddress(null); // Reset the deployed address
 
       const encodedProfileMetadata = await encodeProfileMetadata(params.profileMetadata);
 
-      await createWallet({
+      const trxHash = await createWallet({
         functionName: "createWallet",
         args: [encodedProfileMetadata, params.chainId, params.owners, params.signaturesRequired],
       });
+
+      if (trxHash && multiSigRegistryData?.abi && connectedAddress) {
+        const signerMultisigsData = await publicClient.readContract({
+          address: multiSigRegistryData.address as Address,
+          abi: multiSigRegistryData.abi,
+          functionName: "getSignerMultisigs",
+          args: [connectedAddress],
+        });
+
+        setDeployedAddress(signerMultisigsData[signerMultisigsData.length - 1] as Address);
+
+        return signerMultisigsData[signerMultisigsData.length - 1] as Address;
+      }
     } catch (error) {
       console.error("Error creating wallet:", error);
       setError(error instanceof Error ? error : new Error("Unknown error occurred"));

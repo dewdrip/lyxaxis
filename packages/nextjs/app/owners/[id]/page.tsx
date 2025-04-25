@@ -7,6 +7,7 @@ import { Abi, Address as AddressType, encodeFunctionData } from "viem";
 import { useChainId, usePublicClient, useReadContract, useWalletClient } from "wagmi";
 import { TransactionData } from "~~/app/create/[id]/page";
 import { MultiSigNav } from "~~/components/Navbar";
+import { ProfileInput } from "~~/components/ProfileInput";
 import { Address, AddressInput, IntegerInput } from "~~/components/scaffold-eth";
 import { toaster } from "~~/components/ui/toaster";
 import { useMultiSigRegistry } from "~~/hooks/contract/useMultiSigRegistry";
@@ -189,6 +190,13 @@ const Owners: FC = () => {
                 ))}
               </select>
             </div>
+
+            <ProfileInput
+              onSelectAddress={address => {
+                console.log(address);
+                return true;
+              }}
+            />
 
             <AddressInput
               placeholder="Signer address"

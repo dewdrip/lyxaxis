@@ -51,6 +51,7 @@ interface UseProfileMetadataOptions {
 
 interface UseProfileMetadataResult {
   profile: Profile | null;
+  loading: boolean;
   fetchProfile: (address: `0x${string}`) => Promise<Profile | null>;
 }
 
@@ -63,6 +64,7 @@ interface UseProfileMetadataResult {
 export function useProfileMetadata(options: UseProfileMetadataOptions = { enabled: true }): UseProfileMetadataResult {
   const { address, enabled = true } = options;
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const { targetNetwork } = useTargetNetwork();
 
@@ -79,6 +81,7 @@ export function useProfileMetadata(options: UseProfileMetadataOptions = { enable
       );
 
       try {
+        setLoading(true);
         const profileMetaData = await erc725js.fetchData("LSP3Profile");
 
         if (
@@ -93,6 +96,8 @@ export function useProfileMetadata(options: UseProfileMetadataOptions = { enable
         }
       } catch (error) {
         console.log("Cannot fetch universal profile data: ", error);
+      } finally {
+        setLoading(false);
       }
 
       return null;
@@ -110,8 +115,9 @@ export function useProfileMetadata(options: UseProfileMetadataOptions = { enable
   return useMemo(
     () => ({
       profile,
+      loading,
       fetchProfile,
     }),
-    [profile, fetchProfile],
+    [profile, loading, fetchProfile],
   );
 }

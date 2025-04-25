@@ -2,49 +2,49 @@
 
 import { type FC } from "react";
 import { useParams } from "next/navigation";
-import { TransactionEventItem } from "../_components";
 import { Pool } from "../_components/Pool";
+import { ProfileHeader } from "../_components/ProfileHeader";
 import { QRCodeSVG } from "qrcode.react";
-import { MultiSigNav, Navbar } from "~~/components/Navbar";
+import { CgProfile } from "react-icons/cg";
+import { MultiSigNav } from "~~/components/Navbar";
 import { Address, Balance } from "~~/components/scaffold-eth";
-import { useDeployedContractInfo, useScaffoldEventHistory } from "~~/hooks/scaffold-eth";
+import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
+import { useProfileMetadata } from "~~/hooks/useProfileMetadata";
 
 const Multisig: FC = () => {
-  const { data: contractInfo } = useDeployedContractInfo("MultiSig");
-
   let { id: multisigAddress } = useParams();
 
   multisigAddress = multisigAddress as `0x${string}`;
 
-  const { data: executeTransactionEvents } = useScaffoldEventHistory({
+  const { data: upAddress, isLoading: isUpAddressLoading } = useScaffoldReadContract({
     contractName: "MultiSig",
-    eventName: "ExecuteTransaction",
+    functionName: "getUniversalProfile",
     contractAddress: multisigAddress,
-    fromBlock: 0n,
   });
 
+  const { profile, loading: profileLoading } = useProfileMetadata({
+    address: upAddress as `0x${string}`,
+    enabled: true,
+  });
+
+  console.log("profile", profile);
+
   return (
-    <div className="flex items-center pb-8 flex-col flex-grow gap-8">
+    <div className="flex items-center pb-8 flex-col flex-grow">
       <MultiSigNav multisigAddress={multisigAddress} />
-      <div className="flex gap-4 items-center justify-between border-b border-gray p-6 w-full ">
-        <div className="flex flex-col gap-y-2 items-start">
-          <div>
-            <div className="text-xl">Balance:</div>
-            <Balance className="text-3xl -ml-4" address={multisigAddress} />
-          </div>
-          <Address address={multisigAddress} />
-        </div>
 
-        <div className="flex flex-col items-center gap-y-2">
-          <QRCodeSVG value={multisigAddress || ""} size={100} />
-        </div>
-      </div>
+      <ProfileHeader
+        profileLoading={profileLoading}
+        profile={profile}
+        multisigAddress={multisigAddress}
+        upAddress={upAddress as `0x${string}`}
+      />
 
-      <div className="w-full flex flex-col px-4">
+      {/* <div className="w-full flex flex-col px-4">
         <div>Addresses of Signers</div>
-      </div>
-      <div className="w-full flex flex-col px-4">
-        <Pool multisigAddress={multisigAddress} />
+      </div> */}
+      <div className="w-full flex flex-col px-4 pt-6">
+        <Pool multisigAddress={multisigAddress as `0x${string}`} />
       </div>
     </div>
   );

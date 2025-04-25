@@ -7,6 +7,7 @@ export const AddressCopyIcon = ({ className, address }: { className?: string; ad
   return (
     <CopyToClipboard
       text={address}
+      size={16}
       onCopy={() => {
         setAddressCopied(true);
         setTimeout(() => {

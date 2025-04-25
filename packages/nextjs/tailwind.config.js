@@ -63,6 +63,7 @@ module.exports = {
       animation: { "pulse-fast": "pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite" },
       colors: {
         gray: "#303033",
+        "gray-light": "#374151",
       },
     },
   },

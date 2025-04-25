@@ -1,10 +1,9 @@
 import { type FC, useMemo, useState } from "react";
 import { TransactionItem } from "./TransactionItem";
 import { useQuery } from "@tanstack/react-query";
-import { useInterval } from "usehooks-ts";
-import { Address } from "viem";
 import { useChainId } from "wagmi";
 import { TransactionData } from "~~/app/create/[id]/page";
+import { Address } from "~~/components/scaffold-eth";
 import {
   useDeployedContractInfo,
   useScaffoldContract,
@@ -13,9 +12,8 @@ import {
 } from "~~/hooks/scaffold-eth";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
 import { getPoolServerUrl } from "~~/utils/getPoolServerUrl";
-import { notification } from "~~/utils/scaffold-eth";
 
-export const Pool = ({ multisigAddress }: { multisigAddress: Address }) => {
+export const Pool = ({ multisigAddress }: { multisigAddress: `0x${string}` }) => {
   const [transactions, setTransactions] = useState<TransactionData[]>();
   // const [subscriptionEventsHashes, setSubscriptionEventsHashes] = useState<`0x${string}`[]>([]);
   const { targetNetwork } = useTargetNetwork();
@@ -97,10 +95,14 @@ export const Pool = ({ multisigAddress }: { multisigAddress: Address }) => {
   return (
     <div className="flex flex-col flex-1 items-center gap-8">
       <div className="flex items-center flex-col flex-grow w-full max-w-2xl">
-        <div className="flex flex-col items-center bg-base-100 border border-gray rounded-xl p-6 w-full">
+        <div className="flex flex-col items-center bg-base-100 border border-gray rounded-xl py-6 w-full">
           <div className="text-xl font-bold">Pool</div>
 
-          <div>Nonce: {nonce !== undefined ? `#${nonce}` : "Loading..."}</div>
+          <div className="">Nonce: {nonce !== undefined ? `#${nonce}` : "Loading..."}</div>
+          <div className="flex">
+            <div className="text-sm">Controller Address:</div>{" "}
+            <Address address={multisigAddress} disableBlockie={true} />
+          </div>
 
           <div className="flex flex-col mt-8 gap-4 h-[18rem] overflow-y-scroll">
             {transactions === undefined

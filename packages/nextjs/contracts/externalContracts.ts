@@ -224,7 +224,7 @@ const externalContracts = {
               type: "address",
             },
             {
-              indexed: true,
+              indexed: false,
               internalType: "address payable",
               name: "to",
               type: "address",
@@ -301,6 +301,19 @@ const externalContracts = {
           type: "function",
         },
         {
+          inputs: [],
+          name: "chainId",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
           inputs: [
             {
               internalType: "address payable",
@@ -369,6 +382,19 @@ const externalContracts = {
           type: "function",
         },
         {
+          inputs: [],
+          name: "getUniversalProfile",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
           inputs: [
             {
               internalType: "address",
@@ -385,6 +411,69 @@ const externalContracts = {
             },
           ],
           stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "requestor",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "target",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "caller",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "value",
+              type: "uint256",
+            },
+            {
+              internalType: "bytes",
+              name: "callData",
+              type: "bytes",
+            },
+          ],
+          name: "lsp20VerifyCall",
+          outputs: [
+            {
+              internalType: "bytes4",
+              name: "returnedStatus",
+              type: "bytes4",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "bytes32",
+              name: "callHash",
+              type: "bytes32",
+            },
+            {
+              internalType: "bytes",
+              name: "callResult",
+              type: "bytes",
+            },
+          ],
+          name: "lsp20VerifyCallResult",
+          outputs: [
+            {
+              internalType: "bytes4",
+              name: "",
+              type: "bytes4",
+            },
+          ],
+          stateMutability: "nonpayable",
           type: "function",
         },
         {
@@ -480,10 +569,6 @@ const externalContracts = {
           outputs: [],
           stateMutability: "nonpayable",
           type: "function",
-        },
-        {
-          stateMutability: "payable",
-          type: "receive",
         },
       ],
     },

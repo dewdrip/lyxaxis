@@ -73,6 +73,7 @@ type AddressProps = {
   format?: "short" | "long";
   size?: "xs" | "sm" | "base" | "lg" | "xl" | "2xl" | "3xl";
   onlyEnsOrAddress?: boolean;
+  disableBlockie?: boolean;
 };
 
 export const Address = ({
@@ -81,6 +82,7 @@ export const Address = ({
   format,
   size = "base",
   onlyEnsOrAddress = false,
+  disableBlockie = false,
 }: AddressProps) => {
   const checkSumAddress = address ? getAddress(address) : undefined;
 
@@ -144,14 +146,16 @@ export const Address = ({
 
   return (
     <div className="flex items-center flex-shrink-0">
-      <div className="flex-shrink-0">
-        <BlockieAvatar
-          address={checkSumAddress}
-          ensImage={ensAvatar}
-          size={(blockieSizeMap[blockieSize] * 24) / blockieSizeMap["base"]}
-        />
-      </div>
-      <div className="flex flex-col">
+      {!disableBlockie && (
+        <div className="flex-shrink-0">
+          <BlockieAvatar
+            address={checkSumAddress}
+            ensImage={ensAvatar}
+            size={(blockieSizeMap[blockieSize] * 24) / blockieSizeMap["base"]}
+          />
+        </div>
+      )}
+      <div className="flex flex-col text-sm">
         {showSkeleton &&
           (isEnsNameLoading ? (
             <div className={`ml-1.5 skeleton rounded-lg font-bold ${textSizeMap[ensSize]}`}>
@@ -168,7 +172,7 @@ export const Address = ({
             </span>
           ))}
         <div className="flex">
-          <span className={`ml-1.5 ${textSizeMap[addressSize]} font-normal`}>
+          <span className={`ml-1.5 ${textSizeMap[addressSize]} font-normal text-sm`}>
             <AddressLinkWrapper
               disableAddressLink={disableAddressLink}
               blockExplorerAddressLink={blockExplorerAddressLink}

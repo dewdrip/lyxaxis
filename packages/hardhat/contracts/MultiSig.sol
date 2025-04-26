@@ -136,17 +136,25 @@ contract MultiSig is ILSP20CallVerifier {
     }
 
     function lsp20VerifyCall(
-        address requestor,
-        address target,
+        address /* requestor */,
+        address /* target */,
         address caller,
-        uint256 value,
-        bytes memory callData
-    ) external returns (bytes4 returnedStatus) {
+        uint256 /* value */,
+        bytes memory /* callData */
+    ) external view returns (bytes4 returnedStatus) {
         require(caller == address(this), "Caller not UP owner");
         return 0xde928f01;
     }
 
-    function lsp20VerifyCallResult(bytes32 callHash, bytes memory callResult) external returns (bytes4) {
+    function lsp20VerifyCallResult(
+        bytes32 /* callHash */,
+        bytes memory /* callResult */
+    ) external pure returns (bytes4) {
         return 0xd3fc45d3;
+    }
+
+    receive() external payable {
+        (bool success, ) = payable(i_universalProfile).call{ value: msg.value }("");
+        require(success, "Transfer failed");
     }
 }

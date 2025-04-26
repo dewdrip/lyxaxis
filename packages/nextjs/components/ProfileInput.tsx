@@ -58,11 +58,12 @@ type Profile = {
 };
 
 type SearchProps = {
-  onSelectAddress: (address: `0x${string}`) => boolean;
+  value: string;
+  onSelectAddress: (address: `0x${string}`) => void;
 };
 
-export function ProfileInput({ onSelectAddress }: SearchProps) {
-  const [query, setQuery] = useState("");
+export function ProfileInput({ value, onSelectAddress }: SearchProps) {
+  const [query, setQuery] = useState(value);
   const [debouncedQuery, setDebouncedQuery] = useDebounceValue("", 200);
   const [results, setResults] = useState<Profile[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -98,12 +99,10 @@ export function ProfileInput({ onSelectAddress }: SearchProps) {
       return;
     }
 
-    const isSuccessful = onSelectAddress(address);
+    onSelectAddress(address);
 
-    if (isSuccessful) {
-      setShowDropdown(false);
-      setQuery("");
-    }
+    setShowDropdown(false);
+    setQuery(address);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -141,12 +140,12 @@ export function ProfileInput({ onSelectAddress }: SearchProps) {
     <div className="w-full flex justify-center relative">
       <InputGroup
         endElement={<CiSearch className="text-2xl text-black" />}
-        className="border border-gray-200 bg-white w-[85%] rounded-xl mt-4"
+        className="border border-gray bg-base-200 rounded text-accent w-full mt-4"
       >
         <Input
           type="text"
           placeholder="Enter profile name or address"
-          className="pl-4 text-sm text-black rounded-xl h-12"
+          className="input input-ghost focus-within:border-transparent focus:outline-none focus:bg-transparent h-[3rem] min-h-[2.2rem] px-4 border w-full font-medium placeholder:text-accent/70 text-base-content/70 focus:text-base-content/70"
           value={query}
           onChange={handleInput}
           onKeyPress={handleKeyPress}
@@ -154,7 +153,7 @@ export function ProfileInput({ onSelectAddress }: SearchProps) {
       </InputGroup>
 
       {showDropdown && (
-        <div className="absolute top-[4.7rem] flex flex-col overflow-y-auto space-y-1 px-2 py-1 h-[3.5rem] w-[85%] bg-white rounded-xl shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),0px_1px_0px_0px_rgba(25,28,33,0.02),0px_0px_0px_1px_rgba(25,28,33,0.08)]">
+        <div className="absolute top-[4.7rem] flex flex-col overflow-y-auto space-y-1 px-2 py-1 h-[3.5rem] w-full border border-gray bg-base-200 rounded text-accent shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),0px_1px_0px_0px_rgba(25,28,33,0.02),0px_0px_0px_1px_rgba(25,28,33,0.08)]">
           {isSearching ? (
             <div className="flex justify-center items-center py-4">
               <div className="w-5 h-5 border-2 border-slate-300 border-t-slate-700 rounded-full animate-spin"></div>

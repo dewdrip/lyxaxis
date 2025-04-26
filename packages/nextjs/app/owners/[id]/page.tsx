@@ -192,16 +192,8 @@ const Owners: FC = () => {
             </div>
 
             <ProfileInput
-              onSelectAddress={address => {
-                console.log(address);
-                return true;
-              }}
-            />
-
-            <AddressInput
-              placeholder="Signer address"
               value={predefinedTxData.signer}
-              onChange={s => setPredefinedTxData({ ...predefinedTxData, signer: s })}
+              onSelectAddress={address => setPredefinedTxData({ ...predefinedTxData, signer: address })}
             />
 
             <IntegerInput

@@ -65,7 +65,7 @@ export default function SearchProfile({ address, onSelect }: Props) {
           </Link>
         </div>
 
-        <strong className="text-xs text-black font-bold">
+        <strong className="text-xs text-accent font-bold">
           {profile ? `@${profile.name}` : truncateAddress(address)}
           {profile && <span className="text-purple-400 whitespace-nowrap">#{getFirst4Hex(address)}</span>}
         </strong>

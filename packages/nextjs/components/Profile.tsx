@@ -2,14 +2,16 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { BlockieAvatar } from "./scaffold-eth";
+import { AddressCopyIcon } from "./scaffold-eth/Address/AddressCopyIcon";
 import { useProfileMetadata } from "~~/hooks/useProfileMetadata";
 import { getAddressColor, getFirst4Hex, truncateAddress } from "~~/utils/helpers";
 
 type Props = {
   address: `0x${string}`;
+  copyable?: boolean;
 };
 
-export default function Profile({ address }: Props) {
+export default function Profile({ address, copyable = true }: Props) {
   const { profile } = useProfileMetadata({
     address,
     enabled: true,
@@ -42,6 +44,8 @@ export default function Profile({ address }: Props) {
         {profile ? `${profile.name}` : truncateAddress(address)}
         {profile && <span className="text-purple-400 whitespace-nowrap">#{getFirst4Hex(address)}</span>}
       </strong>
+
+      {copyable && <AddressCopyIcon className="ml-1 w-5 aspect-square cursor-pointer" address={address} />}
     </div>
   );
 }

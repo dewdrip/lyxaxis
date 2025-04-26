@@ -58,12 +58,13 @@ type Profile = {
 };
 
 type SearchProps = {
+  placeholder?: string;
   value: string;
   onSelectAddress: (address: `0x${string}`) => void;
 };
 
-export function ProfileInput({ value, onSelectAddress }: SearchProps) {
-  const [query, setQuery] = useState(value);
+export function ProfileInput({ value, onSelectAddress, placeholder = "Enter profile name or address" }: SearchProps) {
+  const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useDebounceValue("", 200);
   const [results, setResults] = useState<Profile[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -133,6 +134,10 @@ export function ProfileInput({ value, onSelectAddress }: SearchProps) {
   };
 
   useEffect(() => {
+    setQuery(value);
+  }, [value]);
+
+  useEffect(() => {
     handleSearch();
   }, [debouncedQuery, query]);
 
@@ -144,7 +149,7 @@ export function ProfileInput({ value, onSelectAddress }: SearchProps) {
       >
         <Input
           type="text"
-          placeholder="Enter profile name or address"
+          placeholder={placeholder}
           className="input input-ghost focus-within:border-transparent focus:outline-none focus:bg-transparent h-[3rem] min-h-[2.2rem] px-4 border w-full font-medium placeholder:text-accent/70 text-base-content/70 focus:text-base-content/70"
           value={query}
           onChange={handleInput}

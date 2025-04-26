@@ -4,6 +4,7 @@ import { useIsMounted } from "usehooks-ts";
 import { isAddress } from "viem";
 import { useAccount, useWalletClient } from "wagmi";
 import { PlusCircleIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { ProfileInput } from "~~/components/ProfileInput";
 import { Address, AddressInput, InputBase } from "~~/components/scaffold-eth";
 import { toaster } from "~~/components/ui/toaster";
 import { useCreateWallet } from "~~/hooks/contract/useCreateWallet";
@@ -51,9 +52,16 @@ export const RequiredForm = ({
   }, [ownerAddress]);
 
   const addSigner = () => {
-    if (newSigner && !signers.includes(newSigner)) {
+    if (!newSigner) return;
+
+    if (!signers.includes(newSigner)) {
       setSigners([...signers, newSigner]);
       setNewSigner("");
+    } else {
+      toaster.create({
+        title: "Signer already added",
+        type: "error",
+      });
     }
   };
 
@@ -100,15 +108,15 @@ export const RequiredForm = ({
                 ))}
               </div>
               <div className="flex flex-col gap-y-1">
-                <AddressInput
-                  placeholder={"Signer address"}
+                <ProfileInput
                   value={newSigner}
-                  onChange={(newValue: string) => {
-                    isAddress(newValue) ? setNewSignerError("") : setNewSignerError("Invalid address");
-                    setNewSigner(newValue);
+                  onSelectAddress={address => {
+                    setNewSigner(address);
+                    setNewSignerError("");
                   }}
-                  // onKeyPress={handleKeyPressOnAddSigner}
+                  placeholder={"Signer address"}
                 />
+
                 {newSignerError ? (
                   <div className="text-red-500 text-sm">{newSignerError}</div>
                 ) : (

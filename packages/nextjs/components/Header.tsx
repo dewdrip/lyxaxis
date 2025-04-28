@@ -31,8 +31,8 @@ export const menuLinks: HeaderMenuLink[] = [
     icon: <CheckBadgeIcon className="h-4 w-4" />,
   },
   {
-    label: "Create",
-    href: "/create",
+    label: "Transfer",
+    href: "/transfer",
     icon: <PlusCircleIcon className="h-4 w-4" />,
   },
   {

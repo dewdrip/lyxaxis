@@ -160,38 +160,11 @@ const CreatePage: FC = () => {
       <div className="flex flex-col flex-1 items-center my-10 gap-8 px-4">
         <div className="flex items-center flex-col flex-grow w-full max-w-lg">
           <div className="flex flex-col bg-base-200 border border-gray rounded-xl w-full p-6">
-            <div>
-              <label className="label">
-                <span className="label-text">Nonce</span>
-              </label>
-              <InputBase
-                disabled
-                value={nonce !== undefined ? `# ${nonce}` : "Loading..."}
-                placeholder={"Loading..."}
-                onChange={() => {
-                  null;
-                }}
-              />
-            </div>
-
             <div className="flex flex-col gap-4">
               <div className="mt-6 w-full">
                 <label className="label">
-                  <span className="label-text">Select method</span>
+                  <span className="label-text">Transfer Funds</span>
                 </label>
-                <select
-                  className="select select-bordered select-sm w-full bg-base-200 text-accent font-medium"
-                  value={predefinedTxData.methodName}
-                  onChange={e =>
-                    setPredefinedTxData({
-                      ...predefinedTxData,
-                      methodName: e.target.value as Method,
-                      callData: "" as `0x${string}`,
-                    })
-                  }
-                >
-                  <option value={"transferFunds"}>transferFunds</option>
-                </select>
               </div>
 
               <AddressInput
@@ -209,17 +182,9 @@ const CreatePage: FC = () => {
                   }}
                 />
               )}
-              <InputBase
-                value={predefinedTxData.callData || ""}
-                placeholder={"Calldata"}
-                onChange={() => {
-                  null;
-                }}
-                disabled
-              />
 
               <button className="btn btn-secondary btn-sm" disabled={!walletClient} onClick={handleCreate}>
-                Create
+                Propose
               </button>
             </div>
           </div>

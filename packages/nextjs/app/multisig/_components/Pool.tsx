@@ -2,7 +2,7 @@ import { type FC, useMemo, useState } from "react";
 import { TransactionItem } from "./TransactionItem";
 import { useQuery } from "@tanstack/react-query";
 import { useChainId } from "wagmi";
-import { TransactionData } from "~~/app/create/[id]/page";
+import { TransactionData } from "~~/app/transfer/[id]/page";
 import { Address } from "~~/components/scaffold-eth";
 import {
   useDeployedContractInfo,

@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useIsMounted, useLocalStorage } from "usehooks-ts";
 import { Abi, Address as AddressType, encodeFunctionData } from "viem";
 import { useChainId, usePublicClient, useReadContract, useWalletClient } from "wagmi";
-import { TransactionData } from "~~/app/create/[id]/page";
+import { TransactionData } from "~~/app/transfer/[id]/page";
 import { MultiSigNav } from "~~/components/Navbar";
 import { ProfileInput } from "~~/components/ProfileInput";
 import { Address, AddressInput, IntegerInput } from "~~/components/scaffold-eth";

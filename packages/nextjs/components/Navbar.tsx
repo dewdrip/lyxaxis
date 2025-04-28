@@ -39,7 +39,7 @@ export const MultiSigNav = ({ multisigAddress }: { multisigAddress: string }) =>
   return (
     <div className=" w-full flex gap-x-3  border-b border-gray py-4  px-2">
       <NavButton link={`/multisig/${multisigAddress}`} title="Wallet" />
-      <NavButton link={`/create/${multisigAddress}`} title="Create" />
+      <NavButton link={`/transfer/${multisigAddress}`} title="Transfer" />
       <NavButton link={`/owners/${multisigAddress}`} title="Signers" />
       <NavButton link={`/events/${multisigAddress}`} title="Event" />
     </div>

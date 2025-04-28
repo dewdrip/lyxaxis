@@ -3,7 +3,7 @@ import { Address, BlockieAvatar } from "../../../components/scaffold-eth";
 import { IoIosInformationCircleOutline } from "react-icons/io";
 import { Abi, DecodeFunctionDataReturnType, decodeFunctionData, formatEther } from "viem";
 import { useAccount, useWalletClient } from "wagmi";
-import { TransactionData } from "~~/app/create/[id]/page";
+import { TransactionData } from "~~/app/transfer/[id]/page";
 import {
   useDeployedContractInfo,
   useScaffoldContract,

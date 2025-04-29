@@ -30,7 +30,6 @@ export const OptionalForm = ({
   setProfileImageFile,
   handleCreate,
   isCreateWalletLoading,
-
   pages,
   setPages,
 }: {

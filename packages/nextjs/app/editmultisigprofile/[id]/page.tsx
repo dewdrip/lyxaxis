@@ -3,25 +3,34 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
-import { EditProfileForm } from "../components/EditProfileForm";
 import type { NextPage } from "next";
-import { useIsMounted } from "usehooks-ts";
-import { useAccount, useWalletClient } from "wagmi";
+import { useIsMounted, useLocalStorage } from "usehooks-ts";
+import { Abi, encodeFunctionData } from "viem";
+import { useChainId, usePublicClient, useWalletClient } from "wagmi";
+import { TransactionData } from "~~/app/create/[id]/page";
 import { BackButton } from "~~/app/createmultisig/components/BackButton";
 import { ImageUploader } from "~~/app/createmultisig/components/imageUploader";
 import { InputBase } from "~~/components/scaffold-eth";
-import { toaster } from "~~/components/ui/toaster";
 import { useCreateWallet } from "~~/hooks/contract/useCreateWallet";
-import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
-import { UploadedImageData, useProfileMetadata } from "~~/hooks/useProfileMetadata";
+import { useScaffoldReadContract, useTargetNetwork } from "~~/hooks/scaffold-eth";
+import { ProfilePayload, UploadedImageData, useProfileMetadata } from "~~/hooks/useProfileMetadata";
+import { AddressType } from "~~/types/abitype/abi";
+import LspABI from "~~/utils/abis/LspABI.json";
+import MultiSigABI from "~~/utils/abis/MultiSigABI.json";
+import { getPoolServerUrl } from "~~/utils/getPoolServerUrl";
+import { DEFAULT_TX_DATA, PredefinedTxData } from "~~/utils/methods";
 import { notification } from "~~/utils/scaffold-eth";
 
 const EditMultiSigProfile: NextPage = () => {
-  const router = useRouter();
-
   let { id: multisigAddress } = useParams();
-
   multisigAddress = multisigAddress as `0x${string}`;
+  const { data: walletClient } = useWalletClient();
+  const publicClient = usePublicClient();
+  const chainId = useChainId();
+  const { targetNetwork } = useTargetNetwork();
+  const poolServerUrl = getPoolServerUrl(targetNetwork.id);
+
+  const router = useRouter();
 
   const { data: upAddress, isLoading: isUpAddressLoading } = useScaffoldReadContract({
     contractName: "MultiSig",
@@ -34,16 +43,148 @@ const EditMultiSigProfile: NextPage = () => {
     enabled: true,
   });
 
-  const { address: ownerAddress } = useAccount();
-
-  const [profileImage, setProfileImage] = useState<UploadedImageData[]>([]);
-  const [backgroundImage, setBackgroundImage] = useState<UploadedImageData[]>([]);
-
   const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
   const [backgroundImageFile, setBackgroundImageFile] = useState<File | null>(null);
 
   const [name, setName] = useState<string>("");
   const [description, setDescription] = useState<string>("");
+  const [profileImage, setProfileImage] = useState<UploadedImageData[]>([]);
+  const [backgroundImage, setBackgroundImage] = useState<UploadedImageData[]>([]);
+
+  const [createProposalLoading, setCreateProposalLoading] = useState<boolean>(false);
+
+  const [predefinedTxData, setPredefinedTxData] = useLocalStorage<PredefinedTxData>(
+    "predefined-tx-data",
+    DEFAULT_TX_DATA,
+  );
+
+  const { data: signaturesRequired } = useScaffoldReadContract({
+    contractName: "MultiSig",
+    contractAddress: multisigAddress,
+    functionName: "signaturesRequired",
+  });
+
+  const { data: owners } = useScaffoldReadContract({
+    contractName: "MultiSigRegistry",
+    functionName: "getMultisigOwners",
+    args: [multisigAddress],
+  });
+
+  const { data: nonce } = useScaffoldReadContract({
+    contractName: "MultiSig",
+    contractAddress: multisigAddress,
+    functionName: "nonce",
+  });
+
+  const { encodeProfileMetadata } = useCreateWallet();
+
+  const handleCreate = async () => {
+    try {
+      setCreateProposalLoading(true);
+
+      if (!walletClient) {
+        console.log("No wallet client!");
+        return;
+      }
+
+      if (!name) {
+        notification.error("Please enter a name for the multisig");
+        return;
+      }
+
+      const LSP3ProfileKey = "0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5";
+
+      const profileMetadata: ProfilePayload = {
+        name,
+        description,
+        links: [] as any,
+        tags: [] as any,
+      };
+
+      if (profileImage.length > 0) {
+        profileMetadata.profileImage = profileImage;
+      }
+
+      if (backgroundImage.length > 0) {
+        profileMetadata.backgroundImage = backgroundImage;
+      }
+
+      const encodedProfileMetadata = await encodeProfileMetadata(profileMetadata);
+
+      const callData = encodeFunctionData({
+        abi: LspABI as Abi,
+        functionName: "setData",
+        args: [LSP3ProfileKey, encodedProfileMetadata],
+      });
+
+      const newHash = (await publicClient?.readContract({
+        address: multisigAddress,
+        abi: MultiSigABI,
+        functionName: "getTransactionHash",
+        args: [nonce as bigint, String(multisigAddress), 0n, callData as `0x${string}`],
+      })) as `0x${string}`;
+
+      const signature = await walletClient.signMessage({
+        message: { raw: newHash },
+      });
+
+      const recover = (await publicClient?.readContract({
+        address: multisigAddress,
+        abi: MultiSigABI,
+        functionName: "recover",
+        args: [newHash, signature],
+      })) as AddressType;
+
+      const isOwner = await publicClient?.readContract({
+        address: multisigAddress,
+        abi: MultiSigABI,
+        functionName: "isOwner",
+        args: [recover],
+      });
+
+      if (isOwner) {
+        if (!multisigAddress) {
+          return;
+        }
+
+        const txData: TransactionData = {
+          chainId: chainId,
+          address: multisigAddress,
+          nonce: (nonce as bigint) || 0n,
+          to: multisigAddress,
+          amount: "0",
+          data: callData as `0x${string}`,
+          hash: newHash,
+          signatures: [signature],
+          signers: [recover],
+          requiredApprovals: (signaturesRequired as bigint) || 0n,
+        };
+
+        await fetch(poolServerUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(
+            txData,
+            // stringifying bigint
+            (key, value) => (typeof value === "bigint" ? value.toString() : value),
+          ),
+        });
+
+        setPredefinedTxData(DEFAULT_TX_DATA);
+
+        setTimeout(() => {
+          router.push(`/multisig/${multisigAddress}`);
+        }, 777);
+      } else {
+        notification.info("Only owners can propose transactions");
+      }
+    } catch (e) {
+      notification.error("Error while proposing transaction");
+      console.log(e);
+    } finally {
+      setCreateProposalLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (profile) {
@@ -51,34 +192,6 @@ const EditMultiSigProfile: NextPage = () => {
       setDescription(profile.description || "");
     }
   }, [profile]);
-
-  const { createWallet, isLoading: isCreateWalletLoading, error } = useCreateWallet();
-
-  const { data: walletClient } = useWalletClient();
-
-  const handleCreate = async () => {
-    if (!name) {
-      notification.error("Please enter a name for the multisig");
-      return;
-    }
-
-    try {
-      const profileMetadata = {
-        name,
-        description: description,
-        links: [] as any,
-        tags: [] as any,
-        profileImage: profileImage,
-        backgroundImage: backgroundImage,
-      };
-    } catch (error) {
-      console.error("Error creating multisig:", error);
-      toaster.create({
-        title: "Error creating multisigs",
-        type: "error",
-      });
-    }
-  };
 
   const getImageUrl = (ipfsUrl: string) => ipfsUrl.replace("ipfs://", "https://api.universalprofile.cloud/ipfs/");
 
@@ -116,14 +229,14 @@ const EditMultiSigProfile: NextPage = () => {
             <div className="flex flex-col gap-y-4">
               <div>
                 <label className="label">
-                  <span className="label-text">Update Multisig name</span>
+                  <span className="label-text">Multisig name</span>
                 </label>
                 <InputBase value={name} placeholder={"Name of multisig"} onChange={(value: string) => setName(value)} />
               </div>
 
               <div className="flex flex-col gap-y-1">
                 <label className="label p-0">
-                  <span className="label-text">Update Multisig Description</span>
+                  <span className="label-text">Multisig Description</span>
                 </label>
                 <InputBase
                   value={description}
@@ -134,11 +247,15 @@ const EditMultiSigProfile: NextPage = () => {
             </div>
             <div className="mt-2 flex items-center justify-center px-6">
               <button
-                className="w-fit px-3 btn btn-primary btn-sm h-[2.5rem] rounded-xl"
-                disabled={!walletClient || isCreateWalletLoading}
+                className="btn btn-primary btn-sm h-[2.5rem] w-[140px] rounded-lg"
+                disabled={!walletClient || false}
                 onClick={handleCreate}
               >
-                {isCreateWalletLoading ? "Creating..." : "Create Proposal"}
+                {createProposalLoading ? (
+                  <span className="loading loading-spinner loading-xs"></span>
+                ) : (
+                  "Create Proposal"
+                )}
               </button>
             </div>
           </div>

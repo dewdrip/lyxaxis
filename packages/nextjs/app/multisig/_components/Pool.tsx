@@ -113,9 +113,9 @@ export const Pool = ({ multisigAddress }: { multisigAddress: `0x${string}` }) =>
 
           <div className="flex flex-col mt-8 gap-4 h-[18rem] overflow-y-scroll">
             {loading ? (
-              <div className="bg-base-100 w-full h-24 skeleton "></div>
+              <div className="bg-white w-4 h-4 loading loading-spinner my-20"></div>
             ) : transactions && transactions.length === 0 ? (
-              <div className="bg-base-100 w-full h-24 loading "></div>
+              <div className="w-full"></div>
             ) : (
               transactions &&
               transactions.map(tx => {

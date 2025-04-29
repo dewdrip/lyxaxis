@@ -6,11 +6,12 @@ import { useIsMounted, useLocalStorage } from "usehooks-ts";
 import { Address, parseEther } from "viem";
 import { useChainId, usePublicClient, useReadContract, useWalletClient } from "wagmi";
 import { MultiSigNav } from "~~/components/Navbar";
-import { AddressInput, EtherInput, InputBase } from "~~/components/scaffold-eth";
+import { EtherInput } from "~~/components/scaffold-eth";
+import { ProfileInput } from "~~/components/ProfileInput";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
 import MultiSigABI from "~~/utils/abis/MultiSigABI.json";
 import { getPoolServerUrl } from "~~/utils/getPoolServerUrl";
-import { DEFAULT_TX_DATA, Method, PredefinedTxData } from "~~/utils/methods";
+import { DEFAULT_TX_DATA, PredefinedTxData } from "~~/utils/methods";
 import { notification } from "~~/utils/scaffold-eth";
 
 export type TransactionData = {
@@ -144,6 +145,10 @@ const CreatePage: FC = () => {
     }
   };
 
+  const handleSelectAddress = (address: `0x${string}`) => {
+    setPredefinedTxData({ ...predefinedTxData, signer: address });
+  };
+
   useEffect(() => {
     if (predefinedTxData && !predefinedTxData.callData && predefinedTxData.methodName !== "transferFunds") {
       setPredefinedTxData({
@@ -167,10 +172,10 @@ const CreatePage: FC = () => {
                 </label>
               </div>
 
-              <AddressInput
-                placeholder={predefinedTxData.methodName === "transferFunds" ? "Recipient address" : "Signer address"}
+              <ProfileInput
                 value={predefinedTxData.signer}
-                onChange={signer => setPredefinedTxData({ ...predefinedTxData, signer: signer })}
+                onSelectAddress={handleSelectAddress}
+                placeholder="Enter profile name or address"
               />
 
               {predefinedTxData.methodName === "transferFunds" && (

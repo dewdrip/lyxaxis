@@ -118,6 +118,12 @@ export function ProfileInput({ value, onSelectAddress, placeholder = "Enter prof
 
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.trim();
+
+    if (isAddress(value)) {
+      handleSelectProfile(value as `0x${string}`);
+      return;
+    }
+
     if (!value) {
       setShowDropdown(false);
     } else {

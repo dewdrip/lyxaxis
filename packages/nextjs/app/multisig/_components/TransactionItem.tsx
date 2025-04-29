@@ -245,7 +245,7 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
             )}
             <div>{formatEther(BigInt(tx.amount))} Ξ</div>
 
-            <Address address={tx.to} />
+            {/* <Address address={tx.to} /> */}
           </div>
 
           <div className="flex flex-col gap-y-4">
@@ -291,7 +291,8 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
 
         <div className="flex justify-between items-center text-xs gap-4 mt-2">
           <div>Function name: {txnData.functionName || "transferFunds"}</div>
-          {txnData.args && txnData.functionName !== "setData" && (
+
+          {Object.keys(txnData).length === 0 && (
             <div className="flex gap-1 items-center">
               To: <Address address={txnData.args?.[0] ? String(txnData.args?.[0]) : tx.to} size="xs" />
             </div>

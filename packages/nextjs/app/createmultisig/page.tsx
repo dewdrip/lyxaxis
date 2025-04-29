@@ -27,10 +27,10 @@ const CreateMultiSig: NextPage = () => {
   const [profileImage, setProfileImage] = useState<UploadedImageData[]>([]);
   const [backgroundImage, setBackgroundImage] = useState<UploadedImageData[]>([]);
   const [description, setDescription] = useState<string>("");
-  const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
-  const [backgroundImageFile, setBackgroundImageFile] = useState<File | null>(null);
   const [tags, setTags] = useState<string[]>([]);
   const [links, setLinks] = useState<Link[]>([]);
+  const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
+  const [backgroundImageFile, setBackgroundImageFile] = useState<File | null>(null);
 
   const [newSigner, setNewSigner] = useState<string>("");
 

@@ -4,10 +4,7 @@ import { type FC } from "react";
 import { useParams } from "next/navigation";
 import { Pool } from "../_components/Pool";
 import { ProfileHeader } from "../_components/ProfileHeader";
-import { QRCodeSVG } from "qrcode.react";
-import { CgProfile } from "react-icons/cg";
 import { MultiSigNav } from "~~/components/Navbar";
-import { Address, Balance } from "~~/components/scaffold-eth";
 import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
 import { useProfileMetadata } from "~~/hooks/useProfileMetadata";
 

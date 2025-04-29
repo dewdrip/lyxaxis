@@ -119,6 +119,7 @@ export const useCreateWallet = () => {
 
   return {
     createWallet: createWalletWithParams,
+    encodeProfileMetadata,
     deployedAddress,
     isLoading,
     error,

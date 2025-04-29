@@ -17,8 +17,8 @@ export interface ProfilePayload {
   description: string;
   tags: string[];
   links: Link[];
-  profileImage: UploadedImageData[];
-  backgroundImage: UploadedImageData[];
+  profileImage?: UploadedImageData[];
+  backgroundImage?: UploadedImageData[];
 }
 
 interface Link {

@@ -48,9 +48,35 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
     contractName: "MultiSig",
   });
 
+  const combinedAbi = contractInfo?.abi
+    ? [
+        ...contractInfo.abi,
+        ...[
+          {
+            inputs: [
+              {
+                internalType: "bytes32",
+                name: "dataKey",
+                type: "bytes32",
+              },
+              {
+                internalType: "bytes",
+                name: "dataValue",
+                type: "bytes",
+              },
+            ],
+            name: "setData",
+            outputs: [],
+            stateMutability: "payable",
+            type: "function",
+          },
+        ],
+      ]
+    : [];
+
   const txnData =
-    contractInfo?.abi && tx.data
-      ? decodeFunctionData({ abi: contractInfo.abi as Abi, data: tx.data })
+    combinedAbi.length > 0 && tx.data
+      ? decodeFunctionData({ abi: combinedAbi as Abi, data: tx.data })
       : ({} as DecodeFunctionDataReturnType);
 
   const hasSigned = tx.signers.indexOf(address as string) >= 0;
@@ -163,6 +189,8 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
     }
   };
 
+  console.log("trx data", txnData);
+
   return (
     <>
       <input type="checkbox" id={`label-${tx.hash}`} className="modal-toggle" />
@@ -174,7 +202,7 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
               {txnData.functionName || "transferFunds"}
             </div>
             <div className="flex flex-col gap-2 mt-6">
-              {txnData.args ? (
+              {txnData.args && txnData.functionName !== "setData" ? (
                 <>
                   <h4 className="font-bold">Arguments</h4>
                   <div className="flex gap-4">
@@ -185,7 +213,7 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
               ) : (
                 <>
                   <div className="flex gap-4">
-                    Transfer to: <Address address={tx.to} />
+                    Transfer to: <Address address={tx.to} />{" "}
                   </div>
                   <div>Amount: {formatEther(BigInt(tx.amount))} Ξ </div>
                 </>
@@ -263,9 +291,12 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
 
         <div className="flex justify-between items-center text-xs gap-4 mt-2">
           <div>Function name: {txnData.functionName || "transferFunds"}</div>
-          <div className="flex gap-1 items-center">
-            To: <Address address={txnData.args?.[0] ? String(txnData.args?.[0]) : tx.to} size="xs" />
-          </div>
+
+          {Object.keys(txnData).length === 0 && (
+            <div className="flex gap-1 items-center">
+              To: <Address address={txnData.args?.[0] ? String(txnData.args?.[0]) : tx.to} size="xs" />
+            </div>
+          )}
         </div>
       </div>
     </>

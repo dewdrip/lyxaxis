@@ -12,9 +12,11 @@ import {
 } from "~~/hooks/scaffold-eth";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
 import { getPoolServerUrl } from "~~/utils/getPoolServerUrl";
+import { notification } from "~~/utils/scaffold-eth";
 
 export const Pool = ({ multisigAddress }: { multisigAddress: `0x${string}` }) => {
   const [transactions, setTransactions] = useState<TransactionData[]>();
+  const [loading, setLoading] = useState<boolean>(false);
   // const [subscriptionEventsHashes, setSubscriptionEventsHashes] = useState<`0x${string}`[]>([]);
   const { targetNetwork } = useTargetNetwork();
   const poolServerUrl = getPoolServerUrl(targetNetwork.id);
@@ -42,6 +44,8 @@ export const Pool = ({ multisigAddress }: { multisigAddress: `0x${string}` }) =>
 
   const fetchTransactionData = async (id?: string) => {
     try {
+      setLoading(true);
+
       const response = await fetch(`${poolServerUrl}${multisigAddress}`);
       const res = await response.json();
 
@@ -73,6 +77,9 @@ export const Pool = ({ multisigAddress }: { multisigAddress: `0x${string}` }) =>
       return newTransactions;
     } catch (error) {
       console.error("Error fetching transaction data:", error);
+      notification.error("Error fetching transaction data");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -105,18 +112,23 @@ export const Pool = ({ multisigAddress }: { multisigAddress: `0x${string}` }) =>
           </div>
 
           <div className="flex flex-col mt-8 gap-4 h-[18rem] overflow-y-scroll">
-            {transactions === undefined
-              ? "Loading..."
-              : transactions.map(tx => {
-                  return (
-                    <TransactionItem
-                      key={tx.hash}
-                      tx={tx}
-                      completed={historyHashes.includes(tx.hash as `0x${string}`)}
-                      outdated={lastTx?.nonce != undefined && BigInt(tx.nonce) <= BigInt(lastTx?.nonce)}
-                    />
-                  );
-                })}
+            {loading ? (
+              <div className="bg-white w-4 h-4 loading loading-spinner my-20"></div>
+            ) : transactions && transactions.length === 0 ? (
+              <div className="w-full"></div>
+            ) : (
+              transactions &&
+              transactions.map(tx => {
+                return (
+                  <TransactionItem
+                    key={tx.hash}
+                    tx={tx}
+                    completed={historyHashes.includes(tx.hash as `0x${string}`)}
+                    outdated={lastTx?.nonce != undefined && BigInt(tx.nonce) <= BigInt(lastTx?.nonce)}
+                  />
+                );
+              })
+            )}
           </div>
         </div>
       </div>

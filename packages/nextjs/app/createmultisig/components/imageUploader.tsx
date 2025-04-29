@@ -8,13 +8,35 @@ interface ProfileEditorProps {
   setFieldValue: (field: string, value: string) => void;
   setProfileImage: Dispatch<SetStateAction<UploadedImageData[]>>;
   setBackgroundImage: Dispatch<SetStateAction<UploadedImageData[]>>;
+  setBackgroundImageFile: Dispatch<SetStateAction<File | null>>;
+  setProfileImageFile: Dispatch<SetStateAction<File | null>>;
+  profileImageUrl?: string;
+  backgroundImageUrl?: string;
 }
 
-export const ImageUploader: FC<ProfileEditorProps> = ({ setFieldValue, setBackgroundImage, setProfileImage }) => {
+export const ImageUploader: FC<ProfileEditorProps> = ({
+  setFieldValue,
+  setBackgroundImage,
+  setProfileImage,
+  setBackgroundImageFile,
+  setProfileImageFile,
+  profileImageUrl,
+  backgroundImageUrl,
+}) => {
   return (
     <div className="relative">
-      <CoverImageUploader setFieldValue={setFieldValue} setUploadedImage={setBackgroundImage} />
-      <ProfileImageUploader setFieldValue={setFieldValue} setUploadedImage={setProfileImage} />
+      <CoverImageUploader
+        setFieldValue={setFieldValue}
+        setUploadedImage={setBackgroundImage}
+        setCoverImageFile={setBackgroundImageFile}
+        existingImage={backgroundImageUrl}
+      />
+      <ProfileImageUploader
+        setFieldValue={setFieldValue}
+        setUploadedImage={setProfileImage}
+        setProfileFile={setProfileImageFile}
+        existingImage={profileImageUrl}
+      />
     </div>
   );
 };

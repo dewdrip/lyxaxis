@@ -99,9 +99,9 @@ export const RequiredForm = ({
               <label className="label p-0">
                 <span className="label-text">Add Signers and number of confirmations</span>
               </label>
-              <div className="flex flex-wrap gap-y-3 gap-x-5">
+              <div className="flex flex-wrap gap-y-3 gap-x-3">
                 {signers.map(signer => (
-                  <div key={signer} className="flex gap-x-2 cursor-pointer">
+                  <div key={signer} className="flex gap-x-1 cursor-pointer">
                     <Address address={signer} />
                     <TrashIcon className="w-5 text-red-500 cursor-pointer" onClick={() => removeSigner(signer)} />
                   </div>

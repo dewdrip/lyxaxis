@@ -1,5 +1,5 @@
 // src/components/ProfileImageUploader.tsx
-import { Dispatch, FC, SetStateAction } from "react";
+import { Dispatch, FC, SetStateAction, useEffect } from "react";
 import { useImageSetter } from "../hooks/useImageSetter";
 import { useImageUploader } from "../hooks/useImageUploader";
 import { MdCancel } from "react-icons/md";
@@ -8,9 +8,11 @@ import { UploadedImageData } from "~~/hooks/useProfileMetadata";
 interface Props {
   setFieldValue: (field: string, value: string) => void;
   setUploadedImage: Dispatch<SetStateAction<UploadedImageData[]>>;
+  setProfileFile: Dispatch<SetStateAction<File | null>>;
+  existingImage?: string;
 }
 
-export const ProfileImageUploader: FC<Props> = ({ setFieldValue, setUploadedImage }) => {
+export const ProfileImageUploader: FC<Props> = ({ setFieldValue, setUploadedImage, setProfileFile, existingImage }) => {
   const {
     file,
     previewUrl,
@@ -20,7 +22,7 @@ export const ProfileImageUploader: FC<Props> = ({ setFieldValue, setUploadedImag
     handleInputChange,
     handleImageClear,
     isLoading,
-  } = useImageSetter(setFieldValue);
+  } = useImageSetter(setProfileFile, setUploadedImage, existingImage);
 
   const { upload: uploadImage, isUploading } = useImageUploader({ enabled: false });
 
@@ -57,62 +59,68 @@ export const ProfileImageUploader: FC<Props> = ({ setFieldValue, setUploadedImag
     }
   };
 
-  return (
-    <div className="relative w-[140px] h-[140px] -mt-14 ml-5">
-      <div className="relative w-full h-full rounded-full">
-        <img
-          className={`w-full h-full rounded-full object-cover ${isPreviewVisible ? "" : "hidden"}`}
-          alt="Profile Preview"
-          src={previewUrl}
-        />
-        {isPreviewVisible && (
-          <button
-            className="absolute  top-0 right-2 p-1 bg-gray bg-opacity-50 rounded-full hover:bg-opacity-70"
-            onClick={handleImageClear}
-          >
-            <MdCancel className=" text-white" size={32} />
-          </button>
-        )}
+  useEffect(() => {
+    if (file) {
+      handleUpload();
+    }
+  }, [file]);
 
-        {isPreviewVisible && (
-          <div className="absolute right-2 bottom-4">
-            <button
-              className="bg-white text-black flex items-center justify-center text-xs font-medium w-12 py-1 rounded hover:bg-gray-200 transition-all"
+  return (
+    <div className="relative bg-base-100 w-[140px] h-[140px] rounded-full -mt-14 ml-5">
+      <img
+        className={`w-full h-full rounded-full object-cover ${previewUrl ? "" : "hidden"}`}
+        alt="Profile Preview"
+        src={previewUrl}
+      />
+      {previewUrl && (
+        <button
+          className="absolute  top-0 right-2 p-1 bg-gray bg-opacity-50 rounded-full hover:bg-opacity-70"
+          onClick={handleImageClear}
+        >
+          <MdCancel className=" text-white" size={32} />
+        </button>
+      )}
+
+      {previewUrl && (
+        <div className="absolute right-2 bottom-4">
+          {isUploading && (
+            <div
+              className="bg-white text-black flex items-center justify-center text-xs font-medium w-6 rounded-full py-1 hover:bg-gray-200 transition-all"
               onClick={() => {
                 file && handleUpload();
               }}
             >
-              {isUploading ? <span className="w-4 loading loading-spinner"></span> : "Save"}
-            </button>
-          </div>
-        )}
+              <span className="w-4 loading loading-spinner"></span>
+            </div>
+          )}
+        </div>
+      )}
 
-        {!isPreviewVisible && (
-          <>
-            <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              id="profileUpload"
-              ref={inputFileRef}
-              onChange={handleInputChange}
-            />
-            <label
-              htmlFor="profileUpload"
-              className="flex flex-col items-center justify-center h-full w-full border-dashed border-2 border-gray rounded-full cursor-pointer bg-gray-50 hover:bg-gray-100"
-              onDragOver={e => {
-                e.preventDefault();
-              }}
-              onDrop={handleDrop}
-            >
-              <div className="text-xs text-gray-500 text-center">
-                <span className="font-semibold">Click to set Profile image</span> or drag and drop
-                <div>PNG, JPG, GIF up to 2MB</div>
-              </div>
-            </label>
-          </>
-        )}
-      </div>
+      {!previewUrl && (
+        <>
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            id="profileUpload"
+            ref={inputFileRef}
+            onChange={handleInputChange}
+          />
+          <label
+            htmlFor="profileUpload"
+            className="flex flex-col items-center justify-center h-full w-full border-dashed border-2 border-gray rounded-full cursor-pointer bg-gray-50 hover:bg-gray-100"
+            onDragOver={e => {
+              e.preventDefault();
+            }}
+            onDrop={handleDrop}
+          >
+            <div className="text-xs text-gray-500 text-center">
+              <span className="font-semibold">Click to set Profile image</span> or drag and drop
+              <div>PNG, JPG, GIF up to 2MB</div>
+            </div>
+          </label>
+        </>
+      )}
     </div>
   );
 };

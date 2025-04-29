@@ -1,5 +1,5 @@
 // src/components/CoverImageUploader.tsx
-import { Dispatch, FC, SetStateAction } from "react";
+import { Dispatch, FC, SetStateAction, useEffect } from "react";
 import { useImageSetter } from "../hooks/useImageSetter";
 import { useImageUploader } from "../hooks/useImageUploader";
 import { MdCancel } from "react-icons/md";
@@ -8,9 +8,16 @@ import { UploadedImageData } from "~~/hooks/useProfileMetadata";
 interface Props {
   setFieldValue: (field: string, value: string) => void;
   setUploadedImage: Dispatch<SetStateAction<UploadedImageData[]>>;
+  setCoverImageFile: Dispatch<SetStateAction<File | null>>;
+  existingImage?: string;
 }
 
-export const CoverImageUploader: FC<Props> = ({ setFieldValue, setUploadedImage }) => {
+export const CoverImageUploader: FC<Props> = ({
+  setFieldValue,
+  setUploadedImage,
+  setCoverImageFile,
+  existingImage,
+}) => {
   const {
     file,
     previewUrl,
@@ -20,7 +27,7 @@ export const CoverImageUploader: FC<Props> = ({ setFieldValue, setUploadedImage 
     handleInputChange,
     handleImageClear,
     isLoading,
-  } = useImageSetter(setFieldValue);
+  } = useImageSetter(setCoverImageFile, setUploadedImage, existingImage);
 
   const { upload: uploadImage, isUploading } = useImageUploader({ enabled: false });
 
@@ -29,6 +36,7 @@ export const CoverImageUploader: FC<Props> = ({ setFieldValue, setUploadedImage 
       if (!file) {
         return;
       }
+
       const imageData = {
         name: file.name,
         type: file.type,
@@ -57,64 +65,70 @@ export const CoverImageUploader: FC<Props> = ({ setFieldValue, setUploadedImage 
     }
   };
 
+  useEffect(() => {
+    if (file) {
+      handleUpload();
+    }
+  }, [file]);
+
   return (
     <div className="relative w-full">
-      <div className="relative">
-        <img
-          className={`w-full h-[140px] object-cover rounded-lg mb-2 ${isPreviewVisible ? "" : "hidden"}`}
-          alt="Cover Preview"
-          src={previewUrl}
-        />
-        {isPreviewVisible && (
-          <button
-            className="absolute top-2 right-2 p-1 bg-gray bg-opacity-50 rounded-full hover:bg-opacity-70"
-            onClick={handleImageClear}
-          >
-            <MdCancel className=" text-white" size={32} />
-          </button>
-        )}
+      <img
+        className={`w-full h-[120px] object-cover rounded-lg mb-2 ${previewUrl ? "" : "hidden"}`}
+        alt="Cover Preview"
+        src={previewUrl}
+      />
+      {previewUrl && (
+        <button
+          className="absolute top-2 right-2 p-1 bg-gray bg-opacity-50 rounded-full hover:bg-opacity-70"
+          onClick={handleImageClear}
+        >
+          <MdCancel className=" text-white" size={32} />
+        </button>
+      )}
 
-        {isPreviewVisible && (
-          <div className="absolute right-2 bottom-4">
-            <button
-              className="bg-white text-black flex items-center justify-center text-xs font-medium w-12 py-1 rounded hover:bg-gray-200 transition-all"
+      {previewUrl && (
+        <div className="absolute right-2 bottom-4">
+          {isUploading && (
+            <div
+              className="bg-white text-black flex items-center justify-center text-xs font-medium w-6 rounded-full py-1 hover:bg-gray-200 transition-all"
               onClick={() => {
                 file && handleUpload();
               }}
             >
-              {isUploading ? <span className="w-4 loading loading-spinner"></span> : "Save"}
-            </button>
-          </div>
-        )}
+              <span className="w-4 loading loading-spinner"></span>
+            </div>
+          )}
+        </div>
+      )}
 
-        {!isPreviewVisible && (
-          <>
-            <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              id="coverUpload"
-              ref={inputFileRef}
-              onChange={handleInputChange}
-            />
-            <label
-              htmlFor="coverUpload"
-              className="flex flex-col h-[120px] w-full border-dashed border-2 border-gray rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100"
-              onDragOver={e => {
-                e.preventDefault();
-              }}
-              onDrop={handleDrop}
-            >
-              <div className="flex flex-col items-center py-3">
-                <div className="mb-2 text-sm text-gray-500">
-                  <span className="font-semibold">Click to set cover image</span> or drag and drop
-                </div>
-                <div className="text-xs text-gray-500">PNG, JPG, GIF up to 4MB</div>
+      {!previewUrl && (
+        <>
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            id="coverUpload"
+            ref={inputFileRef}
+            onChange={handleInputChange}
+          />
+          <label
+            htmlFor="coverUpload"
+            className="flex flex-col h-[120px] w-full border-dashed border-2 border-gray rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100"
+            onDragOver={e => {
+              e.preventDefault();
+            }}
+            onDrop={handleDrop}
+          >
+            <div className="flex flex-col items-center py-3">
+              <div className="mb-2 text-sm text-gray-500">
+                <span className="font-semibold">Click to set cover image</span> or drag and drop
               </div>
-            </label>
-          </>
-        )}
-      </div>
+              <div className="text-xs text-gray-500">PNG, JPG, GIF up to 4MB</div>
+            </div>
+          </label>
+        </>
+      )}
     </div>
   );
 };

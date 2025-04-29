@@ -26,6 +26,8 @@ export const OptionalForm = ({
   setLinks,
   setProfileImage,
   setBackgroundImage,
+  setBackgroundImageFile,
+  setProfileImageFile,
   handleCreate,
   isCreateWalletLoading,
   pages,
@@ -43,6 +45,8 @@ export const OptionalForm = ({
   setTags: Dispatch<SetStateAction<string[]>>;
   setLinks: Dispatch<SetStateAction<Link[]>>;
   isCreateWalletLoading: boolean;
+  setBackgroundImageFile: Dispatch<SetStateAction<File | null>>;
+  setProfileImageFile: Dispatch<SetStateAction<File | null>>;
   setPages: Dispatch<SetStateAction<number>>;
   pages: number;
 }) => {
@@ -93,6 +97,8 @@ export const OptionalForm = ({
             }}
             setBackgroundImage={setBackgroundImage}
             setProfileImage={setProfileImage}
+            setBackgroundImageFile={setBackgroundImageFile}
+            setProfileImageFile={setProfileImageFile}
           />
           <div className="px-2 flex flex-col gap-y-6 pb-6">
             <div className="flex flex-col gap-y-4">

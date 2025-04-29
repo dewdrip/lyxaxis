@@ -1,6 +1,6 @@
-import React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import React, { useState } from "react";
+import { ReceiveModal } from "~~/components/ReceiveModal";
 import { Address, Balance } from "~~/components/scaffold-eth";
 
 interface ProfileImageData {
@@ -21,6 +21,8 @@ interface ProfileHeaderProps {
 }
 
 export function ProfileHeader({ profileLoading, profile, multisigAddress, upAddress }: ProfileHeaderProps) {
+  const [isReceiveModalOpen, setIsReceiveModalOpen] = useState(false);
+
   const getImageUrl = (ipfsUrl: string) => ipfsUrl.replace("ipfs://", "https://api.universalprofile.cloud/ipfs/");
 
   console.log(
@@ -81,9 +83,12 @@ export function ProfileHeader({ profileLoading, profile, multisigAddress, upAddr
 
         <div className="flex flex-col gap-y-2 mt-auto items-end">
           <div className="flex gap-x-2">
-            <div className="text-sm border border-gray-light rounded-full px-3 py-1 cursor-pointer hover:bg-gray">
-              Signers
-            </div>
+            <button
+              onClick={() => setIsReceiveModalOpen(true)}
+              className="text-sm border border-gray-light rounded-full px-3 py-1 cursor-pointer hover:bg-gray"
+            >
+              Receive
+            </button>
             <Link
               href={`/editmultisigprofile/${multisigAddress}`}
               className="text-sm border border-gray-light rounded-full px-3 py-1 cursor-pointer hover:bg-gray"
@@ -91,9 +96,10 @@ export function ProfileHeader({ profileLoading, profile, multisigAddress, upAddr
               Edit profile
             </Link>
           </div>
-          <div className="underline text-sm text-blue-500 cursor-pointer hover:text-blue-400">QRCode</div>
         </div>
       </div>
+
+      <ReceiveModal address={upAddress} isOpen={isReceiveModalOpen} onClose={() => setIsReceiveModalOpen(false)} />
     </div>
   );
 }

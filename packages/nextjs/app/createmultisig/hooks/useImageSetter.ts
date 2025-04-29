@@ -1,9 +1,9 @@
 // src/hooks/useImageUploader.ts
-import { useRef, useState } from "react";
+import { Dispatch, SetStateAction, useRef, useState } from "react";
 
-export function useImageSetter(setFieldValue: (field: string, value: string) => void) {
+export function useImageSetter(setFieldFile: Dispatch<SetStateAction<File | null>>, existingImage?: string) {
   const [file, setFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string>("");
+  const [previewUrl, setPreviewUrl] = useState<string>(existingImage || "");
   const [isPreviewVisible, setIsPreviewVisible] = useState(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
@@ -12,14 +12,15 @@ export function useImageSetter(setFieldValue: (field: string, value: string) => 
 
   const handleImageClear = () => {
     setFile(null);
+    setFieldFile(null);
     setPreviewUrl("");
     setIsPreviewVisible(false);
     setUploadProgress(0);
-    setFieldValue("imgUrl", "");
   };
 
   const handleFileChange = (file: File) => {
     setFile(file);
+    setFieldFile(file);
     setPreviewUrl(URL.createObjectURL(file));
     setIsPreviewVisible(true);
     setError(null);

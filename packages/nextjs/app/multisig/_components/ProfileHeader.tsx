@@ -1,4 +1,6 @@
 import React from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Address, Balance } from "~~/components/scaffold-eth";
 
 interface ProfileImageData {
@@ -20,6 +22,11 @@ interface ProfileHeaderProps {
 
 export function ProfileHeader({ profileLoading, profile, multisigAddress, upAddress }: ProfileHeaderProps) {
   const getImageUrl = (ipfsUrl: string) => ipfsUrl.replace("ipfs://", "https://api.universalprofile.cloud/ipfs/");
+
+  console.log(
+    "get Image url",
+    profile && profile.backgroundImage.length > 0 && getImageUrl(profile!.backgroundImage[0].url),
+  );
 
   const renderBackgroundImage = () => {
     if (profileLoading || !profile) return <div className="bg-base-100 w-full h-full skeleton absolute"></div>;
@@ -68,7 +75,7 @@ export function ProfileHeader({ profileLoading, profile, multisigAddress, upAddr
           ) : (
             <div className="text-base font-semibold">{profile.name}</div>
           )}
-          <Balance className="text-xl -ml-4" address={multisigAddress} />
+          <Balance className="text-xl -ml-4" address={upAddress} />
           <Address address={upAddress} disableBlockie={false} />
         </div>
 
@@ -77,9 +84,12 @@ export function ProfileHeader({ profileLoading, profile, multisigAddress, upAddr
             <div className="text-sm border border-gray-light rounded-full px-3 py-1 cursor-pointer hover:bg-gray">
               Signers
             </div>
-            <div className="text-sm border border-gray-light rounded-full px-3 py-1 cursor-pointer hover:bg-gray">
+            <Link
+              href={`/editmultisigprofile/${multisigAddress}`}
+              className="text-sm border border-gray-light rounded-full px-3 py-1 cursor-pointer hover:bg-gray"
+            >
               Edit profile
-            </div>
+            </Link>
           </div>
           <div className="underline text-sm text-blue-500 cursor-pointer hover:text-blue-400">QRCode</div>
         </div>

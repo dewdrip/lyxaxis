@@ -1,5 +1,5 @@
 // src/components/ProfileImageUploader.tsx
-import { Dispatch, FC, SetStateAction } from "react";
+import { Dispatch, FC, SetStateAction, useEffect } from "react";
 import { useImageSetter } from "../hooks/useImageSetter";
 import { useImageUploader } from "../hooks/useImageUploader";
 import { MdCancel } from "react-icons/md";
@@ -8,9 +8,11 @@ import { UploadedImageData } from "~~/hooks/useProfileMetadata";
 interface Props {
   setFieldValue: (field: string, value: string) => void;
   setUploadedImage: Dispatch<SetStateAction<UploadedImageData[]>>;
+  setProfileFile: Dispatch<SetStateAction<File | null>>;
+  existingImage?: string;
 }
 
-export const ProfileImageUploader: FC<Props> = ({ setFieldValue, setUploadedImage }) => {
+export const ProfileImageUploader: FC<Props> = ({ setFieldValue, setUploadedImage, setProfileFile, existingImage }) => {
   const {
     file,
     previewUrl,
@@ -20,7 +22,7 @@ export const ProfileImageUploader: FC<Props> = ({ setFieldValue, setUploadedImag
     handleInputChange,
     handleImageClear,
     isLoading,
-  } = useImageSetter(setFieldValue);
+  } = useImageSetter(setProfileFile, existingImage);
 
   const { upload: uploadImage, isUploading } = useImageUploader({ enabled: false });
 
@@ -61,11 +63,11 @@ export const ProfileImageUploader: FC<Props> = ({ setFieldValue, setUploadedImag
     <div className="relative w-[140px] h-[140px] -mt-14 ml-5">
       <div className="relative w-full h-full rounded-full">
         <img
-          className={`w-full h-full rounded-full object-cover ${isPreviewVisible ? "" : "hidden"}`}
+          className={`w-full h-full rounded-full object-cover ${previewUrl ? "" : "hidden"}`}
           alt="Profile Preview"
           src={previewUrl}
         />
-        {isPreviewVisible && (
+        {previewUrl && (
           <button
             className="absolute  top-0 right-2 p-1 bg-gray bg-opacity-50 rounded-full hover:bg-opacity-70"
             onClick={handleImageClear}
@@ -74,7 +76,7 @@ export const ProfileImageUploader: FC<Props> = ({ setFieldValue, setUploadedImag
           </button>
         )}
 
-        {isPreviewVisible && (
+        {previewUrl && (
           <div className="absolute right-2 bottom-4">
             <button
               className="bg-white text-black flex items-center justify-center text-xs font-medium w-12 py-1 rounded hover:bg-gray-200 transition-all"
@@ -87,7 +89,7 @@ export const ProfileImageUploader: FC<Props> = ({ setFieldValue, setUploadedImag
           </div>
         )}
 
-        {!isPreviewVisible && (
+        {!previewUrl && (
           <>
             <input
               type="file"

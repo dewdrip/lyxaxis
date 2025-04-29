@@ -11,6 +11,12 @@ import { useCreateWallet } from "~~/hooks/contract/useCreateWallet";
 import { UploadedImageData } from "~~/hooks/useProfileMetadata";
 import { notification } from "~~/utils/scaffold-eth";
 
+interface Link {
+  id: string;
+  title: string;
+  url: string;
+}
+
 const CreateMultiSig: NextPage = () => {
   const router = useRouter();
   const [pages, setPages] = useState<number>(0);
@@ -21,6 +27,8 @@ const CreateMultiSig: NextPage = () => {
   const [profileImage, setProfileImage] = useState<UploadedImageData[]>([]);
   const [backgroundImage, setBackgroundImage] = useState<UploadedImageData[]>([]);
   const [description, setDescription] = useState<string>("");
+  const [tags, setTags] = useState<string[]>([]);
+  const [links, setLinks] = useState<Link[]>([]);
   const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
   const [backgroundImageFile, setBackgroundImageFile] = useState<File | null>(null);
 
@@ -59,8 +67,8 @@ const CreateMultiSig: NextPage = () => {
       const profileMetadata = {
         name,
         description: description,
-        links: [] as any,
-        tags: [] as any,
+        links,
+        tags,
         profileImage: profileImage,
         backgroundImage: backgroundImage,
       };
@@ -114,6 +122,10 @@ const CreateMultiSig: NextPage = () => {
       backgroundImage={backgroundImage}
       description={description}
       setDescription={setDescription}
+      tags={tags}
+      links={links}
+      setTags={setTags}
+      setLinks={setLinks}
       setProfileImage={setProfileImage}
       setBackgroundImage={setBackgroundImage}
       setBackgroundImageFile={setBackgroundImageFile}

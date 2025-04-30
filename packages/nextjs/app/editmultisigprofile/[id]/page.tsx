@@ -102,17 +102,11 @@ const EditMultiSigProfile: NextPage = () => {
       const profileMetadata: ProfilePayload = {
         name,
         description,
-        links: [] as any,
-        tags: [] as any,
+        links,
+        tags,
+        profileImage,
+        backgroundImage,
       };
-
-      if (profileImage.length > 0) {
-        profileMetadata.profileImage = profileImage;
-      }
-
-      if (backgroundImage.length > 0) {
-        profileMetadata.backgroundImage = backgroundImage;
-      }
 
       const encodedProfileMetadata = await encodeProfileMetadata(profileMetadata);
 
@@ -224,6 +218,8 @@ const EditMultiSigProfile: NextPage = () => {
       setDescription(profile.description || "");
       setTags(profile.tags || []);
       setLinks(profile.links || []);
+      setProfileImage(profileImage);
+      setBackgroundImage(backgroundImage);
     }
   }, [profile]);
 

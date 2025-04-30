@@ -1,5 +1,6 @@
 import { type FC, useState } from "react";
 import { Address, BlockieAvatar } from "../../../components/scaffold-eth";
+import { PreveiwProfileModal } from "./PreviewProfile";
 import { IoIosInformationCircleOutline } from "react-icons/io";
 import { Abi, DecodeFunctionDataReturnType, decodeFunctionData, formatEther } from "viem";
 import { useAccount, useWalletClient } from "wagmi";
@@ -195,43 +196,47 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
     <>
       <input type="checkbox" id={`label-${tx.hash}`} className="modal-toggle" />
       <div className="modal" role="dialog">
-        <div className="modal-box w-[400px] mx-auto">
-          <div className="flex flex-col">
-            <div className="flex gap-2">
-              <div className="font-bold">Function Signature:</div>
-              {txnData.functionName || "transferFunds"}
-            </div>
-            <div className="flex flex-col gap-2 mt-6">
-              {txnData.args && txnData.functionName !== "setData" ? (
-                <>
-                  <h4 className="font-bold">Arguments</h4>
-                  <div className="flex gap-4">
-                    Updated signer: <Address address={String(txnData.args?.[0])} />
-                  </div>
-                  <div>Updated signatures required: {String(txnData.args?.[1])}</div>
-                </>
-              ) : (
-                <>
-                  <div className="flex gap-4">
-                    Transfer to: <Address address={tx.to} />{" "}
-                  </div>
-                  <div>Amount: {formatEther(BigInt(tx.amount))} Ξ </div>
-                </>
-              )}
-            </div>
-            <div className="mt-4">
-              <div className="font-bold">Sig hash</div>{" "}
-              <div className="flex gap-1 mt-2">
-                <BlockieAvatar size={20} address={tx.hash} /> {tx.hash.slice(0, 7)}
+        {Object.keys(txnData).length === 0 ? (
+          <div className="modal-box w-[400px] mx-auto">
+            <div className="flex flex-col">
+              <div className="flex gap-2">
+                <div className="font-bold">Function Signature:</div>
+                {txnData.functionName || "transferFunds"}
+              </div>
+              <div className="flex flex-col gap-2 mt-6">
+                {txnData.args && txnData.functionName !== "setData" ? (
+                  <>
+                    <h4 className="font-bold">Arguments</h4>
+                    <div className="flex gap-4">
+                      Updated signer: <Address address={String(txnData.args?.[0])} />
+                    </div>
+                    <div>Updated signatures required: {String(txnData.args?.[1])}</div>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex gap-4">
+                      Transfer to: <Address address={tx.to} />{" "}
+                    </div>
+                    <div>Amount: {formatEther(BigInt(tx.amount))} Ξ </div>
+                  </>
+                )}
+              </div>
+              <div className="mt-4">
+                <div className="font-bold">Sig hash</div>{" "}
+                <div className="flex gap-1 mt-2">
+                  <BlockieAvatar size={20} address={tx.hash} /> {tx.hash.slice(0, 7)}
+                </div>
+              </div>
+              <div className="modal-action">
+                <label htmlFor={`label-${tx.hash}`} className="btn btn-sm">
+                  Close!
+                </label>
               </div>
             </div>
-            <div className="modal-action">
-              <label htmlFor={`label-${tx.hash}`} className="btn btn-sm">
-                Close!
-              </label>
-            </div>
           </div>
-        </div>
+        ) : (
+          <PreveiwProfileModal txnData={txnData} tx={tx} />
+        )}
       </div>
 
       <div className="flex flex-col pb-2 border-b border-secondary last:border-b-0">

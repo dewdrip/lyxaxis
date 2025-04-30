@@ -1,5 +1,5 @@
-import Link from "next/link";
 import React, { useState } from "react";
+import Link from "next/link";
 import { ReceiveModal } from "~~/components/ReceiveModal";
 import { Address, Balance } from "~~/components/scaffold-eth";
 
@@ -24,11 +24,6 @@ export function ProfileHeader({ profileLoading, profile, multisigAddress, upAddr
   const [isReceiveModalOpen, setIsReceiveModalOpen] = useState(false);
 
   const getImageUrl = (ipfsUrl: string) => ipfsUrl.replace("ipfs://", "https://api.universalprofile.cloud/ipfs/");
-
-  console.log(
-    "get Image url",
-    profile && profile.backgroundImage.length > 0 && getImageUrl(profile!.backgroundImage[0].url),
-  );
 
   const renderBackgroundImage = () => {
     if (profileLoading || !profile) return <div className="bg-base-100 w-full h-full skeleton absolute"></div>;

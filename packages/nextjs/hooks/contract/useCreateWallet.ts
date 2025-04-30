@@ -3,6 +3,7 @@ import useJSONUploader from "../useJSONUploader";
 import { Profile, ProfilePayload } from "../useProfileMetadata";
 import { ERC725 } from "@erc725/erc725.js";
 import LSP3ProfileMetadataSchemas from "@erc725/erc725.js/schemas/LSP3ProfileMetadata.json";
+import axios from "axios";
 import { ethers } from "ethers";
 import { Address } from "viem";
 import "viem";
@@ -124,4 +125,44 @@ export const useCreateWallet = () => {
     isLoading,
     error,
   };
+};
+
+export const useDecodedProfileMetadata = (encodedValue: `0x${string}` | null) => {
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchAndDecodeProfileMetadata = async () => {
+      if (!encodedValue) return;
+
+      setLoading(true);
+      setError(null);
+      setData(null);
+
+      try {
+        const erc725 = new ERC725(LSP3ProfileMetadataSchemas);
+        const decoded = erc725.decodeData([
+          {
+            keyName: "LSP3Profile",
+            value: encodedValue,
+          },
+        ]);
+
+        const ipfsHash = decoded[0]?.value?.url?.replace("ipfs://", "");
+        if (!ipfsHash) throw new Error("Invalid IPFS URL in metadata");
+
+        const response = await axios.get(`https://api.universalprofile.cloud/ipfs/${ipfsHash}`);
+        setData(response.data.LSP3Profile);
+      } catch (err) {
+        setError(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAndDecodeProfileMetadata();
+  }, [encodedValue]);
+
+  return { data, loading, error };
 };

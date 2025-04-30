@@ -7,13 +7,7 @@ import { PlusCircleIcon } from "@heroicons/react/24/outline";
 import { LinkInput } from "~~/components/LinkInput";
 import { TagInput } from "~~/components/TagInput";
 import { InputBase } from "~~/components/scaffold-eth";
-import { UploadedImageData } from "~~/hooks/useProfileMetadata";
-
-interface Link {
-  id: string;
-  title: string;
-  url: string;
-}
+import { Link, UploadedImageData } from "~~/hooks/useProfileMetadata";
 
 export const OptionalForm = ({
   profileImage,
@@ -90,7 +84,7 @@ export const OptionalForm = ({
           </div>
         </div>
 
-        <div className="flex flex-col gap-y-6 bg-base-200 border border-gray rounded-xl w-full">
+        <div className="flex flex-col gap-y-6 bg-base-200 border border-gray rounded-xl w-full h-[490px] overflow-y-scroll">
           <ImageUploader
             setFieldValue={async (field: string, value: string): Promise<void> => {
               console.log(field, value);
@@ -102,7 +96,7 @@ export const OptionalForm = ({
           />
           <div className="px-2 flex flex-col gap-y-6 pb-6">
             <div className="flex flex-col gap-y-4">
-              <div className="flex flex-col gap-y-4">
+              <div className="flex flex-col gap-y-2">
                 <label className="label p-0">
                   <span className="label-text">Add Multisig Description</span>
                 </label>
@@ -115,7 +109,7 @@ export const OptionalForm = ({
             </div>
 
             {/* Tags */}
-            <div className="flex flex-col gap-y-4">
+            <div className="flex flex-col ">
               <label className="label p-0">
                 <span className="label-text">Tags</span>
               </label>

@@ -8,14 +8,8 @@ import type { NextPage } from "next";
 import { useAccount } from "wagmi";
 import { toaster } from "~~/components/ui/toaster";
 import { useCreateWallet } from "~~/hooks/contract/useCreateWallet";
-import { UploadedImageData } from "~~/hooks/useProfileMetadata";
+import { Link, UploadedImageData } from "~~/hooks/useProfileMetadata";
 import { notification } from "~~/utils/scaffold-eth";
-
-interface Link {
-  id: string;
-  title: string;
-  url: string;
-}
 
 const CreateMultiSig: NextPage = () => {
   const router = useRouter();

@@ -24,8 +24,6 @@ const Multisig: FC = () => {
     enabled: true,
   });
 
-  console.log("profile", profile);
-
   return (
     <div className="flex items-center pb-8 flex-col flex-grow">
       <MultiSigNav multisigAddress={multisigAddress} />

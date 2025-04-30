@@ -7,13 +7,16 @@ import type { NextPage } from "next";
 import { useIsMounted, useLocalStorage } from "usehooks-ts";
 import { Abi, encodeFunctionData } from "viem";
 import { useChainId, usePublicClient, useWalletClient } from "wagmi";
-import { TransactionData } from "~~/app/create/[id]/page";
+import { PlusCircleIcon } from "@heroicons/react/24/outline";
 import { BackButton } from "~~/app/createmultisig/components/BackButton";
 import { ImageUploader } from "~~/app/createmultisig/components/imageUploader";
+import { TransactionData } from "~~/app/transfer/[id]/page";
+import { LinkInput } from "~~/components/LinkInput";
+import { TagInput } from "~~/components/TagInput";
 import { InputBase } from "~~/components/scaffold-eth";
 import { useCreateWallet } from "~~/hooks/contract/useCreateWallet";
 import { useScaffoldReadContract, useTargetNetwork } from "~~/hooks/scaffold-eth";
-import { ProfilePayload, UploadedImageData, useProfileMetadata } from "~~/hooks/useProfileMetadata";
+import { Link, ProfilePayload, UploadedImageData, useProfileMetadata } from "~~/hooks/useProfileMetadata";
 import { AddressType } from "~~/types/abitype/abi";
 import LspABI from "~~/utils/abis/LspABI.json";
 import MultiSigABI from "~~/utils/abis/MultiSigABI.json";
@@ -48,6 +51,8 @@ const EditMultiSigProfile: NextPage = () => {
 
   const [name, setName] = useState<string>("");
   const [description, setDescription] = useState<string>("");
+  const [tags, setTags] = useState<string[]>([]);
+  const [links, setLinks] = useState<Link[]>([]);
   const [profileImage, setProfileImage] = useState<UploadedImageData[]>([]);
   const [backgroundImage, setBackgroundImage] = useState<UploadedImageData[]>([]);
 
@@ -186,10 +191,39 @@ const EditMultiSigProfile: NextPage = () => {
     }
   };
 
+  const addTag = (tag: string) => {
+    if (!tags.includes(tag)) {
+      setTags([...tags, tag]);
+    }
+  };
+
+  const removeTag = (tag: string) => {
+    setTags(tags.filter(t => t !== tag));
+  };
+
+  const addLink = () => {
+    setLinks([...links, { id: Date.now().toString(), title: "", url: "" }]);
+  };
+
+  const removeLink = (id: string) => {
+    setLinks(links.filter(link => link.id !== id));
+  };
+
+  const setLinkTitle = (id: string, title: string) => {
+    setLinks(links.map(link => (link.id === id ? { ...link, title } : link)));
+  };
+
+  const setLinkUrl = (id: string, url: string) => {
+    setLinks(links.map(link => (link.id === id ? { ...link, url } : link)));
+  };
+
   useEffect(() => {
+    console.log("profile", profile);
     if (profile) {
       setName(profile.name || "");
       setDescription(profile.description || "");
+      setTags(profile.tags || []);
+      setLinks(profile.links || []);
     }
   }, [profile]);
 
@@ -223,7 +257,7 @@ const EditMultiSigProfile: NextPage = () => {
           <div className="text-xs max-w-[350px] ">Create proposal to update profile details</div>
         </div>
 
-        <div className="flex flex-col gap-y-6 bg-base-200 border border-gray rounded-xl w-full mb-4">
+        <div className="flex flex-col gap-y-6 bg-base-200 border border-gray rounded-xl w-full mb-4 h-[490px] overflow-y-scroll">
           {renderImage()}
           <div className="px-2 flex flex-col gap-y-6 pb-6">
             <div className="flex flex-col gap-y-4">
@@ -243,6 +277,38 @@ const EditMultiSigProfile: NextPage = () => {
                   placeholder={"Brief Description"}
                   onChange={(value: string) => setDescription(value)}
                 />
+              </div>
+
+              {/* Tags */}
+              <div className="flex flex-col ">
+                <label className="label p-0">
+                  <span className="label-text">Tags</span>
+                </label>
+                <TagInput onAdd={addTag} onDelete={removeTag} tags={tags} />
+              </div>
+
+              {/* Links */}
+              <div className="flex flex-col gap-y-4">
+                <div className="flex justify-between items-center">
+                  <label className="label p-0">
+                    <span className="label-text">Links</span>
+                  </label>
+                  <button onClick={addLink} className="btn btn-primary btn-sm h-[2.5rem] rounded-xl">
+                    <PlusCircleIcon className="h-5 w-5" />
+                  </button>
+                </div>
+                <div className="flex flex-col gap-2">
+                  {links.map(link => (
+                    <LinkInput
+                      key={link.id}
+                      title={link.title}
+                      url={link.url}
+                      onCancel={() => removeLink(link.id)}
+                      onChangeTitle={title => setLinkTitle(link.id, title)}
+                      onChangeUrl={url => setLinkUrl(link.id, url)}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
             <div className="mt-2 flex items-center justify-center px-6">

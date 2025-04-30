@@ -21,7 +21,8 @@ export interface ProfilePayload {
   backgroundImage?: UploadedImageData[];
 }
 
-interface Link {
+export interface Link {
+  id: string;
   title: string;
   url: string;
 }

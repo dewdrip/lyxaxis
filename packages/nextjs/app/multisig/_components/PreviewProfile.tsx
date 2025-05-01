@@ -79,10 +79,7 @@ export const PreveiwProfileModal = ({
 
           <div>
             <div className="w-24 text-sm">Description:</div>
-            <div className="text-base">
-              {profile?.description || "Loading..."} {profile?.description || "Loading..."}{" "}
-              {profile?.description || "Loading..."}
-            </div>
+            <div className="text-base">{profile?.description || "Loading..."}</div>
           </div>
 
           <div>

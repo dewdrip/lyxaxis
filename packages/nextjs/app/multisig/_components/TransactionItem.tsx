@@ -197,7 +197,7 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
       <input type="checkbox" id={`label-${tx.hash}`} className="modal-toggle" />
       <div className="modal" role="dialog">
         {Object.keys(txnData).length === 0 ? (
-          <div className="modal-box w-[400px] mx-auto">
+          <div className="modal-box w-[400px] top-20 mx-auto">
             <div className="flex flex-col">
               <div className="flex gap-2">
                 <div className="font-bold">Function Signature:</div>

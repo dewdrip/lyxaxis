@@ -17,14 +17,13 @@ contract Lyxaxis is ILyxaxis {
 
     function createWallet(
         bytes calldata profileMetadata,
-        uint256 _chainId,
         address[] calldata _owners,
         uint256 _signaturesRequired
     ) external returns (address) {
         require(_signaturesRequired != 0, Lyxaxis__NoRequiredSignatures());
         require(_owners.length > 0, Lyxaxis__NoOwners());
 
-        MultiSig multisig = new MultiSig(profileMetadata, _chainId, _owners, _signaturesRequired, i_registry);
+        MultiSig multisig = new MultiSig(profileMetadata, _owners, _signaturesRequired, i_registry);
         address multisigAddress = address(multisig);
 
         // Register the new multisig with its owners in the registry

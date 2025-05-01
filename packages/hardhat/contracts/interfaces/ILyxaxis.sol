@@ -6,8 +6,9 @@ interface ILyxaxis {
 
     function createWallet(
         bytes calldata profileMetadata,
-        uint256 _chainId,
         address[] calldata _owners,
         uint256 _signaturesRequired
     ) external returns (address);
+
+    function getRegistry() external view returns (address);
 }

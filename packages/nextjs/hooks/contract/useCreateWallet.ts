@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import useJSONUploader from "../useJSONUploader";
-import { Profile, ProfilePayload } from "../useProfileMetadata";
+import { ProfilePayload } from "../useProfileMetadata";
 import { ERC725 } from "@erc725/erc725.js";
 import LSP3ProfileMetadataSchemas from "@erc725/erc725.js/schemas/LSP3ProfileMetadata.json";
 import axios from "axios";
@@ -8,16 +8,10 @@ import { ethers } from "ethers";
 import { Address } from "viem";
 import "viem";
 import { useAccount, usePublicClient } from "wagmi";
-import {
-  useDeployedContractInfo,
-  useScaffoldReadContract,
-  useScaffoldWatchContractEvent,
-  useScaffoldWriteContract,
-} from "~~/hooks/scaffold-eth";
+import { useDeployedContractInfo, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 import { notification } from "~~/utils/scaffold-eth";
 
 interface CreateWalletParams {
-  chainId: bigint;
   owners: Address[];
   signaturesRequired: bigint;
   profileMetadata: ProfilePayload;
@@ -91,7 +85,7 @@ export const useCreateWallet = () => {
 
       const trxHash = await createWallet({
         functionName: "createWallet",
-        args: [encodedProfileMetadata, params.chainId, params.owners, params.signaturesRequired],
+        args: [encodedProfileMetadata, params.owners, params.signaturesRequired],
       });
 
       if (trxHash && multiSigRegistryData?.abi && connectedAddress) {

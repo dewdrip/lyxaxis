@@ -68,10 +68,9 @@ const CreateMultiSig: NextPage = () => {
       };
 
       const newMultisigAddress = await createWallet({
-        chainId: 31337n,
+        profileMetadata,
         owners: signers as `0x${string}`[],
         signaturesRequired: BigInt(requiredSignatures || "0"),
-        profileMetadata,
       });
 
       if (error) {

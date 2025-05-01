@@ -24,7 +24,6 @@ import MultiSigABI from "~~/utils/abis/MultiSigABI.json";
 import { getPoolServerUrl } from "~~/utils/getPoolServerUrl";
 import { DEFAULT_TX_DATA, PredefinedTxData } from "~~/utils/methods";
 import { notification } from "~~/utils/scaffold-eth";
-import { ethers, InterfaceAbi } from "ethers";
 
 const EditMultiSigProfile: NextPage = () => {
   let { id: multisigAddress } = useParams();
@@ -117,8 +116,6 @@ const EditMultiSigProfile: NextPage = () => {
         profileImage,
         backgroundImage,
       };
-
-      console.log("profile", profile);
 
       const encodedProfileMetadata = await encodeProfileMetadata(profileMetadata);
 

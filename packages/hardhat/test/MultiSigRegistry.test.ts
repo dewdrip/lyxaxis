@@ -37,7 +37,7 @@ describe("MultiSigRegistry", function () {
     const owners = [owner.address, addr1.address];
     const signaturesRequired = 2;
 
-    const tx = await lyxaxis.createWallet(encodedProfileMetadata, owners, signaturesRequired);
+    const tx = await lyxaxis.createWallet(encodedProfileMetadata.value, owners, signaturesRequired);
     await tx.wait();
 
     // Get the multisig address from the registry
@@ -60,7 +60,7 @@ describe("MultiSigRegistry", function () {
 
       const encodedProfileMetadata = await encodeProfileMetadata(profileMetadata);
       const newMultisig = await ethers.deployContract("MultiSig", [
-        encodedProfileMetadata,
+        encodedProfileMetadata.value,
         [owner.address],
         1,
         registry,

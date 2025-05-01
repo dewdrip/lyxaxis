@@ -4,6 +4,9 @@ import { Lyxaxis } from "../typechain-types";
 import { MultiSigRegistry } from "../typechain-types";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { encodeProfileMetadata } from "./utils/encodeProfileMetadata";
+import ERC725, { ERC725JSONSchema } from "@erc725/erc725.js";
+import lsp3ProfileSchema from "@erc725/erc725.js/schemas/LSP3ProfileMetadata.json";
+
 describe("Lyxaxis", function () {
   let lyxaxis: Lyxaxis;
   let registry: MultiSigRegistry;
@@ -44,7 +47,7 @@ describe("Lyxaxis", function () {
       const owners = [owner.address, addr1.address];
       const signaturesRequired = 2;
 
-      const tx = await lyxaxis.createWallet(encodedProfileMetadata, owners, signaturesRequired);
+      const tx = await lyxaxis.createWallet(encodedProfileMetadata.value, owners, signaturesRequired);
       await tx.wait();
 
       // Get the multisig address from the registry
@@ -83,7 +86,7 @@ describe("Lyxaxis", function () {
       const signaturesRequired = 0;
 
       await expect(
-        lyxaxis.createWallet(encodedProfileMetadata, owners, signaturesRequired),
+        lyxaxis.createWallet(encodedProfileMetadata.value, owners, signaturesRequired),
       ).to.be.revertedWithCustomError(lyxaxis, "Lyxaxis__NoRequiredSignatures");
     });
 
@@ -102,7 +105,7 @@ describe("Lyxaxis", function () {
       const signaturesRequired = 1;
 
       await expect(
-        lyxaxis.createWallet(encodedProfileMetadata, owners, signaturesRequired),
+        lyxaxis.createWallet(encodedProfileMetadata.value, owners, signaturesRequired),
       ).to.be.revertedWithCustomError(lyxaxis, "Lyxaxis__NoOwners");
     });
   });
@@ -123,7 +126,7 @@ describe("Lyxaxis", function () {
       const owners = [owner.address];
       const signaturesRequired = 1;
 
-      const tx = await lyxaxis.createWallet(encodedProfileMetadata, owners, signaturesRequired);
+      const tx = await lyxaxis.createWallet(encodedProfileMetadata.value, owners, signaturesRequired);
       await tx.wait();
 
       // Get the multisig address
@@ -166,7 +169,7 @@ describe("Lyxaxis", function () {
       const owners = [owner.address, addr2.address];
       const signaturesRequired = 2;
 
-      const tx = await lyxaxis.createWallet(encodedProfileMetadata, owners, signaturesRequired);
+      const tx = await lyxaxis.createWallet(encodedProfileMetadata.value, owners, signaturesRequired);
       await tx.wait();
 
       // Get the multisig address
@@ -217,7 +220,7 @@ describe("Lyxaxis", function () {
       const owners = [owner.address];
       const signaturesRequired = 1;
 
-      const tx = await lyxaxis.createWallet(encodedProfileMetadata, owners, signaturesRequired);
+      const tx = await lyxaxis.createWallet(encodedProfileMetadata.value, owners, signaturesRequired);
       await tx.wait();
 
       // Get the multisig address
@@ -249,7 +252,7 @@ describe("Lyxaxis", function () {
       const owners = [owner.address, addr1.address];
       const signaturesRequired = 2;
 
-      const tx = await lyxaxis.createWallet(encodedProfileMetadata, owners, signaturesRequired);
+      const tx = await lyxaxis.createWallet(encodedProfileMetadata.value, owners, signaturesRequired);
       await tx.wait();
 
       // Get the multisig address
@@ -295,6 +298,68 @@ describe("Lyxaxis", function () {
 
       expect(newRecipientBalance).to.eq(oldRecipientBalance + transferAmount);
       expect(await ethers.provider.getBalance(universalProfileAddress)).to.equal(amount - transferAmount);
+    });
+  });
+
+  describe("Profile Updates", function () {
+    it("Should allow updating the universal profile name through UP", async function () {
+      // Create initial multisig
+      const profileMetadata = {
+        name: "Test Wallet",
+        description: "Test Description",
+        links: [],
+        tags: [],
+        profileImage: [],
+        backgroundImage: [],
+      };
+
+      const encodedProfileMetadata = await encodeProfileMetadata(profileMetadata);
+      const owners = [owner.address, addr1.address];
+      const signaturesRequired = 2;
+
+      const tx = await lyxaxis.createWallet(encodedProfileMetadata.value, owners, signaturesRequired);
+      await tx.wait();
+
+      // Get the multisig address
+      const ownerMultisigs = await registry.getSignerMultisigs(owner.address);
+      const multisigAddress = ownerMultisigs[0];
+      const multisig = await ethers.getContractAt("MultiSig", multisigAddress);
+
+      // Get the universal profile address
+      const universalProfileAddress = await multisig.getUniversalProfile();
+      const universalProfile = await ethers.getContractAt("LSP0ERC725Account", universalProfileAddress);
+
+      // Prepare new profile metadata with updated name
+      const newProfileMetadata = {
+        name: "Updated Wallet Name",
+        description: "Test Description",
+        links: [],
+        tags: [],
+        profileImage: [],
+        backgroundImage: [],
+      };
+
+      const newEncodedProfileMetadata = await encodeProfileMetadata(newProfileMetadata);
+
+      // Prepare the setData transaction
+      const setDataData = universalProfile.interface.encodeFunctionData("setData", [
+        newEncodedProfileMetadata.key,
+        newEncodedProfileMetadata.value,
+      ]);
+
+      // Get transaction hash and signatures
+      const nonce = await multisig.nonce();
+      const txHash = await multisig.getTransactionHash(nonce, universalProfileAddress, 0n, setDataData);
+
+      const signature1 = await owner.provider.send("personal_sign", [txHash, owner.address]);
+      const signature2 = await addr1.provider.send("personal_sign", [txHash, addr1.address]);
+
+      // Execute the transaction
+      const updateTx = await multisig.executeTransaction(universalProfileAddress, 0n, setDataData, [
+        signature2,
+        signature1,
+      ]);
+      await updateTx.wait();
     });
   });
 });

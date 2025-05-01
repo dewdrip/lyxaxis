@@ -12,7 +12,7 @@ export interface ProfilePayload {
   backgroundImage?: any[];
 }
 
-export const encodeProfileMetadata = async (_profile: ProfilePayload): Promise<BytesLike> => {
+export const encodeProfileMetadata = async (_profile: ProfilePayload): Promise<{ key: string; value: BytesLike }> => {
   let profileMetadata = {
     LSP3Profile: _profile,
   };
@@ -37,5 +37,5 @@ export const encodeProfileMetadata = async (_profile: ProfilePayload): Promise<B
     },
   ]);
 
-  return encodedData.values[0] as BytesLike;
+  return { key: encodedData.keys[0], value: encodedData.values[0] };
 };

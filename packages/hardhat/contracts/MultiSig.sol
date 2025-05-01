@@ -139,7 +139,7 @@ contract MultiSig is ILSP20CallVerifier {
         uint256 /* value */,
         bytes memory /* callData */
     ) external view returns (bytes4 returnedStatus) {
-        require(caller == address(this), "Caller not UP owner");
+        require(caller == address(this) || caller == address(i_universalProfile), "Caller not UP owner");
         return 0xde928f01;
     }
 

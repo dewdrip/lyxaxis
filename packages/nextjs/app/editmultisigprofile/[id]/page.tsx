@@ -117,6 +117,8 @@ const EditMultiSigProfile: NextPage = () => {
         backgroundImage,
       };
 
+      console.log("profile", profile);
+
       const encodedProfileMetadata = await encodeProfileMetadata(profileMetadata);
 
       console.log("encodedProfileMetadata", encodedProfileMetadata);

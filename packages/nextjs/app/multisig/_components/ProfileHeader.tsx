@@ -2,20 +2,11 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { ReceiveModal } from "~~/components/ReceiveModal";
 import { Address, Balance } from "~~/components/scaffold-eth";
-
-interface ProfileImageData {
-  url: string;
-}
-
-interface ProfileData {
-  name: string;
-  backgroundImage: ProfileImageData[];
-  profileImage: ProfileImageData[];
-}
+import { Profile } from "~~/hooks/useProfileMetadata";
 
 interface ProfileHeaderProps {
   profileLoading: boolean;
-  profile: ProfileData | null;
+  profile: Profile | null;
   multisigAddress: string;
   upAddress: string;
 }

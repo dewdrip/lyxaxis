@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Link from "next/link";
+import { FaExternalLinkAlt } from "react-icons/fa";
 import { ReceiveModal } from "~~/components/ReceiveModal";
 import { Address, Balance } from "~~/components/scaffold-eth";
 import { Profile } from "~~/hooks/useProfileMetadata";
@@ -13,6 +14,7 @@ interface ProfileHeaderProps {
 
 export function ProfileHeader({ profileLoading, profile, multisigAddress, upAddress }: ProfileHeaderProps) {
   const [isReceiveModalOpen, setIsReceiveModalOpen] = useState(false);
+  const [isDescriptionModalOpen, setIsDescriptionModalOpen] = useState(false);
 
   const getImageUrl = (ipfsUrl: string) => ipfsUrl.replace("ipfs://", "https://api.universalprofile.cloud/ipfs/");
 
@@ -49,6 +51,23 @@ export function ProfileHeader({ profileLoading, profile, multisigAddress, upAddr
     );
   };
 
+  const renderBio = () => {
+    if (!profile) return;
+
+    if (profile.description.length < 100) {
+      return <p className="text-sm line-clamp-1">{profile.description}</p>;
+    } else {
+      return (
+        <p className="text-sm">
+          {profile.description.slice(0, 94)}...
+          <button onClick={() => setIsDescriptionModalOpen(true)} className="text-primary text-sm hover:underline ml-1">
+            See more
+          </button>
+        </p>
+      );
+    }
+  };
+
   return (
     <div className="w-full">
       <div className="relative w-full h-24">
@@ -56,36 +75,87 @@ export function ProfileHeader({ profileLoading, profile, multisigAddress, upAddr
         {renderProfileImage()}
       </div>
 
-      <div className="flex gap-4 items-center justify-between border-b border-gray pt-7 p-6 w-full">
-        <div className="flex flex-col items-start">
-          {profileLoading || !profile ? (
-            <div className="skeleton w-24 h-6"></div>
-          ) : (
-            <div className="text-base font-semibold">{profile.name}</div>
-          )}
-          <Balance className="text-xl -ml-4" address={upAddress} />
-          <Address address={upAddress} disableBlockie={false} />
-        </div>
+      <div className="flex flex-col  border-b border-gray pt-7 p-6 w-full">
+        <div className="flex justify-between items-start">
+          <div className="flex flex-col items-start">
+            {profileLoading || !profile ? (
+              <div className="skeleton w-24 h-6"></div>
+            ) : (
+              <div className="text-base font-semibold">{profile.name}</div>
+            )}
+            <Balance className="text-xl -ml-4" address={upAddress} />
+            <Address address={upAddress} disableBlockie={false} />
+          </div>
 
-        <div className="flex flex-col gap-y-2 mt-auto items-end">
-          <div className="flex gap-x-2">
-            <button
-              onClick={() => setIsReceiveModalOpen(true)}
-              className="text-sm border border-gray-light rounded-full px-3 py-1 cursor-pointer hover:bg-gray"
-            >
-              Receive
-            </button>
-            <Link
-              href={`/editmultisigprofile/${multisigAddress}`}
-              className="text-sm border border-gray-light rounded-full px-3 py-1 cursor-pointer hover:bg-gray"
-            >
-              Edit profile
-            </Link>
+          <div className="flex flex-col gap-y-2 mt-auto items-end">
+            <div className="flex gap-x-2">
+              <button
+                onClick={() => setIsReceiveModalOpen(true)}
+                className="text-sm border border-gray-light rounded-full px-3 py-1 cursor-pointer hover:bg-gray"
+              >
+                Receive
+              </button>
+              <Link
+                href={`/editmultisigprofile/${multisigAddress}`}
+                className="text-sm border border-gray-light rounded-full px-3 py-1 cursor-pointer hover:bg-gray"
+              >
+                Edit profile
+              </Link>
+            </div>
           </div>
         </div>
+
+        {/* Description */}
+        {renderBio()}
+
+        {/* Links */}
+        {profile?.links && profile.links.length > 0 && (
+          <div className="flex gap-2 overflow-x-auto max-w-full scrollbar-hide">
+            {profile.links.map((link, index) => (
+              <Link
+                key={index}
+                href={link.url}
+                target="_blank"
+                className="text-sm bg-gray-100 py-1 rounded-full whitespace-nowrap flex items-center gap-1 hover:bg-gray-200"
+              >
+                {link.title}
+                <FaExternalLinkAlt size={12} />
+              </Link>
+            ))}
+          </div>
+        )}
+
+        {/* Tags */}
+        {profile?.tags && profile.tags.length > 0 && (
+          <div className="flex gap-2 overflow-x-auto max-w-full scrollbar-hide">
+            {profile.tags.map((tag, index) => (
+              <span
+                key={index}
+                className="text-sm border border-gray-light bg-gray-100 px-3 py-1 rounded-full whitespace-nowrap"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
       <ReceiveModal address={upAddress} isOpen={isReceiveModalOpen} onClose={() => setIsReceiveModalOpen(false)} />
+
+      {/* Description Modal */}
+      {isDescriptionModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-base-100 p-6 rounded-lg max-w-lg w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Description</h3>
+              <button onClick={() => setIsDescriptionModalOpen(false)} className="text-gray-500 hover:text-gray-700">
+                ✕
+              </button>
+            </div>
+            <p className="text-sm whitespace-pre-wrap">{profile?.description}</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

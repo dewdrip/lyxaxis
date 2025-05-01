@@ -5,8 +5,8 @@ import { useParams, useRouter } from "next/navigation";
 import { useIsMounted, useLocalStorage } from "usehooks-ts";
 import { Address, parseEther } from "viem";
 import { useChainId, usePublicClient, useReadContract, useWalletClient } from "wagmi";
+import LyxInput from "~~/components/LyxInput";
 import { MultiSigNav } from "~~/components/Navbar";
-import { EtherInput } from "~~/components/scaffold-eth";
 import { ProfileInput } from "~~/components/ProfileInput";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
 import MultiSigABI from "~~/utils/abis/MultiSigABI.json";
@@ -41,8 +41,6 @@ const CreatePage: FC = () => {
 
   const poolServerUrl = getPoolServerUrl(targetNetwork.id);
 
-  const [ethValue, setEthValue] = useState("");
-
   const [predefinedTxData, setPredefinedTxData] = useLocalStorage<PredefinedTxData>("predefined-tx-data", {
     methodName: "transferFunds",
     signer: "",
@@ -66,12 +64,16 @@ const CreatePage: FC = () => {
 
   const publicClient = usePublicClient();
 
+  const [isProposing, setIsProposing] = useState(false);
+
   const handleCreate = async () => {
     try {
       if (!walletClient) {
         console.log("No wallet client!");
         return;
       }
+
+      setIsProposing(true);
 
       const newHash = (await publicClient?.readContract({
         address: multisigAddress,
@@ -142,6 +144,8 @@ const CreatePage: FC = () => {
     } catch (e) {
       notification.error("Error while proposing transaction");
       console.log(e);
+    } finally {
+      setIsProposing(false);
     }
   };
 
@@ -179,17 +183,20 @@ const CreatePage: FC = () => {
               />
 
               {predefinedTxData.methodName === "transferFunds" && (
-                <EtherInput
-                  value={ethValue}
+                <LyxInput
+                  value={predefinedTxData.amount}
                   onChange={val => {
                     setPredefinedTxData({ ...predefinedTxData, amount: String(parseEther(val)) });
-                    setEthValue(val);
                   }}
                 />
               )}
 
-              <button className="btn btn-secondary btn-sm" disabled={!walletClient} onClick={handleCreate}>
-                Propose
+              <button
+                className="btn btn-secondary btn-sm"
+                disabled={!walletClient || isProposing}
+                onClick={handleCreate}
+              >
+                {isProposing ? "Proposing..." : "Propose"}
               </button>
             </div>
           </div>

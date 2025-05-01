@@ -13,7 +13,7 @@ const Multisig: FC = () => {
 
   multisigAddress = multisigAddress as `0x${string}`;
 
-  const { data: upAddress, isLoading: isUpAddressLoading } = useScaffoldReadContract({
+  const { data: upAddress } = useScaffoldReadContract({
     contractName: "MultiSig",
     functionName: "getUniversalProfile",
     contractAddress: multisigAddress,
@@ -35,9 +35,6 @@ const Multisig: FC = () => {
         upAddress={upAddress as `0x${string}`}
       />
 
-      {/* <div className="w-full flex flex-col px-4">
-        <div>Addresses of Signers</div>
-      </div> */}
       <div className="w-full flex flex-col px-4 pt-6">
         <Pool multisigAddress={multisigAddress as `0x${string}`} />
       </div>

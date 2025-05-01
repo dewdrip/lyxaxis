@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
+import { InterfaceAbi, ethers } from "ethers";
 import type { NextPage } from "next";
 import { useIsMounted, useLocalStorage } from "usehooks-ts";
 import { Abi, encodeFunctionData } from "viem";
@@ -23,7 +24,6 @@ import MultiSigABI from "~~/utils/abis/MultiSigABI.json";
 import { getPoolServerUrl } from "~~/utils/getPoolServerUrl";
 import { DEFAULT_TX_DATA, PredefinedTxData } from "~~/utils/methods";
 import { notification } from "~~/utils/scaffold-eth";
-import { ethers, InterfaceAbi } from "ethers";
 
 const EditMultiSigProfile: NextPage = () => {
   let { id: multisigAddress } = useParams();
@@ -101,6 +101,11 @@ const EditMultiSigProfile: NextPage = () => {
         return;
       }
 
+      if (!upAddress) {
+        notification.error("No Universal Profile address found");
+        return;
+      }
+
       const LSP3ProfileKey = "0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5";
 
       const profileMetadata: ProfilePayload = {
@@ -112,29 +117,24 @@ const EditMultiSigProfile: NextPage = () => {
         backgroundImage,
       };
 
-      console.log("profile", profile);
-
       const encodedProfileMetadata = await encodeProfileMetadata(profileMetadata);
+
+      console.log("encodedProfileMetadata", encodedProfileMetadata);
+
+      console.log("upAddress", upAddress);
 
       const upContract = new ethers.Contract(upAddress as `0x${string}`, LspABI as InterfaceAbi);
 
       // Prepare the setData transaction
-      const callData = upContract.interface.encodeFunctionData("setData", [
-        LSP3ProfileKey,
-        encodedProfileMetadata,
-      ]);
+      const callData = upContract.interface.encodeFunctionData("setData", [LSP3ProfileKey, encodedProfileMetadata]);
 
-      // const callData = encodeFunctionData({
-      //   abi: LspABI as Abi,
-      //   functionName: "setData",
-      //   args: [LSP3ProfileKey, encodedProfileMetadata],
-      // });
+      console.log("callData", callData);
 
       const newHash = (await publicClient?.readContract({
         address: multisigAddress,
         abi: MultiSigABI,
         functionName: "getTransactionHash",
-        args: [nonce as bigint, String(multisigAddress), 0n, callData as `0x${string}`],
+        args: [nonce as bigint, upAddress, 0n, callData as `0x${string}`],
       })) as `0x${string}`;
 
       const signature = await walletClient.signMessage({
@@ -164,7 +164,7 @@ const EditMultiSigProfile: NextPage = () => {
           chainId: chainId,
           address: multisigAddress,
           nonce: (nonce as bigint) || 0n,
-          to: multisigAddress,
+          to: upAddress,
           amount: "0",
           data: callData as `0x${string}`,
           hash: newHash,
@@ -172,6 +172,8 @@ const EditMultiSigProfile: NextPage = () => {
           signers: [recover],
           requiredApprovals: (signaturesRequired as bigint) || 0n,
         };
+
+        console.log("txData", txData);
 
         await fetch(poolServerUrl, {
           method: "POST",

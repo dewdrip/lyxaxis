@@ -7,7 +7,7 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 const deployedContracts = {
   31337: {
     Lyxaxis: {
-      address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+      address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
       abi: [
         {
           inputs: [],
@@ -43,11 +43,6 @@ const deployedContracts = {
               internalType: "bytes",
               name: "profileMetadata",
               type: "bytes",
-            },
-            {
-              internalType: "uint256",
-              name: "_chainId",
-              type: "uint256",
             },
             {
               internalType: "address[]",
@@ -87,6 +82,7 @@ const deployedContracts = {
       ],
       inheritedFunctions: {
         createWallet: "contracts/interfaces/ILyxaxis.sol",
+        getRegistry: "contracts/interfaces/ILyxaxis.sol",
       },
     },
   },

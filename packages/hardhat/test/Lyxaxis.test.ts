@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import { Lyxaxis } from "../typechain-types";
 import { MultiSigRegistry } from "../typechain-types";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
-
+import { encodeProfileMetadata } from "./utils/encodeProfileMetadata";
 describe("Lyxaxis", function () {
   let lyxaxis: Lyxaxis;
   let registry: MultiSigRegistry;
@@ -31,12 +31,20 @@ describe("Lyxaxis", function () {
 
   describe("createWallet", function () {
     it("Should create a new multisig wallet", async function () {
-      const name = "Test Wallet";
-      const chainId = 1;
+      const profileMetadata = {
+        name: "Test Wallet",
+        description: "Test Description",
+        links: [],
+        tags: [],
+        profileImage: [],
+        backgroundImage: [],
+      };
+
+      const encodedProfileMetadata = await encodeProfileMetadata(profileMetadata);
       const owners = [owner.address, addr1.address];
       const signaturesRequired = 2;
 
-      const tx = await lyxaxis.createWallet(name, chainId, owners, signaturesRequired);
+      const tx = await lyxaxis.createWallet(encodedProfileMetadata, owners, signaturesRequired);
       await tx.wait();
 
       // Get the multisig address from the registry
@@ -61,39 +69,61 @@ describe("Lyxaxis", function () {
     });
 
     it("Should revert if no signatures required", async function () {
-      const name = "Test Wallet";
-      const chainId = 1;
+      const profileMetadata = {
+        name: "Test Wallet",
+        description: "Test Description",
+        links: [],
+        tags: [],
+        profileImage: [],
+        backgroundImage: [],
+      };
+
+      const encodedProfileMetadata = await encodeProfileMetadata(profileMetadata);
       const owners = [owner.address];
       const signaturesRequired = 0;
 
-      await expect(lyxaxis.createWallet(name, chainId, owners, signaturesRequired)).to.be.revertedWithCustomError(
-        lyxaxis,
-        "Lyxaxis__NoRequiredSignatures",
-      );
+      await expect(
+        lyxaxis.createWallet(encodedProfileMetadata, owners, signaturesRequired),
+      ).to.be.revertedWithCustomError(lyxaxis, "Lyxaxis__NoRequiredSignatures");
     });
 
     it("Should revert if no owners provided", async function () {
-      const name = "Test Wallet";
-      const chainId = 1;
+      const profileMetadata = {
+        name: "Test Wallet",
+        description: "Test Description",
+        links: [],
+        tags: [],
+        profileImage: [],
+        backgroundImage: [],
+      };
+
+      const encodedProfileMetadata = await encodeProfileMetadata(profileMetadata);
       const owners: string[] = [];
       const signaturesRequired = 1;
 
-      await expect(lyxaxis.createWallet(name, chainId, owners, signaturesRequired)).to.be.revertedWithCustomError(
-        lyxaxis,
-        "Lyxaxis__NoOwners",
-      );
+      await expect(
+        lyxaxis.createWallet(encodedProfileMetadata, owners, signaturesRequired),
+      ).to.be.revertedWithCustomError(lyxaxis, "Lyxaxis__NoOwners");
     });
   });
 
   describe("Signer Management", function () {
     it("Should allow adding a new signer through UP", async function () {
       // Create initial multisig
-      const name = "Test Wallet";
-      const chainId = 42;
+      const profileMetadata = {
+        name: "Test Wallet",
+        description: "Test Description",
+        links: [],
+        tags: [],
+        profileImage: [],
+        backgroundImage: [],
+      };
+
+      const encodedProfileMetadata = await encodeProfileMetadata(profileMetadata);
       const owners = [owner.address];
       const signaturesRequired = 1;
 
-      const tx = await lyxaxis.createWallet(name, chainId, owners, signaturesRequired);
+      const tx = await lyxaxis.createWallet(encodedProfileMetadata, owners, signaturesRequired);
       await tx.wait();
 
       // Get the multisig address
@@ -123,12 +153,20 @@ describe("Lyxaxis", function () {
 
     it("Should allow removing a signer through UP", async function () {
       // Create initial multisig with two owners
-      const name = "Test Wallet";
-      const chainId = 1;
+      const profileMetadata = {
+        name: "Test Wallet",
+        description: "Test Description",
+        links: [],
+        tags: [],
+        profileImage: [],
+        backgroundImage: [],
+      };
+
+      const encodedProfileMetadata = await encodeProfileMetadata(profileMetadata);
       const owners = [owner.address, addr2.address];
       const signaturesRequired = 2;
 
-      const tx = await lyxaxis.createWallet(name, chainId, owners, signaturesRequired);
+      const tx = await lyxaxis.createWallet(encodedProfileMetadata, owners, signaturesRequired);
       await tx.wait();
 
       // Get the multisig address
@@ -166,12 +204,20 @@ describe("Lyxaxis", function () {
 
     it("Should revert if non-UP tries to add signer", async function () {
       // Create initial multisig
-      const name = "Test Wallet";
-      const chainId = 1;
+      const profileMetadata = {
+        name: "Test Wallet",
+        description: "Test Description",
+        links: [],
+        tags: [],
+        profileImage: [],
+        backgroundImage: [],
+      };
+
+      const encodedProfileMetadata = await encodeProfileMetadata(profileMetadata);
       const owners = [owner.address];
       const signaturesRequired = 1;
 
-      const tx = await lyxaxis.createWallet(name, chainId, owners, signaturesRequired);
+      const tx = await lyxaxis.createWallet(encodedProfileMetadata, owners, signaturesRequired);
       await tx.wait();
 
       // Get the multisig address
@@ -190,12 +236,20 @@ describe("Lyxaxis", function () {
   describe("Fund Transfer", function () {
     it("Should allow transferring funds through UP", async function () {
       // Create initial multisig
-      const name = "Test Wallet";
-      const chainId = 1;
+      const profileMetadata = {
+        name: "Test Wallet",
+        description: "Test Description",
+        links: [],
+        tags: [],
+        profileImage: [],
+        backgroundImage: [],
+      };
+
+      const encodedProfileMetadata = await encodeProfileMetadata(profileMetadata);
       const owners = [owner.address, addr1.address];
       const signaturesRequired = 2;
 
-      const tx = await lyxaxis.createWallet(name, chainId, owners, signaturesRequired);
+      const tx = await lyxaxis.createWallet(encodedProfileMetadata, owners, signaturesRequired);
       await tx.wait();
 
       // Get the multisig address

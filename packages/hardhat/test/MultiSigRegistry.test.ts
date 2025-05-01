@@ -2,6 +2,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { MultiSigRegistry } from "../typechain-types";
 import { Lyxaxis } from "../typechain-types";
+import { encodeProfileMetadata } from "./utils/encodeProfileMetadata";
 
 describe("MultiSigRegistry", function () {
   let registry: MultiSigRegistry;
@@ -23,12 +24,20 @@ describe("MultiSigRegistry", function () {
     registry = await ethers.getContractAt("MultiSigRegistry", registryAddress);
 
     // Create a test multisig
-    const name = "Test Wallet";
-    const chainId = 1;
+    const profileMetadata = {
+      name: "Test Wallet",
+      description: "Test Description",
+      links: [],
+      tags: [],
+      profileImage: [],
+      backgroundImage: [],
+    };
+
+    const encodedProfileMetadata = await encodeProfileMetadata(profileMetadata);
     const owners = [owner.address, addr1.address];
     const signaturesRequired = 2;
 
-    const tx = await lyxaxis.createWallet(name, chainId, owners, signaturesRequired);
+    const tx = await lyxaxis.createWallet(encodedProfileMetadata, owners, signaturesRequired);
     await tx.wait();
 
     // Get the multisig address from the registry
@@ -40,7 +49,22 @@ describe("MultiSigRegistry", function () {
 
   describe("registerMultisig", function () {
     it("Should only allow Lyxaxis to register multisigs", async function () {
-      const newMultisig = await ethers.deployContract("MultiSig", ["New Wallet", 1, [owner.address], 1, registry]);
+      const profileMetadata = {
+        name: "Test Wallet",
+        description: "Test Description",
+        links: [],
+        tags: [],
+        profileImage: [],
+        backgroundImage: [],
+      };
+
+      const encodedProfileMetadata = await encodeProfileMetadata(profileMetadata);
+      const newMultisig = await ethers.deployContract("MultiSig", [
+        encodedProfileMetadata,
+        [owner.address],
+        1,
+        registry,
+      ]);
 
       await expect(
         registry.registerMultisig(await newMultisig.getAddress(), [owner.address]),

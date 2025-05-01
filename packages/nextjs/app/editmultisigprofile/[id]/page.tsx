@@ -23,6 +23,7 @@ import MultiSigABI from "~~/utils/abis/MultiSigABI.json";
 import { getPoolServerUrl } from "~~/utils/getPoolServerUrl";
 import { DEFAULT_TX_DATA, PredefinedTxData } from "~~/utils/methods";
 import { notification } from "~~/utils/scaffold-eth";
+import { ethers, InterfaceAbi } from "ethers";
 
 const EditMultiSigProfile: NextPage = () => {
   let { id: multisigAddress } = useParams();
@@ -115,11 +116,19 @@ const EditMultiSigProfile: NextPage = () => {
 
       const encodedProfileMetadata = await encodeProfileMetadata(profileMetadata);
 
-      const callData = encodeFunctionData({
-        abi: LspABI as Abi,
-        functionName: "setData",
-        args: [LSP3ProfileKey, encodedProfileMetadata],
-      });
+      const upContract = new ethers.Contract(upAddress as `0x${string}`, LspABI as InterfaceAbi);
+
+      // Prepare the setData transaction
+      const callData = upContract.interface.encodeFunctionData("setData", [
+        LSP3ProfileKey,
+        encodedProfileMetadata,
+      ]);
+
+      // const callData = encodeFunctionData({
+      //   abi: LspABI as Abi,
+      //   functionName: "setData",
+      //   args: [LSP3ProfileKey, encodedProfileMetadata],
+      // });
 
       const newHash = (await publicClient?.readContract({
         address: multisigAddress,

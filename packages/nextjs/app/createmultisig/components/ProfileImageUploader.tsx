@@ -2,6 +2,7 @@
 import { Dispatch, FC, SetStateAction, useEffect } from "react";
 import { useImageSetter } from "../hooks/useImageSetter";
 import { useImageUploader } from "../hooks/useImageUploader";
+import { FaCheck, FaRedo } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";
 import { UploadedImageData } from "~~/hooks/useProfileMetadata";
 
@@ -24,7 +25,7 @@ export const ProfileImageUploader: FC<Props> = ({ setFieldValue, setUploadedImag
     isLoading,
   } = useImageSetter(setProfileFile, setUploadedImage, existingImage);
 
-  const { upload: uploadImage, isUploading } = useImageUploader({ enabled: false });
+  const { upload: uploadImage, isUploading, error } = useImageUploader({ enabled: false });
 
   const handleUpload = async () => {
     try {
@@ -74,23 +75,29 @@ export const ProfileImageUploader: FC<Props> = ({ setFieldValue, setUploadedImag
       />
       {previewUrl && (
         <button
-          className="absolute  top-0 right-2 p-1 bg-gray bg-opacity-50 rounded-full hover:bg-opacity-70"
+          className="absolute top-0 right-2 p-1 bg-gray bg-opacity-50 rounded-full hover:bg-opacity-70"
           onClick={handleImageClear}
         >
-          <MdCancel className=" text-white" size={32} />
+          <MdCancel className="text-white" size={32} />
         </button>
       )}
 
       {previewUrl && (
         <div className="absolute right-2 bottom-4">
-          {isUploading && (
-            <div
-              className="bg-white text-black flex items-center justify-center text-xs font-medium w-6 rounded-full py-1 hover:bg-gray-200 transition-all"
-              onClick={() => {
-                file && handleUpload();
-              }}
-            >
+          {isUploading ? (
+            <div className="bg-white text-black flex items-center justify-center text-xs font-medium w-6 rounded-full py-1">
               <span className="w-4 loading loading-spinner"></span>
+            </div>
+          ) : error ? (
+            <button
+              className="bg-white text-red-500 flex items-center justify-center text-xs font-medium w-6 rounded-full py-1 hover:bg-gray-200 transition-all"
+              onClick={() => file && handleUpload()}
+            >
+              <FaRedo size={16} />
+            </button>
+          ) : (
+            <div className="bg-white text-green-500 flex items-center justify-center text-xs font-medium w-6 rounded-full py-1">
+              <FaCheck size={16} />
             </div>
           )}
         </div>

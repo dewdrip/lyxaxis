@@ -44,7 +44,10 @@ const EditMultiSigProfile: NextPage = () => {
   const { profile, loading: profileLoading } = useProfileMetadata({
     address: upAddress as `0x${string}`,
     enabled: true,
-  });
+  }) as {
+    profile: ProfilePayload | null;
+    loading: boolean;
+  };
 
   const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
   const [backgroundImageFile, setBackgroundImageFile] = useState<File | null>(null);
@@ -107,6 +110,8 @@ const EditMultiSigProfile: NextPage = () => {
         profileImage,
         backgroundImage,
       };
+
+      console.log("profile", profile);
 
       const encodedProfileMetadata = await encodeProfileMetadata(profileMetadata);
 
@@ -218,8 +223,8 @@ const EditMultiSigProfile: NextPage = () => {
       setDescription(profile.description || "");
       setTags(profile.tags || []);
       setLinks(profile.links || []);
-      setProfileImage(profileImage);
-      setBackgroundImage(backgroundImage);
+      setProfileImage(profile.profileImage ?? []);
+      setBackgroundImage(profile.backgroundImage ?? []);
     }
   }, [profile]);
 
@@ -238,8 +243,16 @@ const EditMultiSigProfile: NextPage = () => {
         setProfileImageFile={setProfileImageFile}
         setBackgroundImage={setBackgroundImage}
         setProfileImage={setProfileImage}
-        profileImageUrl={profile.profileImage.length > 0 ? getImageUrl(profile.profileImage[0].url) : ""}
-        backgroundImageUrl={profile.backgroundImage.length > 0 ? getImageUrl(profile.backgroundImage[0].url) : ""}
+        profileImageUrl={
+          Array.isArray(profile.profileImage) && profile.profileImage.length > 0
+            ? getImageUrl(profile.profileImage[0].url)
+            : ""
+        }
+        backgroundImageUrl={
+          Array.isArray(profile.backgroundImage) && profile.backgroundImage.length > 0
+            ? getImageUrl(profile.backgroundImage[0].url)
+            : ""
+        }
       />
     );
   };

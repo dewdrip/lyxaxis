@@ -9,8 +9,9 @@ import { Abi, Address as AddressType, encodeFunctionData } from "viem";
 import { useChainId, usePublicClient, useReadContract, useWalletClient } from "wagmi";
 import { TransactionData } from "~~/app/transfer/[id]/page";
 import { MultiSigNav } from "~~/components/Navbar";
+import Profile from "~~/components/Profile";
 import { ProfileInput } from "~~/components/ProfileInput";
-import { Address, IntegerInput } from "~~/components/scaffold-eth";
+import { IntegerInput } from "~~/components/scaffold-eth";
 import { toaster } from "~~/components/ui/toaster";
 import { useMultiSigRegistry } from "~~/hooks/contract/useMultiSigRegistry";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
@@ -171,7 +172,7 @@ const Owners: FC = () => {
           <div className="mt-6 w-full space-y-3 max-h-[100px] overflow-y-auto">
             {owners?.map((owner: string, i: number) => (
               <div key={i} className="flex justify-between items-center">
-                <Address address={owner} />
+                <Profile address={owner as `0x${string}`} imageClassName="w-6" />
                 <div className="flex items-center gap-2">
                   <span>Owner</span>
                   {!addSigner && selectedForRemoval !== owner && (

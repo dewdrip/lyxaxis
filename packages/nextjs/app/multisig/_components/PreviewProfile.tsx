@@ -2,6 +2,7 @@ import { Abi, decodeFunctionData } from "viem";
 import { TransactionData } from "~~/app/transfer/[id]/page";
 import { BlockieAvatar } from "~~/components/scaffold-eth";
 import { useCreateWallet, useDecodedProfileMetadata } from "~~/hooks/contract/useCreateWallet";
+import { ProfilePayload } from "~~/hooks/useProfileMetadata";
 import LspABI from "~~/utils/abis/LspABI.json";
 
 export const PreveiwProfileModal = ({
@@ -18,7 +19,11 @@ export const PreveiwProfileModal = ({
     data: profile,
     loading: profileLoading,
     error,
-  } = useDecodedProfileMetadata(txnData.args?.[1] as `0x${string}`);
+  } = useDecodedProfileMetadata(txnData.args?.[1] as `0x${string}`) as {
+    data: ProfilePayload;
+    loading: boolean;
+    error: any;
+  };
 
   console.log("data", profile);
 
@@ -59,22 +64,54 @@ export const PreveiwProfileModal = ({
   };
 
   return (
-    <div className="modal-box w-[400px] h-[500px] mx-auto">
-      <div className="flex flex-col w-full">
+    <div className="modal-box w-[400px] h-[520px] overflow-y-scroll mx-auto">
+      <div className="flex flex-col w-full h-full">
         <div className="relative w-full h-24">
           {renderBackgroundImage()}
           {renderProfileImage()}
         </div>
 
-        <div className="flex gap-2">
-          <div className="font-bold">Function Signature:</div>
-          {txnData.functionName || "transferFunds"}
+        <div className=" flex flex-col gap-y-2 mt-6">
+          <div>
+            <div className="w-24 text-sm">Name:</div>
+            <div className="text-base font-semibold">{profile?.name || "Loading..."}</div>
+          </div>
+
+          <div>
+            <div className="w-24 text-sm">Description:</div>
+            <div className="text-base">
+              {profile?.description || "Loading..."} {profile?.description || "Loading..."}{" "}
+              {profile?.description || "Loading..."}
+            </div>
+          </div>
+
+          <div>
+            <div className="w-24 text-sm">Tags:</div>
+            <div className="text-base flex gap-x-1">
+              {profile?.tags.map((tag, index) => <span key={index}>{tag} | </span>) || "Loading..."}
+            </div>
+          </div>
+
+          <div>
+            <div className="w-24 text-sm">Links:</div>
+            <div className="text-base flex flex-col gap-y-1">
+              {profile?.links.map(({ id, title, url }, index) => (
+                <div className="flex gap-x-2" key={index}>
+                  <span className="font-semibold text-sm p-1">{title}: </span>{" "}
+                  <input className="text-sm p-1 w-[200px] " disabled={true} value={url} />
+                </div>
+              )) || "Loading..."}
+            </div>
+          </div>
         </div>
 
-        <div className="mt-4">
-          <div className="font-bold">Sig hash</div>{" "}
-          <div className="flex gap-1 mt-2">
-            <BlockieAvatar size={20} address={tx.hash} /> {tx.hash.slice(0, 7)}
+        <div className="mt-2">
+          <div className="font-semibold">Function Signature: {txnData.functionName || "transferFunds"}</div>
+          <div className="flex gap-x-2">
+            <div className="font-semibold">Sig hash: </div>{" "}
+            <div className="flex gap-1">
+              <BlockieAvatar size={20} address={tx.hash} /> {tx.hash.slice(0, 7)}
+            </div>
           </div>
         </div>
         <div className="modal-action">

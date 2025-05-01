@@ -25,13 +25,11 @@ contract MultiSig is ILSP20CallVerifier {
     mapping(address => bool) public isOwner;
     uint public signaturesRequired;
     uint public nonce;
-    uint public chainId;
     MultiSigRegistry private immutable i_registry;
     LSP0ERC725Account private immutable i_universalProfile;
 
     constructor(
         bytes memory profileMetadata,
-        uint256 _chainId,
         address[] memory _owners,
         uint _signaturesRequired,
         MultiSigRegistry _registry
@@ -45,7 +43,6 @@ contract MultiSig is ILSP20CallVerifier {
             isOwner[owner] = true;
             emit Owner(owner, isOwner[owner]);
         }
-        chainId = _chainId;
         i_registry = _registry;
 
         i_universalProfile = new LSP0ERC725Account(address(this));
@@ -94,7 +91,7 @@ contract MultiSig is ILSP20CallVerifier {
         uint256 value,
         bytes memory data
     ) public view returns (bytes32) {
-        return keccak256(abi.encodePacked(address(this), chainId, _nonce, to, value, data));
+        return keccak256(abi.encodePacked(address(this), _nonce, to, value, data));
     }
 
     function executeTransaction(

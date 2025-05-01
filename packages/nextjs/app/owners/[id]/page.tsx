@@ -3,10 +3,10 @@
 import { type FC, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Checkbox } from "@chakra-ui/react";
-import { FaTrash } from "react-icons/fa";
 import { useIsMounted, useLocalStorage } from "usehooks-ts";
 import { Abi, Address as AddressType, encodeFunctionData } from "viem";
 import { useChainId, usePublicClient, useReadContract, useWalletClient } from "wagmi";
+import { TrashIcon } from "@heroicons/react/24/solid";
 import { TransactionData } from "~~/app/transfer/[id]/page";
 import { MultiSigNav } from "~~/components/Navbar";
 import Profile from "~~/components/Profile";
@@ -176,8 +176,8 @@ const Owners: FC = () => {
                 <div className="flex items-center gap-2">
                   <span>Owner</span>
                   {!addSigner && selectedForRemoval !== owner && (
-                    <FaTrash
-                      className="text-red-500 cursor-pointer hover:text-red-700"
+                    <TrashIcon
+                      className="w-5 text-red-500 cursor-pointer hover:text-red-700"
                       onClick={() => {
                         setSelectedForRemoval(owner);
                         setPredefinedTxData({

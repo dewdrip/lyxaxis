@@ -4,11 +4,10 @@ import { useIsMounted } from "usehooks-ts";
 import { isAddress } from "viem";
 import { useAccount, useWalletClient } from "wagmi";
 import { PlusCircleIcon, TrashIcon } from "@heroicons/react/24/outline";
+import Profile from "~~/components/Profile";
 import { ProfileInput } from "~~/components/ProfileInput";
-import { Address, AddressInput, InputBase } from "~~/components/scaffold-eth";
+import { InputBase } from "~~/components/scaffold-eth";
 import { toaster } from "~~/components/ui/toaster";
-import { useCreateWallet } from "~~/hooks/contract/useCreateWallet";
-import { notification } from "~~/utils/scaffold-eth";
 
 export const RequiredForm = ({
   setSigners,
@@ -99,13 +98,15 @@ export const RequiredForm = ({
               <label className="label p-0">
                 <span className="label-text">Add Signers and number of confirmations</span>
               </label>
-              <div className="flex flex-wrap gap-y-3 gap-x-3">
-                {signers.map(signer => (
-                  <div key={signer} className="flex gap-x-1 cursor-pointer">
-                    <Address address={signer} />
-                    <TrashIcon className="w-5 text-red-500 cursor-pointer" onClick={() => removeSigner(signer)} />
-                  </div>
-                ))}
+              <div className="flex flex-wrap gap-y-3 gap-x-3 max-h-[100px] overflow-y-auto">
+                {signers
+                  .map(signer => (
+                    <div key={signer} className="flex gap-x-1 cursor-pointer">
+                      <Profile address={signer as `0x${string}`} imageClassName="w-6" />
+                      <TrashIcon className="w-5 text-red-500 cursor-pointer" onClick={() => removeSigner(signer)} />
+                    </div>
+                  ))
+                  .reverse()}
               </div>
               <div className="flex flex-col gap-y-1">
                 <ProfileInput

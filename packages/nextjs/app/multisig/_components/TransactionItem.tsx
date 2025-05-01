@@ -217,7 +217,7 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
                     <div className="flex gap-4">
                       Transfer to: <Address address={tx.to} />{" "}
                     </div>
-                    <div>Amount: {formatEther(BigInt(tx.amount))} Ξ </div>
+                    <div>Amount: {formatEther(BigInt(tx.amount))} LYX </div>
                   </>
                 )}
               </div>
@@ -248,7 +248,7 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
                 {tx.signatures.length}/{String(tx.requiredApprovals)} {hasSigned ? "✅" : ""}
               </span>
             )}
-            <div>{formatEther(BigInt(tx.amount))} Ξ</div>
+            <div>{formatEther(BigInt(tx.amount))} LYX</div>
 
             {/* <Address address={tx.to} /> */}
           </div>

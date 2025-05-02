@@ -81,7 +81,7 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
       ? decodeFunctionData({ abi: combinedAbi as Abi, data: tx.data })
       : ({} as DecodeFunctionDataReturnType);
 
-  const hasSigned = tx.signers.indexOf(address as string) >= 0;
+  const hasSigned = tx.signers.indexOf(address as string) >= 0 && tx.nonce === nonce;
   const hasEnoughSignatures = signaturesRequired ? tx.signatures.length >= Number(signaturesRequired) : false;
 
   const getSortedSigList = async (allSigs: `0x${string}`[], newHash: `0x${string}`) => {
@@ -181,7 +181,18 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
       const isOwner = await metaMultiSigWallet?.read.isOwner([signer as string]);
 
       if (isOwner) {
-        const [finalSigList, finalSigners] = await getSortedSigList([...tx.signatures, signature], newHash);
+        // Remove any existing signature from the same signer
+        const filteredSignatures: `0x${string}`[] = [];
+        for (const sig of tx.signatures) {
+          const recovered = await metaMultiSigWallet?.read.recover([newHash, sig]);
+          if (recovered !== signer) {
+            filteredSignatures.push(sig);
+          }
+        }
+        // Add the new signature
+        const updatedSignatures = [...filteredSignatures, signature];
+
+        const [finalSigList, finalSigners] = await getSortedSigList(updatedSignatures, newHash);
 
         await fetch(poolServerUrl, {
           method: "POST",
@@ -189,6 +200,7 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
           body: JSON.stringify(
             {
               ...tx,
+              nonce,
               signatures: finalSigList,
               signers: finalSigners,
             },
@@ -209,6 +221,8 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
   };
 
   console.log("tx data", txnData);
+
+  console.log("nonce", nonce);
 
   return (
     <>
@@ -288,14 +302,16 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
             ) : (
               <div className="flex justify-center items-center gap-x-2">
                 <div className="flex" title={hasSigned ? "You have already Signed this transaction" : ""}>
-                  <button
-                    className="btn btn-xs w-[3.6rem] btn-primary"
-                    disabled={hasSigned}
-                    title={!hasEnoughSignatures ? "Not enough signers to Execute" : ""}
-                    onClick={signTransaction}
-                  >
-                    {isSigning ? <div className="loading loading-xs" /> : "Sign"}
-                  </button>
+                  {nonce !== undefined && (
+                    <button
+                      className="btn btn-xs w-[3.6rem] btn-primary"
+                      disabled={hasSigned}
+                      title={!hasEnoughSignatures ? "Not enough signers to Execute" : ""}
+                      onClick={signTransaction}
+                    >
+                      {isSigning ? <div className="loading loading-xs" /> : "Sign"}
+                    </button>
+                  )}
                 </div>
 
                 <div title={!hasEnoughSignatures ? "Not enough signers to Execute" : ""}>

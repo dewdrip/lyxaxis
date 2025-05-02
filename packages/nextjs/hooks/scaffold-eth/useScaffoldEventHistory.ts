@@ -5,6 +5,7 @@ import { BlockNumber, GetLogsParameters } from "viem";
 import { Config, UsePublicClientReturnType, useBlockNumber, usePublicClient } from "wagmi";
 import { useSelectedNetwork } from "~~/hooks/scaffold-eth";
 import { useDeployedContractInfo } from "~~/hooks/scaffold-eth";
+import MultiSigABI from "~~/utils/abis/MultiSigABI.json";
 import { AllowedChainIds } from "~~/utils/scaffold-eth";
 import { replacer } from "~~/utils/scaffold-eth/common";
 import {
@@ -99,11 +100,10 @@ export const useScaffoldEventHistory = <
     chainId: selectedNetwork.id as AllowedChainIds,
   });
 
-  const event =
-    deployedContractData &&
-    ((deployedContractData.abi as Abi).find(part => part.type === "event" && part.name === eventName) as AbiEvent);
+  const event = (MultiSigABI as Abi).find(part => part.type === "event" && part.name === eventName) as AbiEvent;
 
-  const isContractAddressAndClientReady = Boolean(deployedContractData?.address) && Boolean(publicClient);
+  const isContractAddressAndClientReady =
+    Boolean(contractAddress ? contractAddress : deployedContractData?.address) && Boolean(publicClient);
 
   const query = useInfiniteQuery({
     queryKey: [
@@ -120,7 +120,12 @@ export const useScaffoldEventHistory = <
     queryFn: async ({ pageParam }) => {
       if (!isContractAddressAndClientReady) return undefined;
       const data = await getEvents(
-        { address: deployedContractData?.address, event, fromBlock: pageParam, args: filters },
+        {
+          address: contractAddress ? contractAddress : deployedContractData?.address,
+          event,
+          fromBlock: pageParam,
+          args: filters,
+        },
         publicClient,
         { blockData, transactionData, receiptData },
       );

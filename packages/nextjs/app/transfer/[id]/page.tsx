@@ -27,6 +27,7 @@ export type TransactionData = {
   signers: Address[];
   validSignatures?: { signer: Address; signature: Address }[];
   requiredApprovals: bigint;
+  isExecuted?: boolean;
 };
 
 const CreatePage: FC = () => {

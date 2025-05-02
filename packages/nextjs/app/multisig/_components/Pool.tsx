@@ -14,7 +14,13 @@ import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
 import { getPoolServerUrl } from "~~/utils/getPoolServerUrl";
 import { notification } from "~~/utils/scaffold-eth";
 
-export const Pool = ({ multisigAddress }: { multisigAddress: `0x${string}` }) => {
+export const Pool = ({
+  multisigAddress,
+  isHistory = false,
+}: {
+  multisigAddress: `0x${string}`;
+  isHistory?: boolean;
+}) => {
   const [transactions, setTransactions] = useState<TransactionData[]>();
   const [loading, setLoading] = useState<boolean>(false);
   // const [subscriptionEventsHashes, setSubscriptionEventsHashes] = useState<`0x${string}`[]>([]);
@@ -40,7 +46,10 @@ export const Pool = ({ multisigAddress }: { multisigAddress: `0x${string}` }) =>
     contractAddress: multisigAddress,
   });
 
-  const historyHashes = useMemo(() => eventsHistory?.map(ev => ev.args.hash) || [], [eventsHistory]);
+  const historyHashes = useMemo(
+    () => (eventsHistory ? eventsHistory.filter(ev => ev.args && ev.args.hash).map(ev => ev.args.hash) : []),
+    [eventsHistory],
+  );
 
   const fetchTransactionData = async (id?: string) => {
     try {
@@ -100,9 +109,9 @@ export const Pool = ({ multisigAddress }: { multisigAddress: `0x${string}` }) =>
   );
 
   return (
-    <div className="flex flex-col flex-1 items-center gap-8">
+    <div className="flex flex-col flex-1 w-full items-center gap-8">
       <div className="flex items-center flex-col flex-grow w-full max-w-2xl">
-        <div className="flex flex-col items-center bg-base-100 border border-gray rounded-xl py-6 w-full">
+        <div className="flex flex-col  items-center bg-base-100 border border-gray rounded-xl p-6 w-full">
           <div className="text-xl font-bold">Pool</div>
 
           <div className="">Nonce: {nonce !== undefined ? `#${nonce}` : "Loading..."}</div>
@@ -111,22 +120,31 @@ export const Pool = ({ multisigAddress }: { multisigAddress: `0x${string}` }) =>
             <Address address={multisigAddress} disableBlockie={true} />
           </div>
 
-          <div className="flex flex-col mt-8 gap-4 h-[18rem] overflow-y-scroll">
+          <div className="flex flex-col mt-8 w-full gap-4 h-[18rem] overflow-y-scroll">
             {loading ? (
-              <div className="bg-white w-4 h-4 loading loading-spinner my-20"></div>
+              <div className="bg-white w-4 h-4 mx-auto loading loading-spinner my-20"></div>
             ) : transactions && transactions.length === 0 ? (
               <div className="w-full"></div>
             ) : (
               transactions &&
               transactions.map(tx => {
-                return (
-                  <TransactionItem
-                    key={tx.hash}
-                    tx={tx}
-                    completed={historyHashes.includes(tx.hash as `0x${string}`)}
-                    outdated={lastTx?.nonce != undefined && BigInt(tx.nonce) <= BigInt(lastTx?.nonce)}
-                  />
-                );
+                return isHistory
+                  ? tx.isExecuted && (
+                      <TransactionItem
+                        key={tx.hash}
+                        tx={tx}
+                        completed={historyHashes.includes(tx.hash as `0x${string}`)}
+                        outdated={lastTx?.nonce != undefined && BigInt(tx.nonce) <= BigInt(lastTx?.nonce)}
+                      />
+                    )
+                  : !tx.isExecuted && (
+                      <TransactionItem
+                        key={tx.hash}
+                        tx={tx}
+                        completed={historyHashes.includes(tx.hash as `0x${string}`)}
+                        outdated={lastTx?.nonce != undefined && BigInt(tx.nonce) <= BigInt(lastTx?.nonce)}
+                      />
+                    );
               })
             )}
           </div>

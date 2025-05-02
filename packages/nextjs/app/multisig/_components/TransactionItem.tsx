@@ -1,5 +1,6 @@
-import { type FC, useState } from "react";
+import { type FC, useEffect, useState } from "react";
 import { Address, BlockieAvatar } from "../../../components/scaffold-eth";
+import { useHasSignedNewHash } from "../hook/useHasSignedNewHash";
 import { PreveiwProfileModal } from "./PreviewProfile";
 import { IoIosInformationCircleOutline } from "react-icons/io";
 import { Abi, DecodeFunctionDataReturnType, decodeFunctionData, formatEther } from "viem";
@@ -46,6 +47,12 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
     walletClient,
   });
 
+  const { hasSignedNewHash, isLoading: isCheckingSignatures } = useHasSignedNewHash({
+    metaMultiSigWallet,
+    nonce,
+    tx,
+  });
+
   const { data: contractInfo } = useDeployedContractInfo({
     contractName: "MultiSig",
   });
@@ -81,7 +88,7 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
       ? decodeFunctionData({ abi: combinedAbi as Abi, data: tx.data })
       : ({} as DecodeFunctionDataReturnType);
 
-  const hasSigned = tx.signers.indexOf(address as string) >= 0 && tx.nonce === nonce;
+  const hasSigned = tx.signers.indexOf(address as string) >= 0 && BigInt(tx.nonce) === nonce;
   const hasEnoughSignatures = signaturesRequired ? tx.signatures.length >= Number(signaturesRequired) : false;
 
   const getSortedSigList = async (allSigs: `0x${string}`[], newHash: `0x${string}`) => {
@@ -104,7 +111,10 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
     for (const s in sigList) {
       if (!used[sigList[s].signature]) {
         finalSigList.push(sigList[s].signature);
-        finalSigners.push(sigList[s].signer);
+
+        if (!finalSigners.includes(sigList[s].signer)) {
+          finalSigners.push(sigList[s].signer);
+        }
       }
       used[sigList[s].signature] = true;
     }
@@ -145,10 +155,27 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
 
       const [finalSigList] = await getSortedSigList(tx.signatures, newHash);
 
-      await transactor(() =>
+      const txHash = await transactor(() =>
         metaMultiSigWallet.write.executeTransaction([tx.to, BigInt(tx.amount), tx.data, finalSigList]),
       );
-      setIsExecuting(false);
+
+      if (txHash) {
+        await fetch(poolServerUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(
+            {
+              ...tx,
+              nonce,
+              isExecuted: true,
+            },
+            // stringifying bigint
+            (key, value) => (typeof value === "bigint" ? value.toString() : value),
+          ),
+        });
+
+        setIsExecuting(false);
+      }
     } catch (e) {
       //notification.error("Error executing transaction");
       console.log(e);
@@ -220,10 +247,6 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
     }
   };
 
-  console.log("tx data", txnData);
-
-  console.log("nonce", nonce);
-
   return (
     <>
       <input type="checkbox" id={`label-${tx.hash}`} className="modal-toggle" />
@@ -271,8 +294,8 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
         )}
       </div>
 
-      <div className="flex flex-col pb-2 border-b border-secondary last:border-b-0">
-        <div className="flex gap-4 justify-between">
+      <div className="flex flex-col  pb-2 border-b border-secondary last:border-b-0">
+        <div className="flex w-full gap-4 justify-between">
           <div className="flex flex-col gap-y-1">
             <div className="font-bold"># {String(tx.nonce)}</div>
             {String(signaturesRequired) && (
@@ -285,7 +308,7 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
             {/* <Address address={tx.to} /> */}
           </div>
 
-          <div className="flex flex-col gap-y-4">
+          <div className="flex flex-col gap-y-2">
             <div className="flex gap-x-2 items-center">
               <div className="flex gap-1 font-bold">
                 <BlockieAvatar size={20} address={tx.hash} /> {tx.hash.slice(0, 7)}
@@ -295,36 +318,36 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
               </label>
             </div>
 
-            {completed ? (
-              <div className="font-bold">Completed</div>
-            ) : outdated ? (
-              <div className="font-bold">Outdated</div>
+            {/* {isCheckingSignatures ? (
+              <div>Loading...</div>
+            ) : !hasSignedNewHash ? (
+              <div className="text-sm">Outdated, Resign!</div>
             ) : (
-              <div className="flex justify-center items-center gap-x-2">
-                <div className="flex" title={hasSigned ? "You have already Signed this transaction" : ""}>
-                  {nonce !== undefined && (
-                    <button
-                      className="btn btn-xs w-[3.6rem] btn-primary"
-                      disabled={hasSigned}
-                      title={!hasEnoughSignatures ? "Not enough signers to Execute" : ""}
-                      onClick={signTransaction}
-                    >
-                      {isSigning ? <div className="loading loading-xs" /> : "Sign"}
-                    </button>
-                  )}
-                </div>
+              <div className="text-sm">Pending Transaction</div>
+            )} */}
 
-                <div title={!hasEnoughSignatures ? "Not enough signers to Execute" : ""}>
-                  <button
-                    className="btn btn-xs w-[3.6rem] btn-primary "
-                    disabled={!hasEnoughSignatures}
-                    onClick={executeTransaction}
-                  >
-                    {isExecuting ? <div className="loading loading-xs" /> : "Exec"}
-                  </button>
-                </div>
+            <div className="flex justify-center items-center gap-x-2">
+              <div className="flex" title={hasSigned ? "You have already Signed this transaction" : ""}>
+                <button
+                  className="btn btn-xs w-[3.6rem] btn-primary"
+                  disabled={hasSigned && hasSignedNewHash}
+                  title={!hasEnoughSignatures ? "Not enough signers to Execute" : ""}
+                  onClick={signTransaction}
+                >
+                  {isSigning ? <div className="loading loading-xs" /> : "Sign"}
+                </button>
               </div>
-            )}
+
+              <div title={!hasEnoughSignatures ? "Not enough signers to Execute" : ""}>
+                <button
+                  className="btn btn-xs w-[3.6rem] btn-primary "
+                  disabled={!hasEnoughSignatures}
+                  onClick={executeTransaction}
+                >
+                  {isExecuting ? <div className="loading loading-xs" /> : "Exec"}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 

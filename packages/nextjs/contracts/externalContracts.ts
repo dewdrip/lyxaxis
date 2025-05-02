@@ -161,14 +161,9 @@ const externalContracts = {
         {
           inputs: [
             {
-              internalType: "string",
-              name: "_name",
-              type: "string",
-            },
-            {
-              internalType: "uint256",
-              name: "_chainId",
-              type: "uint256",
+              internalType: "bytes",
+              name: "profileMetadata",
+              type: "bytes",
             },
             {
               internalType: "address[]",
@@ -188,6 +183,51 @@ const externalContracts = {
           ],
           stateMutability: "nonpayable",
           type: "constructor",
+        },
+        {
+          inputs: [],
+          name: "MultiSig__DuplicateOrUnorderedSignatures",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "MultiSig__InvalidSignaturesCount",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "MultiSig__NotOwner",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "MultiSig__NotUPOrUPOwner",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "MultiSig__NotUniversalProfile",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "MultiSig__OwnerNotUnique",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "MultiSig__TransferFailed",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "MultiSig__ZeroAddress",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "MultiSig__ZeroRequiredSignatures",
+          type: "error",
         },
         {
           anonymous: false,
@@ -215,7 +255,8 @@ const externalContracts = {
           type: "event",
         },
         {
-          anonymous: false,
+          type: "event",
+          name: "ExecuteTransaction",
           inputs: [
             {
               indexed: true,
@@ -260,8 +301,6 @@ const externalContracts = {
               type: "bytes",
             },
           ],
-          name: "ExecuteTransaction",
-          type: "event",
         },
         {
           anonymous: false,
@@ -298,19 +337,6 @@ const externalContracts = {
           name: "addSigner",
           outputs: [],
           stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "chainId",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
           type: "function",
         },
         {
@@ -417,12 +443,12 @@ const externalContracts = {
           inputs: [
             {
               internalType: "address",
-              name: "requestor",
+              name: "",
               type: "address",
             },
             {
               internalType: "address",
-              name: "target",
+              name: "",
               type: "address",
             },
             {
@@ -432,12 +458,12 @@ const externalContracts = {
             },
             {
               internalType: "uint256",
-              name: "value",
+              name: "",
               type: "uint256",
             },
             {
               internalType: "bytes",
-              name: "callData",
+              name: "",
               type: "bytes",
             },
           ],
@@ -449,19 +475,19 @@ const externalContracts = {
               type: "bytes4",
             },
           ],
-          stateMutability: "nonpayable",
+          stateMutability: "view",
           type: "function",
         },
         {
           inputs: [
             {
               internalType: "bytes32",
-              name: "callHash",
+              name: "",
               type: "bytes32",
             },
             {
               internalType: "bytes",
-              name: "callResult",
+              name: "",
               type: "bytes",
             },
           ],
@@ -473,20 +499,7 @@ const externalContracts = {
               type: "bytes4",
             },
           ],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "name",
-          outputs: [
-            {
-              internalType: "string",
-              name: "",
-              type: "string",
-            },
-          ],
-          stateMutability: "view",
+          stateMutability: "pure",
           type: "function",
         },
         {
@@ -569,6 +582,10 @@ const externalContracts = {
           outputs: [],
           stateMutability: "nonpayable",
           type: "function",
+        },
+        {
+          stateMutability: "payable",
+          type: "receive",
         },
       ],
     },

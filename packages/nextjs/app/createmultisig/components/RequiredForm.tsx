@@ -69,6 +69,26 @@ export const RequiredForm = ({
     setSigners(signers.filter(signer => signer !== signerToRemove));
   };
 
+  const handleNext = () => {
+    if (Number(requiredSignatures) <= 0) {
+      toaster.create({
+        title: "Required signatures must be greater than 0",
+        type: "error",
+      });
+      return;
+    }
+
+    if (Number(requiredSignatures) > signers.length) {
+      toaster.create({
+        title: "Required signatures cannot be greater than number of signers",
+        type: "error",
+      });
+      return;
+    }
+
+    setPages(1);
+  };
+
   const handleKeyPressOnAddSigner = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       addSigner();
@@ -103,7 +123,9 @@ export const RequiredForm = ({
                   .map(signer => (
                     <div key={signer} className="flex gap-x-1 cursor-pointer">
                       <Profile address={signer as `0x${string}`} imageClassName="w-6" />
-                      <TrashIcon className="w-5 text-red-500 cursor-pointer" onClick={() => removeSigner(signer)} />
+                      {signers.length > 1 && (
+                        <TrashIcon className="w-5 text-red-500 cursor-pointer" onClick={() => removeSigner(signer)} />
+                      )}
                     </div>
                   ))
                   .reverse()}
@@ -151,9 +173,7 @@ export const RequiredForm = ({
             <button
               className="w-fit px-12 btn btn-primary btn-sm h-[2.5rem] rounded-xl"
               disabled={!walletClient || isCreateWalletLoading}
-              onClick={() => {
-                setPages(1);
-              }}
+              onClick={handleNext}
             >
               {isCreateWalletLoading ? "Creating..." : "Next"}
             </button>

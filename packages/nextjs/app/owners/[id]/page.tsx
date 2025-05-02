@@ -153,6 +153,8 @@ const Owners: FC = () => {
 
       if (isOwner) {
         const txData: TransactionData = {
+          title: "Signer Management",
+          description: "Add or remove a signer from the multisig",
           chainId: chainId,
           address: multisigAddress,
           nonce: (nonce as bigint) || 0n,

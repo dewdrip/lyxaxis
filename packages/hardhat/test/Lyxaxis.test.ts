@@ -4,8 +4,6 @@ import { Lyxaxis } from "../typechain-types";
 import { MultiSigRegistry } from "../typechain-types";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { encodeProfileMetadata } from "./utils/encodeProfileMetadata";
-import ERC725, { ERC725JSONSchema } from "@erc725/erc725.js";
-import lsp3ProfileSchema from "@erc725/erc725.js/schemas/LSP3ProfileMetadata.json";
 
 describe("Lyxaxis", function () {
   let lyxaxis: Lyxaxis;
@@ -232,7 +230,10 @@ describe("Lyxaxis", function () {
       const newSigner = addr2.address;
       const newSignaturesRequired = 2;
 
-      await expect(multisig.addSigner(newSigner, newSignaturesRequired)).to.be.revertedWith("Not Universal Profile");
+      await expect(multisig.addSigner(newSigner, newSignaturesRequired)).to.be.revertedWithCustomError(
+        multisig,
+        "MultiSig__NotUniversalProfile",
+      );
     });
   });
 
@@ -302,7 +303,7 @@ describe("Lyxaxis", function () {
   });
 
   describe("Profile Updates", function () {
-    it("Should allow updating the universal profile name through UP", async function () {
+    it("Should allow updating the universal profile metadata", async function () {
       // Create initial multisig
       const profileMetadata = {
         name: "Test Wallet",

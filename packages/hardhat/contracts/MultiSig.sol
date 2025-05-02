@@ -10,6 +10,16 @@ import "./MultiSigRegistry.sol";
 import { LSP0ERC725Account } from "@lukso/lsp-smart-contracts/contracts/LSP0ERC725Account/LSP0ERC725Account.sol";
 import { ILSP20CallVerifier } from "@lukso/lsp-smart-contracts/contracts/LSP20CallVerification/ILSP20CallVerifier.sol";
 
+error MultiSig__ZeroAddress();
+error MultiSig__OwnerNotUnique();
+error MultiSig__NotUniversalProfile();
+error MultiSig__ZeroRequiredSignatures();
+error MultiSig__NotOwner();
+error MultiSig__DuplicateOrUnorderedSignatures();
+error MultiSig__NotUPOrUPOwner();
+error MultiSig__TransferFailed();
+error MultiSig__InvalidSignaturesCount();
+
 contract MultiSig is ILSP20CallVerifier {
     event Deposit(address indexed sender, uint amount, uint balance);
     event ExecuteTransaction(
@@ -22,11 +32,15 @@ contract MultiSig is ILSP20CallVerifier {
         bytes result
     );
     event Owner(address indexed owner, bool added);
-    mapping(address => bool) public isOwner;
+
+    bytes32 constant LSP3_PROFILE_KEY = 0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5;
+
     uint public signaturesRequired;
     uint public nonce;
     MultiSigRegistry private immutable i_registry;
     LSP0ERC725Account private immutable i_universalProfile;
+
+    mapping(address => bool) public isOwner;
 
     constructor(
         bytes memory profileMetadata,
@@ -38,8 +52,8 @@ contract MultiSig is ILSP20CallVerifier {
         uint256 numOfOwners = _owners.length;
         for (uint i = 0; i < numOfOwners; i++) {
             address owner = _owners[i];
-            require(owner != address(0), "constructor: zero address");
-            require(!isOwner[owner], "constructor: owner not unique");
+            require(owner != address(0), MultiSig__ZeroAddress());
+            require(!isOwner[owner], MultiSig__OwnerNotUnique());
             isOwner[owner] = true;
             emit Owner(owner, isOwner[owner]);
         }
@@ -48,19 +62,18 @@ contract MultiSig is ILSP20CallVerifier {
         i_universalProfile = new LSP0ERC725Account(address(this));
 
         // Set the profile metadata
-        bytes32 LSP3ProfileKey = 0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5;
-        i_universalProfile.setData(LSP3ProfileKey, profileMetadata);
+        i_universalProfile.setData(LSP3_PROFILE_KEY, profileMetadata);
     }
 
     modifier onlyUP() {
-        require(msg.sender == address(i_universalProfile), "Not Universal Profile");
+        require(msg.sender == address(i_universalProfile), MultiSig__NotUniversalProfile());
         _;
     }
 
     function addSigner(address newSigner, uint256 newSignaturesRequired) public onlyUP {
-        require(newSigner != address(0), "addSigner: zero address");
-        require(!isOwner[newSigner], "addSigner: owner not unique");
-        require(newSignaturesRequired > 0, "addSigner: must be non-zero sigs required");
+        require(newSigner != address(0), MultiSig__ZeroAddress());
+        require(!isOwner[newSigner], MultiSig__OwnerNotUnique());
+        require(newSignaturesRequired > 0, MultiSig__ZeroRequiredSignatures());
         isOwner[newSigner] = true;
         signaturesRequired = newSignaturesRequired;
         emit Owner(newSigner, isOwner[newSigner]);
@@ -70,8 +83,8 @@ contract MultiSig is ILSP20CallVerifier {
     }
 
     function removeSigner(address oldSigner, uint256 newSignaturesRequired) public onlyUP {
-        require(isOwner[oldSigner], "removeSigner: not owner");
-        require(newSignaturesRequired > 0, "removeSigner: must be non-zero sigs required");
+        require(isOwner[oldSigner], MultiSig__NotOwner());
+        require(newSignaturesRequired > 0, MultiSig__ZeroRequiredSignatures());
         isOwner[oldSigner] = false;
         signaturesRequired = newSignaturesRequired;
         emit Owner(oldSigner, isOwner[oldSigner]);
@@ -81,7 +94,7 @@ contract MultiSig is ILSP20CallVerifier {
     }
 
     function updateSignaturesRequired(uint256 newSignaturesRequired) public onlyUP {
-        require(newSignaturesRequired > 0, "updateSignaturesRequired: must be non-zero sigs required");
+        require(newSignaturesRequired > 0, MultiSig__ZeroRequiredSignatures());
         signaturesRequired = newSignaturesRequired;
     }
 
@@ -100,14 +113,14 @@ contract MultiSig is ILSP20CallVerifier {
         bytes memory data,
         bytes[] memory signatures
     ) public returns (bytes memory) {
-        require(isOwner[msg.sender], "executeTransaction: only owners can execute");
+        require(isOwner[msg.sender], MultiSig__NotOwner());
         bytes32 _hash = getTransactionHash(nonce, to, value, data);
         nonce++;
         uint256 validSignatures;
         address duplicateGuard;
         for (uint i = 0; i < signatures.length; i++) {
             address recovered = recover(_hash, signatures[i]);
-            require(recovered > duplicateGuard, "executeTransaction: duplicate or unordered signatures");
+            require(recovered > duplicateGuard, MultiSig__DuplicateOrUnorderedSignatures());
             duplicateGuard = recovered;
 
             if (isOwner[recovered]) {
@@ -115,7 +128,7 @@ contract MultiSig is ILSP20CallVerifier {
             }
         }
 
-        require(validSignatures >= signaturesRequired, "executeTransaction: not enough valid signatures");
+        require(validSignatures >= signaturesRequired, MultiSig__InvalidSignaturesCount());
 
         // Execute transaction through UP's execute function to maintain UP context
         bytes memory result = i_universalProfile.execute(0, to, value, data);
@@ -139,7 +152,7 @@ contract MultiSig is ILSP20CallVerifier {
         uint256 /* value */,
         bytes memory /* callData */
     ) external view returns (bytes4 returnedStatus) {
-        require(caller == address(this) || caller == address(i_universalProfile), "Caller not UP owner");
+        require(caller == address(this) || caller == address(i_universalProfile), MultiSig__NotUPOrUPOwner());
         return 0xde928f01;
     }
 
@@ -152,6 +165,6 @@ contract MultiSig is ILSP20CallVerifier {
 
     receive() external payable {
         (bool success, ) = payable(i_universalProfile).call{ value: msg.value }("");
-        require(success, "Transfer failed");
+        require(success, MultiSig__TransferFailed());
     }
 }

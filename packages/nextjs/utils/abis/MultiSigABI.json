@@ -26,6 +26,51 @@
     "type": "constructor"
   },
   {
+    "inputs": [],
+    "name": "MultiSig__DuplicateOrUnorderedSignatures",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "MultiSig__InvalidSignaturesCount",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "MultiSig__NotOwner",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "MultiSig__NotUPOrUPOwner",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "MultiSig__NotUniversalProfile",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "MultiSig__OwnerNotUnique",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "MultiSig__TransferFailed",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "MultiSig__ZeroAddress",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "MultiSig__ZeroRequiredSignatures",
+    "type": "error"
+  },
+  {
     "anonymous": false,
     "inputs": [
       {

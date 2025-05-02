@@ -79,8 +79,8 @@ export const OptionalForm = ({
           <BackButton action={() => setPages(0)} />
           <div className="text-left text-2xl mt-2">Give your Multisig a face</div>
           <div className="text-xs max-w-[350px]">
-            Add profile image and other meta data to your multisig. These details are optional and can be updated later
-            by creating a proposal
+            Add profile image and other meta data to your multisig. These details are{" "}
+            <span className="text-yellow-500 font-bold">OPTIONAL</span> and can be updated later by creating a proposal
           </div>
         </div>
 

@@ -88,7 +88,7 @@ const Owners: FC = () => {
       if (predefinedTxData.methodName === "addSigner") {
         if (Number(predefinedTxData.newSignaturesNumber) > (owners?.length || 0) + 1) {
           toaster.create({
-            title: "New required signatures cannot exceed number of owners + 1",
+            title: `New required signatures cannot exceed ${(owners?.length || 0) + 1}`,
             type: "error",
           });
           setIsCreating(false);
@@ -97,7 +97,7 @@ const Owners: FC = () => {
       } else if (predefinedTxData.methodName === "removeSigner") {
         if (Number(predefinedTxData.newSignaturesNumber) > (owners?.length || 0) - 1) {
           toaster.create({
-            title: "New required signatures cannot exceed number of owners - 1",
+            title: `New required signatures cannot exceed ${(owners?.length || 0) - 1}`,
             type: "error",
           });
           setIsCreating(false);
@@ -138,6 +138,8 @@ const Owners: FC = () => {
 
       if (isOwner) {
         const txData: TransactionData = {
+          title: "Signer Management",
+          description: "Add or remove a signer from the multisig",
           chainId: chainId,
           address: multisigAddress,
           nonce: (nonce as bigint) || 0n,
@@ -194,8 +196,15 @@ const Owners: FC = () => {
       setAddSigner(true);
     } else if (owners?.length && predefinedTxData.methodName === "removeSigner") {
       setAddSigner(false);
+    } else {
+      setPredefinedTxData({
+        ...predefinedTxData,
+        methodName: "addSigner",
+        signer: "",
+        newSignaturesNumber: "",
+      });
     }
-  }, [predefinedTxData.methodName, setPredefinedTxData]);
+  }, []);
 
   return isMounted() ? (
     <div className="flex flex-col flex-1 items-center  gap-8">

@@ -16,6 +16,8 @@ import { DEFAULT_TX_DATA, PredefinedTxData } from "~~/utils/methods";
 import { notification } from "~~/utils/scaffold-eth";
 
 export type TransactionData = {
+  title: string;
+  description: string;
   chainId: number;
   address: Address;
   nonce: bigint;
@@ -68,7 +70,7 @@ const CreatePage: FC = () => {
   const handleCreate = async () => {
     try {
       if (!walletClient) {
-        console.log("No wallet client!");
+        notification.error("No wallet client!");
         return;
       }
 
@@ -124,6 +126,8 @@ const CreatePage: FC = () => {
 
       if (isOwner) {
         const txData: TransactionData = {
+          title: "Transfer Funds",
+          description: "Transfer funds to the recipient",
           chainId: chainId,
           address: multisigAddress,
           nonce: (nonce as bigint) || 0n,

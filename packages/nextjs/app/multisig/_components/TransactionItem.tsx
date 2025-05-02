@@ -208,7 +208,7 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
     }
   };
 
-  console.log("trx data", txnData);
+  console.log("tx data", txnData);
 
   return (
     <>

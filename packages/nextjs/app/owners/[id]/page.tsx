@@ -57,9 +57,11 @@ const Owners: FC = () => {
   });
 
   const [selectedForRemoval, setSelectedForRemoval] = useState<string | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
 
   const handleCreate = async () => {
     try {
+      setIsCreating(true);
       if (!walletClient) {
         console.log("No wallet client!");
         return;
@@ -75,12 +77,7 @@ const Owners: FC = () => {
         address: multisigAddress,
         abi: MultiSigABI,
         functionName: "getTransactionHash",
-        args: [
-          nonce as bigint,
-          String(multisigAddress),
-          BigInt(predefinedTxData.amount as string),
-          callData as `0x${string}`,
-        ],
+        args: [nonce as bigint, String(multisigAddress), 0n, callData as `0x${string}`],
       })) as `0x${string}`;
 
       const signature = await walletClient.signMessage({
@@ -102,16 +99,12 @@ const Owners: FC = () => {
       });
 
       if (isOwner) {
-        if (!multisigAddress || !predefinedTxData.amount || !multisigAddress) {
-          return;
-        }
-
         const txData: TransactionData = {
           chainId: chainId,
           address: multisigAddress,
           nonce: (nonce as bigint) || 0n,
           to: multisigAddress,
-          amount: predefinedTxData.amount,
+          amount: "0",
           data: callData as `0x${string}`,
           hash: newHash,
           signatures: [signature],
@@ -151,16 +144,20 @@ const Owners: FC = () => {
         type: "error",
       });
       console.log(e);
+    } finally {
+      setIsCreating(false);
     }
   };
 
+  const [addSigner, setAddSigner] = useState(true);
+
   useEffect(() => {
-    if (predefinedTxData.methodName === "transferFunds") {
-      setPredefinedTxData(DEFAULT_TX_DATA);
+    if (predefinedTxData.methodName === "addSigner") {
+      setAddSigner(true);
+    } else if (owners?.length && predefinedTxData.methodName === "removeSigner") {
+      setAddSigner(false);
     }
   }, [predefinedTxData.methodName, setPredefinedTxData]);
-
-  const [addSigner, setAddSigner] = useState(true);
 
   return isMounted() ? (
     <div className="flex flex-col flex-1 items-center  gap-8">
@@ -216,26 +213,28 @@ const Owners: FC = () => {
                   <Checkbox.Label>Add Signer</Checkbox.Label>
                 </Checkbox.Root>
 
-                <Checkbox.Root
-                  checked={!addSigner}
-                  onCheckedChange={() => {
-                    setAddSigner(false);
-                    setSelectedForRemoval(null);
-                    setPredefinedTxData({
-                      ...predefinedTxData,
-                      methodName: "removeSigner",
-                      signer: "",
-                      newSignaturesNumber: "",
-                    });
-                  }}
-                  className="cursor-pointer"
-                >
-                  <Checkbox.HiddenInput />
-                  <Checkbox.Control>
-                    <Checkbox.Indicator className="border border-gray bg-base-200" />
-                  </Checkbox.Control>
-                  <Checkbox.Label>Remove Signer</Checkbox.Label>
-                </Checkbox.Root>
+                {owners?.length > 1 && (
+                  <Checkbox.Root
+                    checked={!addSigner}
+                    onCheckedChange={() => {
+                      setAddSigner(false);
+                      setSelectedForRemoval(null);
+                      setPredefinedTxData({
+                        ...predefinedTxData,
+                        methodName: "removeSigner",
+                        signer: "",
+                        newSignaturesNumber: "",
+                      });
+                    }}
+                    className="cursor-pointer"
+                  >
+                    <Checkbox.HiddenInput />
+                    <Checkbox.Control>
+                      <Checkbox.Indicator className="border border-gray bg-base-200" />
+                    </Checkbox.Control>
+                    <Checkbox.Label>Remove Signer</Checkbox.Label>
+                  </Checkbox.Root>
+                )}
               </div>
             </div>
 
@@ -251,8 +250,8 @@ const Owners: FC = () => {
               disableMultiplyBy1e18
             />
 
-            <button className="btn btn-secondary btn-sm" onClick={handleCreate}>
-              Create Tx
+            <button className="btn btn-secondary btn-sm" onClick={handleCreate} disabled={!walletClient || isCreating}>
+              {isCreating ? "Proposing..." : "Propose"}
             </button>
           </div>
         </div>

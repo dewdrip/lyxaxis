@@ -16,6 +16,8 @@ import { DEFAULT_TX_DATA, PredefinedTxData } from "~~/utils/methods";
 import { notification } from "~~/utils/scaffold-eth";
 
 export type TransactionData = {
+  title: string;
+  description: string;
   chainId: number;
   address: Address;
   nonce: bigint;
@@ -90,24 +92,6 @@ const CreatePage: FC = () => {
         return;
       }
 
-      if (!isAddress(predefinedTxData.signer)) {
-        toaster.create({
-          title: "Invalid recipient address",
-          type: "error",
-        });
-        setIsProposing(false);
-        return;
-      }
-
-      if (!predefinedTxData.amount || Number(predefinedTxData.amount) <= 0) {
-        toaster.create({
-          title: "Amount must be greater than 0",
-          type: "error",
-        });
-        setIsProposing(false);
-        return;
-      }
-
       setIsProposing(true);
 
       const newHash = (await publicClient?.readContract({
@@ -142,6 +126,8 @@ const CreatePage: FC = () => {
 
       if (isOwner) {
         const txData: TransactionData = {
+          title: "Transfer Funds",
+          description: "Transfer funds to the recipient",
           chainId: chainId,
           address: multisigAddress,
           nonce: (nonce as bigint) || 0n,

@@ -94,6 +94,21 @@ const Owners: FC = () => {
           setIsCreating(false);
           return;
         }
+        const isAlreadyOwner = await publicClient?.readContract({
+          address: multisigAddress,
+          abi: MultiSigABI,
+          functionName: "isOwner",
+          args: [predefinedTxData.signer],
+        });
+
+        if (isAlreadyOwner) {
+          toaster.create({
+            title: "Address is already an owner",
+            type: "error",
+          });
+          setIsCreating(false);
+          return;
+        }
       } else if (predefinedTxData.methodName === "removeSigner") {
         if (Number(predefinedTxData.newSignaturesNumber) > (owners?.length || 0) - 1) {
           toaster.create({

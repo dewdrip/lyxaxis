@@ -3,11 +3,12 @@
 import { type FC, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useIsMounted, useLocalStorage } from "usehooks-ts";
-import { Address, parseEther } from "viem";
+import { Address, isAddress, parseEther } from "viem";
 import { useChainId, usePublicClient, useReadContract, useWalletClient } from "wagmi";
 import LyxInput from "~~/components/LyxInput";
 import { MultiSigNav } from "~~/components/Navbar";
 import { ProfileInput } from "~~/components/ProfileInput";
+import { toaster } from "~~/components/ui/toaster";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
 import MultiSigABI from "~~/utils/abis/MultiSigABI.json";
 import { getPoolServerUrl } from "~~/utils/getPoolServerUrl";
@@ -45,7 +46,7 @@ const CreatePage: FC = () => {
     methodName: "transferFunds",
     signer: "",
     newSignaturesNumber: "",
-    amount: "0",
+    amount: "",
   });
 
   const { data: nonce } = useReadContract({
@@ -60,8 +61,6 @@ const CreatePage: FC = () => {
     functionName: "signaturesRequired",
   });
 
-  const txTo = predefinedTxData.methodName === "transferFunds" ? predefinedTxData.signer : multisigAddress;
-
   const publicClient = usePublicClient();
 
   const [isProposing, setIsProposing] = useState(false);
@@ -73,6 +72,24 @@ const CreatePage: FC = () => {
         return;
       }
 
+      if (!isAddress(predefinedTxData.signer)) {
+        toaster.create({
+          title: "Invalid recipient address",
+          type: "error",
+        });
+        setIsProposing(false);
+        return;
+      }
+
+      if (!predefinedTxData.amount || Number(predefinedTxData.amount) <= 0) {
+        toaster.create({
+          title: "Amount must be greater than 0",
+          type: "error",
+        });
+        setIsProposing(false);
+        return;
+      }
+
       setIsProposing(true);
 
       const newHash = (await publicClient?.readContract({
@@ -81,7 +98,7 @@ const CreatePage: FC = () => {
         functionName: "getTransactionHash",
         args: [
           nonce as bigint,
-          String(txTo),
+          String(predefinedTxData.signer),
           BigInt(predefinedTxData.amount as string),
           predefinedTxData.callData as `0x${string}`,
         ],
@@ -106,15 +123,11 @@ const CreatePage: FC = () => {
       });
 
       if (isOwner) {
-        if (!multisigAddress || !predefinedTxData.amount || !txTo) {
-          return;
-        }
-
         const txData: TransactionData = {
           chainId: chainId,
           address: multisigAddress,
           nonce: (nonce as bigint) || 0n,
-          to: txTo,
+          to: predefinedTxData.signer,
           amount: predefinedTxData.amount,
           data: predefinedTxData.callData as `0x${string}`,
           hash: newHash,
@@ -182,14 +195,12 @@ const CreatePage: FC = () => {
                 placeholder="Enter profile name or address"
               />
 
-              {predefinedTxData.methodName === "transferFunds" && (
-                <LyxInput
-                  value={predefinedTxData.amount}
-                  onChange={val => {
-                    setPredefinedTxData({ ...predefinedTxData, amount: String(parseEther(val)) });
-                  }}
-                />
-              )}
+              <LyxInput
+                value={predefinedTxData.amount}
+                onChange={val => {
+                  setPredefinedTxData({ ...predefinedTxData, amount: String(parseEther(val)) });
+                }}
+              />
 
               <button
                 className="btn btn-secondary btn-sm"

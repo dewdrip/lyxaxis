@@ -4,7 +4,7 @@ import { type FC, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Checkbox } from "@chakra-ui/react";
 import { useIsMounted, useLocalStorage } from "usehooks-ts";
-import { Abi, Address as AddressType, encodeFunctionData } from "viem";
+import { Abi, Address as AddressType, encodeFunctionData, isAddress } from "viem";
 import { useChainId, usePublicClient, useReadContract, useWalletClient } from "wagmi";
 import { TrashIcon } from "@heroicons/react/24/solid";
 import { TransactionData } from "~~/app/transfer/[id]/page";
@@ -65,6 +65,44 @@ const Owners: FC = () => {
       if (!walletClient) {
         console.log("No wallet client!");
         return;
+      }
+
+      if (!isAddress(predefinedTxData.signer)) {
+        toaster.create({
+          title: "Invalid signer address",
+          type: "error",
+        });
+        setIsCreating(false);
+        return;
+      }
+
+      if (Number(predefinedTxData.newSignaturesNumber) < 1) {
+        toaster.create({
+          title: "Required signatures must be at least 1",
+          type: "error",
+        });
+        setIsCreating(false);
+        return;
+      }
+
+      if (predefinedTxData.methodName === "addSigner") {
+        if (Number(predefinedTxData.newSignaturesNumber) > (owners?.length || 0) + 1) {
+          toaster.create({
+            title: "New required signatures cannot exceed number of owners + 1",
+            type: "error",
+          });
+          setIsCreating(false);
+          return;
+        }
+      } else if (predefinedTxData.methodName === "removeSigner") {
+        if (Number(predefinedTxData.newSignaturesNumber) > (owners?.length || 0) - 1) {
+          toaster.create({
+            title: "New required signatures cannot exceed number of owners - 1",
+            type: "error",
+          });
+          setIsCreating(false);
+          return;
+        }
       }
 
       const callData = encodeFunctionData({

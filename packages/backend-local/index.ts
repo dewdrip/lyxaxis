@@ -32,8 +32,6 @@ app.get("/:key", async (req, res) => {
     // Fetch transactions filtered by address
     const transactions = await Transaction.find({ address: address });
 
-    console.log("Fetched transactions for address:", address, transactions);
-
     if (transactions.length === 0) {
       return res
         .status(404)
@@ -65,8 +63,6 @@ const addTransaction = async (txData: ITransaction) => {
     { upsert: true, new: true }
   );
 
-  console.log("Multisig entry ensured:", existingMultisig.address);
-
   // Upsert transaction: update if exists, insert if not
   const transaction = await Transaction.findOneAndUpdate(
     { address, hash },
@@ -74,10 +70,6 @@ const addTransaction = async (txData: ITransaction) => {
     { upsert: true, new: true }
   );
 
-  console.log(
-    transaction ? "Transaction upserted:" : "Transaction added:",
-    hash
-  );
   return transaction;
 };
 
@@ -104,6 +96,33 @@ app.post("/", async (req, res) => {
     });
   }
 });
+
+// app.delete("/", async (req, res) => {
+//   console.log("DELETE /", req.body);
+
+//   try {
+//     // Delete all transactions
+//     const response = await Transaction.deleteMany({});
+
+//     if (!response) {
+//       return res.status(500).json({ message: "ITEM_NOT_FOUND" });
+//     }
+
+//     return res
+//       .status(200)
+//       .json({
+//         message: "All transactions deleted successfully",
+//         data: response,
+//       });
+//   } catch (error) {
+//     console.error("Transaction Error:", error);
+//     return res.status(500).json({
+//       status: "error",
+//       message: "Failed to delete data",
+//       error: error.message,
+//     });
+//   }
+// });
 
 const PORT = process.env.PORT || 49832;
 const server = app

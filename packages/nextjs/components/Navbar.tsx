@@ -41,7 +41,7 @@ export const MultiSigNav = ({ multisigAddress }: { multisigAddress: string }) =>
       <NavButton link={`/multisig/${multisigAddress}`} title="Wallet" />
       <NavButton link={`/transfer/${multisigAddress}`} title="Transfer" />
       <NavButton link={`/owners/${multisigAddress}`} title="Signers" />
-      <NavButton link={`/events/${multisigAddress}`} title="Event" />
+      <NavButton link={`/history/${multisigAddress}`} title="History" />
     </div>
   );
 };

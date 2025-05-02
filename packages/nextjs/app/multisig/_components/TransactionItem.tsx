@@ -3,7 +3,7 @@ import { Address, BlockieAvatar } from "../../../components/scaffold-eth";
 import { PreveiwProfileModal } from "./PreviewProfile";
 import { IoIosInformationCircleOutline } from "react-icons/io";
 import { Abi, DecodeFunctionDataReturnType, decodeFunctionData, formatEther } from "viem";
-import { useAccount, useWalletClient } from "wagmi";
+import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 import { TransactionData } from "~~/app/transfer/[id]/page";
 import {
   useDeployedContractInfo,
@@ -20,6 +20,7 @@ type TransactionItemProps = { tx: TransactionData; completed: boolean; outdated:
 export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outdated }) => {
   const { address } = useAccount();
   const { data: walletClient } = useWalletClient();
+  const publicClient = usePublicClient();
   const transactor = useTransactor();
   const { targetNetwork } = useTargetNetwork();
   const poolServerUrl = getPoolServerUrl(targetNetwork.id);
@@ -118,6 +119,23 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
         console.log("No contract info");
         return;
       }
+
+      const upAddress = (await publicClient?.readContract({
+        address: tx.address,
+        abi: contractInfo.abi,
+        functionName: "getUniversalProfile",
+      })) as `0x${string}`;
+
+      const balance = await publicClient?.getBalance({
+        address: upAddress,
+      });
+
+      if (balance && BigInt(tx.amount) >= balance) {
+        notification.error("Insufficient balance in the Universal Profile");
+        setIsExecuting(false);
+        return;
+      }
+
       const newHash = (await metaMultiSigWallet.read.getTransactionHash([
         nonce as bigint,
         tx.to,

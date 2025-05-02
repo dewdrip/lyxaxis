@@ -46,8 +46,8 @@ const CreateMultiSig: NextPage = () => {
       return;
     }
 
-    if (signers.length < 2) {
-      notification.error("Please add at least 2 signers");
+    if (signers.length === 0) {
+      notification.error("Please add a signer");
       return;
     }
 

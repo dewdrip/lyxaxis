@@ -6,12 +6,12 @@ import { RainbowKitProvider, darkTheme, lightTheme } from "@rainbow-me/rainbowki
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AppProgressBar as ProgressBar } from "next-nprogress-bar";
 import { useTheme } from "next-themes";
-// import { Toaster } from "~~/components/ui/toaster";
-import { Toaster } from "react-hot-toast";
+// import { Toaster } from "react-hot-toast";
 import { WagmiProvider } from "wagmi";
 import { Footer } from "~~/components/Footer";
 import { BlockieAvatar } from "~~/components/scaffold-eth";
 import { Provider as ChakraProvider } from "~~/components/ui/provider";
+import { Toaster } from "~~/components/ui/toaster";
 import { useInitializeNativeCurrencyPrice } from "~~/hooks/scaffold-eth";
 import { wagmiConfig } from "~~/services/web3/wagmiConfig";
 

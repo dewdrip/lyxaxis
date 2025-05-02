@@ -91,6 +91,24 @@ const CreatePage: FC = () => {
         return;
       }
 
+      if (!isAddress(predefinedTxData.signer)) {
+        toaster.create({
+          title: "Invalid recipient address",
+          type: "error",
+        });
+        setIsProposing(false);
+        return;
+      }
+
+      if (!predefinedTxData.amount || Number(predefinedTxData.amount) <= 0) {
+        toaster.create({
+          title: "Amount must be greater than 0",
+          type: "error",
+        });
+        setIsProposing(false);
+        return;
+      }
+
       setIsProposing(true);
 
       const newHash = (await publicClient?.readContract({

@@ -11,7 +11,7 @@ import { TransactionData } from "~~/app/transfer/[id]/page";
 import { MultiSigNav } from "~~/components/Navbar";
 import Profile from "~~/components/Profile";
 import { ProfileInput } from "~~/components/ProfileInput";
-import { IntegerInput } from "~~/components/scaffold-eth";
+import { InputBase, IntegerInput } from "~~/components/scaffold-eth";
 import { useMultiSigRegistry } from "~~/hooks/contract/useMultiSigRegistry";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
 import MultiSigABI from "~~/utils/abis/MultiSigABI.json";
@@ -194,6 +194,7 @@ const Owners: FC = () => {
         methodName: "addSigner",
         signer: "",
         newSignaturesNumber: "",
+        description: "",
       });
     }
   }, []);
@@ -287,6 +288,14 @@ const Owners: FC = () => {
               value={predefinedTxData.newSignaturesNumber}
               onChange={s => setPredefinedTxData({ ...predefinedTxData, newSignaturesNumber: s as string })}
               disableMultiplyBy1e18
+            />
+
+            <InputBase
+              value={predefinedTxData.description}
+              placeholder="Description (optional)"
+              onChange={val => {
+                setPredefinedTxData({ ...predefinedTxData, description: val });
+              }}
             />
 
             <button className="btn btn-secondary btn-sm" onClick={handleCreate} disabled={!walletClient || isCreating}>

@@ -70,6 +70,14 @@ export const RequiredForm = ({
   };
 
   const handleNext = () => {
+    if (!name) {
+      toaster.create({
+        title: "Please enter a name for the multisig",
+        type: "error",
+      });
+      return;
+    }
+
     if (Number(requiredSignatures) <= 0) {
       toaster.create({
         title: "Required signatures must be greater than 0",

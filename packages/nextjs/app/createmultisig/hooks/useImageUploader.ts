@@ -123,7 +123,7 @@ export function useImageUploader({ image, enabled, onUpload, onError }: UseImage
       if (onError) {
         onError(error);
       }
-      notification.error("Image Upload Failed");
+      notification.error("Image Upload Failed. Please check your network connection and try again.");
     } finally {
       setIsUploading(false);
     }

@@ -159,6 +159,8 @@ const EditMultiSigProfile: NextPage = () => {
         }
 
         const txData: TransactionData = {
+          title: "Edit Profile",
+          description: "",
           chainId: chainId,
           address: multisigAddress,
           nonce: (nonce as bigint) || 0n,

@@ -8,6 +8,7 @@ import { useChainId, usePublicClient, useReadContract, useWalletClient } from "w
 import LyxInput from "~~/components/LyxInput";
 import { MultiSigNav } from "~~/components/Navbar";
 import { ProfileInput } from "~~/components/ProfileInput";
+import { InputBase } from "~~/components/scaffold-eth";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
 import MultiSigABI from "~~/utils/abis/MultiSigABI.json";
 import { getPoolServerUrl } from "~~/utils/getPoolServerUrl";
@@ -49,6 +50,7 @@ const CreatePage: FC = () => {
     signer: "",
     newSignaturesNumber: "",
     amount: "",
+    description: "",
   });
 
   const { data: nonce } = useReadContract({
@@ -212,6 +214,14 @@ const CreatePage: FC = () => {
                 value={predefinedTxData.amount}
                 onChange={val => {
                   setPredefinedTxData({ ...predefinedTxData, amount: String(parseEther(val)) });
+                }}
+              />
+
+              <InputBase
+                value={predefinedTxData.description}
+                placeholder="Description (optional)"
+                onChange={val => {
+                  setPredefinedTxData({ ...predefinedTxData, description: val });
                 }}
               />
 

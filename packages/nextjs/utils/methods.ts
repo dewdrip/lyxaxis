@@ -15,4 +15,5 @@ export type PredefinedTxData = {
   to?: string;
   amount?: string;
   callData?: `0x${string}` | "";
+  description?: string;
 };

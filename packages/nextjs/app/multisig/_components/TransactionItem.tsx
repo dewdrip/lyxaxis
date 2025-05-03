@@ -7,6 +7,7 @@ import { IoIosInformationCircleOutline } from "react-icons/io";
 import { Abi, DecodeFunctionDataReturnType, decodeFunctionData, formatEther } from "viem";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 import { TransactionData } from "~~/app/transfer/[id]/page";
+import Profile from "~~/components/Profile";
 import {
   useDeployedContractInfo,
   useScaffoldContract,
@@ -390,7 +391,11 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
 
           {Object.keys(txnData).length === 0 && (
             <div className="flex gap-1 items-center">
-              To: <Address address={txnData.args?.[0] ? String(txnData.args?.[0]) : tx.to} size="xs" />
+              To:{" "}
+              <Profile
+                address={(txnData.args?.[0] ? String(txnData.args?.[0]) : tx.to) as `0x${string}`}
+                imageClassName="w-6"
+              />
             </div>
           )}
         </div>

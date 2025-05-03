@@ -13,6 +13,8 @@ export interface ITransaction extends Document {
   signers: string[];
   requiredApprovals: string; // bigint converted to string
   isExecuted: boolean;
+  title: string;
+  description: string;
 }
 
 // Define the schema
@@ -34,6 +36,8 @@ const TransactionSchema: Schema<ITransaction> = new Schema(
     signers: [String],
     requiredApprovals: String,
     isExecuted: Boolean,
+    title: { type: String, required: true },
+    description: { type: String, required: false, default: "" },
   },
   { timestamps: true }
 );

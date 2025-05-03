@@ -247,6 +247,8 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
     }
   };
 
+  console.log("txnData.functionName", txnData.functionName);
+
   return (
     <>
       <input type="checkbox" id={`label-${tx.hash}`} className="modal-toggle" />
@@ -294,13 +296,13 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
         )}
       </div>
 
-      <div className="flex flex-col  pb-2 border-b border-secondary last:border-b-0">
+      <div className="flex flex-col pb-2 border-b border-secondary last:border-b-0">
         <div className="flex w-full gap-4 justify-between">
           <div className="flex flex-col gap-y-1">
             <div className="font-bold"># {String(tx.nonce)}</div>
             {String(signaturesRequired) && (
               <span>
-                {tx.signatures.length}/{String(tx.requiredApprovals)} {hasSigned ? "✅" : ""}
+                Signers: {tx.signatures.length}/{String(tx.requiredApprovals)} {hasSignedNewHash ? "✅" : ""}
               </span>
             )}
             <div>{formatEther(BigInt(tx.amount))} LYX</div>
@@ -308,7 +310,7 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
             {/* <Address address={tx.to} /> */}
           </div>
 
-          <div className="flex flex-col gap-y-2">
+          <div className="flex flex-col gap-y-4">
             <div className="flex gap-x-2 items-center">
               <div className="flex gap-1 font-bold">
                 <BlockieAvatar size={20} address={tx.hash} /> {tx.hash.slice(0, 7)}
@@ -317,8 +319,8 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
                 <IoIosInformationCircleOutline size={24} />
               </label>
             </div>
-
-            {/* {isCheckingSignatures ? (
+            {/* 
+            {isCheckingSignatures ? (
               <div>Loading...</div>
             ) : !hasSignedNewHash ? (
               <div className="text-sm">Outdated, Resign!</div>
@@ -352,7 +354,11 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
         </div>
 
         <div className="flex justify-between items-center text-xs gap-4 mt-2">
-          <div>Function name: {txnData.functionName || "transferFunds"}</div>
+          {(txnData.functionName === "addSigner" ? (
+            <div>Add a New Signer</div>
+          ) : (
+            txnData.functionName === "setData" && <div>Update Profile</div>
+          )) || <div>Transfer funds</div>}
 
           {Object.keys(txnData).length === 0 && (
             <div className="flex gap-1 items-center">

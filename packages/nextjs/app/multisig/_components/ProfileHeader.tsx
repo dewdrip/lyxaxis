@@ -55,10 +55,10 @@ export function ProfileHeader({ profileLoading, profile, multisigAddress, upAddr
     if (!profile) return;
 
     if (profile.description.length < 100) {
-      return <p className="text-sm line-clamp-1">{profile.description}</p>;
+      return <div className="text-sm line-clamp-1 mt-4">{profile.description}</div>;
     } else {
       return (
-        <p className="text-sm">
+        <p className="text-sm mt-4">
           {profile.description.slice(0, 94)}...
           <button onClick={() => setIsDescriptionModalOpen(true)} className="text-primary text-sm hover:underline ml-1">
             See more
@@ -75,7 +75,7 @@ export function ProfileHeader({ profileLoading, profile, multisigAddress, upAddr
         {renderProfileImage()}
       </div>
 
-      <div className="flex flex-col  border-b border-gray pt-7 p-6 w-full">
+      <div className="flex flex-col  border-b border-gray pt-7 px-6 pb-2 w-full">
         <div className="flex justify-between items-start">
           <div className="flex flex-col items-start">
             {profileLoading || !profile ? (
@@ -110,7 +110,7 @@ export function ProfileHeader({ profileLoading, profile, multisigAddress, upAddr
 
         {/* Links */}
         {profile?.links && profile.links.length > 0 && (
-          <div className="flex gap-2 overflow-x-auto max-w-full scrollbar-hide">
+          <div className="flex gap-2 overflow-x-auto max-w-full scrollbar-hide mt-1">
             {profile.links.map((link, index) => (
               <Link
                 key={index}
@@ -127,7 +127,7 @@ export function ProfileHeader({ profileLoading, profile, multisigAddress, upAddr
 
         {/* Tags */}
         {profile?.tags && profile.tags.length > 0 && (
-          <div className="flex gap-2 overflow-x-auto max-w-full scrollbar-hide">
+          <div className="flex gap-2 overflow-x-auto max-w-full scrollbar-hide mt-1">
             {profile.tags.map((tag, index) => (
               <span
                 key={index}

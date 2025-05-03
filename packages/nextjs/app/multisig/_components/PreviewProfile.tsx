@@ -64,14 +64,14 @@ export const PreveiwProfileModal = ({
   };
 
   return (
-    <div className="modal-box w-[400px] h-[520px] overflow-y-scroll mx-auto">
+    <div className="modal-box p-0 w-[380px] h-auto overflow-y-scroll mx-auto">
       <div className="flex flex-col w-full h-full">
         <div className="relative w-full h-24">
           {renderBackgroundImage()}
           {renderProfileImage()}
         </div>
 
-        <div className=" flex flex-col gap-y-2 mt-6">
+        <div className=" flex flex-col gap-y-2 mt-6 px-4">
           <div>
             <div className="w-24 text-sm">Name:</div>
             <div className="text-base font-semibold">{profile?.name || "Loading..."}</div>
@@ -102,7 +102,7 @@ export const PreveiwProfileModal = ({
           </div>
         </div>
 
-        <div className="mt-2">
+        <div className="mt-2 px-4">
           <div className="font-semibold">Function Signature: {txnData.functionName || "transferFunds"}</div>
           <div className="flex gap-x-2">
             <div className="font-semibold">Sig hash: </div>{" "}
@@ -111,7 +111,7 @@ export const PreveiwProfileModal = ({
             </div>
           </div>
         </div>
-        <div className="modal-action">
+        <div className="modal-action p-2">
           <label htmlFor={`label-${tx.hash}`} className="btn btn-sm">
             Close!
           </label>

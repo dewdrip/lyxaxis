@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useAccount } from "wagmi";
 
 export function useHasSignedNewHash({
@@ -11,44 +11,41 @@ export function useHasSignedNewHash({
   tx: any;
 }) {
   const { address } = useAccount();
-  const [hasSignedNewHash, setHasSignedNewHash] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    const checkValidSigForUpdateHah = async () => {
-      setIsLoading(true);
-      try {
-        if (!metaMultiSigWallet || nonce === undefined) {
-          setHasSignedNewHash(false);
-          setIsLoading(false);
-          return;
-        }
-        const newHash = (await metaMultiSigWallet.read.getTransactionHash([
-          nonce as bigint,
-          tx.to,
-          BigInt(tx.amount),
-          tx.data,
-        ])) as `0x${string}`;
+  const { data: hasSignedNewHash = false, isLoading } = useQuery({
+    queryKey: [
+      "hasSignedNewHash",
+      metaMultiSigWallet?.address,
+      nonce?.toString(), // ✅ Convert BigInt to string
+      tx?.to,
+      tx?.amount?.toString?.() || tx?.amount, // ✅ Safe conversion if it's BigInt
+      tx?.data,
+      tx?.signatures,
+      address,
+    ],
+    enabled: !!metaMultiSigWallet && nonce !== undefined && !!tx && Array.isArray(tx.signatures) && !!address,
+    queryFn: async () => {
+      const newHash = (await metaMultiSigWallet.read.getTransactionHash([
+        nonce as bigint,
+        tx.to,
+        BigInt(tx.amount),
+        tx.data,
+      ])) as `0x${string}`;
 
-        for (const sig of tx.signatures) {
-          const signer = await metaMultiSigWallet.read.recover([newHash, sig]);
-          const isOwner = await metaMultiSigWallet.read.isOwner([signer as string]);
-          if (isOwner && signer === address) {
-            setHasSignedNewHash(true);
-            return;
-          }
+      for (const sig of tx.signatures) {
+        const signer = await metaMultiSigWallet.read.recover([newHash, sig]);
+        const isOwner = await metaMultiSigWallet.read.isOwner([signer as string]);
+        if (isOwner && signer === address) {
+          return true;
         }
-        setHasSignedNewHash(false);
-      } catch (error) {
-        console.error("Error checking valid signature for update hash:", error);
-        setHasSignedNewHash(false);
-      } finally {
-        setIsLoading(false);
       }
-    };
 
-    checkValidSigForUpdateHah();
-  }, [metaMultiSigWallet, nonce, tx.to, tx.amount, tx.data, tx.signatures, address]);
+      return false;
+    },
+    refetchOnMount: true, // Always refetch when the component mounts
+    refetchOnWindowFocus: true,
+    staleTime: 10_000_000, // adjust as needed
+  });
 
   return { hasSignedNewHash, isLoading };
 }

@@ -1,7 +1,7 @@
 import { type FC, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Address, BlockieAvatar } from "../../../components/scaffold-eth";
-import { useHasSignedNewHash } from "../hook/useHasSignedNewHash";
+import { useCanExecute, useHasSignedNewHash } from "../hook/useHasSignedNewHash";
 import { PreveiwProfileModal } from "./PreviewProfile";
 import { IoIosInformationCircleOutline } from "react-icons/io";
 import { Abi, DecodeFunctionDataReturnType, decodeFunctionData, formatEther } from "viem";
@@ -17,9 +17,9 @@ import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
 import { getPoolServerUrl } from "~~/utils/getPoolServerUrl";
 import { notification } from "~~/utils/scaffold-eth";
 
-type TransactionItemProps = { tx: TransactionData; completed: boolean; outdated: boolean };
+type TransactionItemProps = { tx: TransactionData; completed: boolean; outdated: boolean; onRefetch?: () => void };
 
-export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outdated }) => {
+export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outdated, onRefetch }) => {
   const router = useRouter();
   const { address } = useAccount();
   const { data: walletClient } = useWalletClient();
@@ -51,6 +51,13 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
 
   const { hasSignedNewHash, isLoading: isCheckingSignatures } = useHasSignedNewHash({
     metaMultiSigWallet,
+    nonce,
+    tx,
+  });
+
+  const { canExecuteTransaction, isLoading: isLoadingCanExecute } = useCanExecute({
+    metaMultiSigWallet,
+    signaturesRequired,
     nonce,
     tx,
   });
@@ -239,6 +246,10 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
             (key, value) => (typeof value === "bigint" ? value.toString() : value),
           ),
         });
+
+        if (onRefetch) {
+          onRefetch();
+        }
       } else {
         notification.info("Only owners can sign transactions");
       }
@@ -334,30 +345,35 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
               <div className="text-sm">Pending Transaction</div>
             )} */}
 
-            {!tx.isExecuted && (
-              <div className="flex justify-center items-center gap-x-2">
-                <div className="flex" title={hasSigned ? "You have already Signed this transaction" : ""}>
-                  <button
-                    className="btn btn-xs w-[3.6rem] btn-primary"
-                    disabled={hasSigned && hasSignedNewHash}
-                    title={!hasEnoughSignatures ? "Not enough signers to Execute" : ""}
-                    onClick={signTransaction}
-                  >
-                    {isSigning ? <div className="loading loading-xs" /> : "Sign"}
-                  </button>
+            {!tx.isExecuted &&
+              (isCheckingSignatures || isLoadingCanExecute ? (
+                <div className="flex w-full items-center justify-center">
+                  <div className="loading loading-xs" />
                 </div>
+              ) : (
+                <div className="flex justify-center items-center gap-x-2">
+                  <div className="flex" title={hasSigned ? "You have already Signed this transaction" : ""}>
+                    <button
+                      className="btn btn-xs w-[3.6rem] btn-primary"
+                      disabled={hasSignedNewHash}
+                      title={!hasEnoughSignatures ? "Not enough signers to Execute" : ""}
+                      onClick={signTransaction}
+                    >
+                      {isSigning ? <div className="loading loading-xs" /> : "Sign"}
+                    </button>
+                  </div>
 
-                <div title={!hasEnoughSignatures ? "Not enough signers to Execute" : ""}>
-                  <button
-                    className="btn btn-xs w-[3.6rem] btn-primary "
-                    disabled={!hasEnoughSignatures}
-                    onClick={executeTransaction}
-                  >
-                    {isExecuting ? <div className="loading loading-xs" /> : "Exec"}
-                  </button>
+                  <div title={!hasEnoughSignatures ? "Not enough signers to Execute" : ""}>
+                    <button
+                      className="btn btn-xs w-[3.6rem] btn-primary "
+                      disabled={!canExecuteTransaction}
+                      onClick={executeTransaction}
+                    >
+                      {isExecuting ? <div className="loading loading-xs" /> : "Exec"}
+                    </button>
+                  </div>
                 </div>
-              </div>
-            )}
+              ))}
           </div>
         </div>
 

@@ -184,9 +184,7 @@ const Owners: FC = () => {
           to: multisigAddress,
         });
 
-        setTimeout(() => {
-          router.push(`/multisig/${multisigAddress}`);
-        }, 777);
+        router.push(`/multisig/${multisigAddress}`);
       } else {
         toaster.create({
           title: "Only owners can propose transactions",

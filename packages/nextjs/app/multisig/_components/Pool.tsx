@@ -1,6 +1,6 @@
 import { type FC, useMemo, useState } from "react";
 import { TransactionItem } from "./TransactionItem";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useChainId } from "wagmi";
 import { TransactionData } from "~~/app/transfer/[id]/page";
 import { Address } from "~~/components/scaffold-eth";
@@ -21,6 +21,8 @@ export const Pool = ({
   multisigAddress: `0x${string}`;
   isHistory?: boolean;
 }) => {
+  const queryClient = useQueryClient();
+
   const [transactions, setTransactions] = useState<TransactionData[]>();
   const [loading, setLoading] = useState<boolean>(false);
   // const [subscriptionEventsHashes, setSubscriptionEventsHashes] = useState<`0x${string}`[]>([]);
@@ -92,8 +94,10 @@ export const Pool = ({
     }
   };
 
+  const queryKey = ["campaign", multisigAddress];
+
   useQuery({
-    queryKey: ["campaign", multisigAddress],
+    queryKey,
     queryFn: () => fetchTransactionData(),
     enabled: !!multisigAddress, // Prevents execution if ID is missing
     refetchOnMount: true, // Always refetch when the component mounts
@@ -145,6 +149,7 @@ export const Pool = ({
                       <TransactionItem
                         key={tx.hash}
                         tx={tx}
+                        onRefetch={() => queryClient.invalidateQueries({ queryKey })}
                         completed={historyHashes.includes(tx.hash as `0x${string}`)}
                         outdated={lastTx?.nonce != undefined && BigInt(tx.nonce) <= BigInt(lastTx?.nonce)}
                       />

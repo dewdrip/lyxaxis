@@ -84,7 +84,8 @@ const CreateMultiSig: NextPage = () => {
     } catch (error) {
       console.error("Error creating multisig:", error);
       toaster.create({
-        title: "Error creating multisigs",
+        title: "Error creating multisig",
+        description: error instanceof Error ? error.message : "Unknown error",
         type: "error",
       });
     }

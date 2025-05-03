@@ -32,7 +32,7 @@ const CreateMultiSig: NextPage = () => {
 
   const [name, setName] = useState<string>("");
 
-  const { createWallet, isLoading: isCreateWalletLoading, error } = useCreateWallet();
+  const { createWallet, isLoading: isCreateWalletLoading } = useCreateWallet();
 
   const [hasMounted, setHasMounted] = useState(false);
 
@@ -72,10 +72,6 @@ const CreateMultiSig: NextPage = () => {
         owners: signers as `0x${string}`[],
         signaturesRequired: BigInt(requiredSignatures || "0"),
       });
-
-      if (error) {
-        throw error;
-      }
 
       if (newMultisigAddress) {
         setName("");

@@ -140,8 +140,8 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
         address: upAddress,
       });
 
-      if (balance && BigInt(tx.amount) >= balance) {
-        notification.error("Insufficient balance in the Universal Profile");
+      if (balance && BigInt(tx.amount) > balance) {
+        notification.error("Insufficient balance. Please fund your profile.");
         setIsExecuting(false);
         return;
       }

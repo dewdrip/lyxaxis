@@ -23,7 +23,7 @@ error MultiSig__CannotRemoveLastOwner();
 error MultiSig__InvalidSignaturesRequired();
 
 contract MultiSig is ILSP20CallVerifier {
-    event Deposit(address indexed sender, uint amount, uint balance);
+    event Deposit(address indexed sender, uint256 amount, uint256 balance);
     event ExecuteTransaction(
         address indexed owner,
         address payable to,
@@ -34,6 +34,7 @@ contract MultiSig is ILSP20CallVerifier {
         bytes result
     );
     event Owner(address indexed owner, bool added);
+    event UpdatedRequiredSignatures(uint256 newRequiredSignatures);
 
     bytes32 constant LSP3_PROFILE_KEY = 0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5;
 
@@ -49,17 +50,20 @@ contract MultiSig is ILSP20CallVerifier {
     constructor(
         bytes memory profileMetadata,
         address[] memory _owners,
-        uint _signaturesRequired,
+        uint256 _signaturesRequired,
         MultiSigRegistry _registry
     ) {
         signaturesRequired = _signaturesRequired;
         uint256 ownersLength = _owners.length;
-        for (uint i = 0; i < ownersLength; i++) {
+        for (uint256 i = 0; i < ownersLength; i++) {
             address owner = _owners[i];
+
             require(owner != address(0), MultiSig__ZeroAddress());
             require(!isOwner[owner], MultiSig__OwnerNotUnique());
+
             isOwner[owner] = true;
-            emit Owner(owner, isOwner[owner]);
+
+            emit Owner(owner, true);
         }
         numOfOwners = ownersLength;
         i_registry = _registry;
@@ -85,7 +89,7 @@ contract MultiSig is ILSP20CallVerifier {
         signaturesRequired = newSignaturesRequired;
         numOfOwners++;
 
-        emit Owner(newSigner, isOwner[newSigner]);
+        emit Owner(newSigner, true);
 
         // Update registry
         i_registry.addSigner(newSigner);
@@ -101,7 +105,7 @@ contract MultiSig is ILSP20CallVerifier {
         signaturesRequired = newSignaturesRequired;
         numOfOwners--;
 
-        emit Owner(oldSigner, isOwner[oldSigner]);
+        emit Owner(oldSigner, false);
 
         // Update registry
         i_registry.removeSigner(oldSigner);
@@ -112,6 +116,8 @@ contract MultiSig is ILSP20CallVerifier {
         require(newSignaturesRequired <= numOfOwners, MultiSig__InvalidSignaturesRequired());
 
         signaturesRequired = newSignaturesRequired;
+
+        emit UpdatedRequiredSignatures(newSignaturesRequired);
     }
 
     function getTransactionHash(
@@ -130,13 +136,20 @@ contract MultiSig is ILSP20CallVerifier {
         bytes[] memory signatures
     ) public returns (bytes memory) {
         require(isOwner[msg.sender], MultiSig__NotOwner());
+
         bytes32 _hash = getTransactionHash(nonce, to, value, data);
+
         nonce++;
+
         uint256 validSignatures;
         address duplicateGuard;
-        for (uint i = 0; i < signatures.length; i++) {
+
+        uint256 signaturesLength = signatures.length;
+        for (uint256 i = 0; i < signaturesLength; i++) {
             address recovered = recover(_hash, signatures[i]);
+
             require(recovered > duplicateGuard, MultiSig__DuplicateOrUnorderedSignatures());
+
             duplicateGuard = recovered;
 
             if (isOwner[recovered]) {

@@ -8,12 +8,11 @@ import { useChainId, usePublicClient, useReadContract, useWalletClient } from "w
 import LyxInput from "~~/components/LyxInput";
 import { MultiSigNav } from "~~/components/Navbar";
 import { ProfileInput } from "~~/components/ProfileInput";
-import { toaster } from "~~/components/ui/toaster";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
 import MultiSigABI from "~~/utils/abis/MultiSigABI.json";
 import { getPoolServerUrl } from "~~/utils/getPoolServerUrl";
 import { DEFAULT_TX_DATA, PredefinedTxData } from "~~/utils/methods";
-import { notification } from "~~/utils/scaffold-eth";
+import { notification } from "~~/utils/scaffold-eth/notification";
 
 export type TransactionData = {
   title: string;
@@ -76,37 +75,25 @@ const CreatePage: FC = () => {
       }
 
       if (!isAddress(predefinedTxData.signer)) {
-        toaster.create({
-          title: "Invalid recipient address",
-          type: "error",
-        });
+        notification.error("Invalid recipient address");
         setIsProposing(false);
         return;
       }
 
       if (!predefinedTxData.amount || Number(predefinedTxData.amount) <= 0) {
-        toaster.create({
-          title: "Amount must be greater than 0",
-          type: "error",
-        });
+        notification.error("Amount must be greater than 0");
         setIsProposing(false);
         return;
       }
 
       if (!isAddress(predefinedTxData.signer)) {
-        toaster.create({
-          title: "Invalid recipient address",
-          type: "error",
-        });
+        notification.error("Invalid recipient address");
         setIsProposing(false);
         return;
       }
 
       if (!predefinedTxData.amount || Number(predefinedTxData.amount) <= 0) {
-        toaster.create({
-          title: "Amount must be greater than 0",
-          type: "error",
-        });
+        notification.error("Amount must be greater than 0");
         setIsProposing(false);
         return;
       }

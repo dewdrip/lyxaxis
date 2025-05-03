@@ -1,8 +1,8 @@
 import React, { useMemo, useState } from "react";
 import Image from "next/image";
-import { toaster } from "./ui/toaster";
 import { Button, Input } from "@chakra-ui/react";
 import { useCryptoPrice } from "~~/hooks/useCryptoPrice";
+import { notification } from "~~/utils/scaffold-eth/notification";
 
 type Props = {
   value?: string;
@@ -55,10 +55,7 @@ export default function LyxInput({ value = "", onChange = () => {}, placeholder 
 
   const switchCurrency = () => {
     if (!nativeCurrencyPrice) {
-      toaster.create({
-        title: "Loading exchange rate",
-        type: "warning",
-      });
+      notification.warning("Loading exchange rate");
 
       if (!isFetchingNativeCurrency) {
         fetchNativeCurrency();

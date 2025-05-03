@@ -12,12 +12,12 @@ import { MultiSigNav } from "~~/components/Navbar";
 import Profile from "~~/components/Profile";
 import { ProfileInput } from "~~/components/ProfileInput";
 import { IntegerInput } from "~~/components/scaffold-eth";
-import { toaster } from "~~/components/ui/toaster";
 import { useMultiSigRegistry } from "~~/hooks/contract/useMultiSigRegistry";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
 import MultiSigABI from "~~/utils/abis/MultiSigABI.json";
 import { getPoolServerUrl } from "~~/utils/getPoolServerUrl";
 import { DEFAULT_TX_DATA, PredefinedTxData } from "~~/utils/methods";
+import { notification } from "~~/utils/scaffold-eth/notification";
 
 const Owners: FC = () => {
   const isMounted = useIsMounted();
@@ -68,29 +68,20 @@ const Owners: FC = () => {
       }
 
       if (!isAddress(predefinedTxData.signer)) {
-        toaster.create({
-          title: "Invalid signer address",
-          type: "error",
-        });
+        notification.error("Invalid signer address");
         setIsCreating(false);
         return;
       }
 
       if (Number(predefinedTxData.newSignaturesNumber) < 1) {
-        toaster.create({
-          title: "Required signatures must be at least 1",
-          type: "error",
-        });
+        notification.error("Required signatures must be at least 1");
         setIsCreating(false);
         return;
       }
 
       if (predefinedTxData.methodName === "addSigner") {
         if (Number(predefinedTxData.newSignaturesNumber) > (owners?.length || 0) + 1) {
-          toaster.create({
-            title: `New required signatures cannot exceed ${(owners?.length || 0) + 1}`,
-            type: "error",
-          });
+          notification.error(`New required signatures cannot exceed ${(owners?.length || 0) + 1}`);
           setIsCreating(false);
           return;
         }
@@ -102,19 +93,13 @@ const Owners: FC = () => {
         });
 
         if (isAlreadyOwner) {
-          toaster.create({
-            title: "Address is already an owner",
-            type: "error",
-          });
+          notification.error("Address is already an owner");
           setIsCreating(false);
           return;
         }
       } else if (predefinedTxData.methodName === "removeSigner") {
         if (Number(predefinedTxData.newSignaturesNumber) > (owners?.length || 0) - 1) {
-          toaster.create({
-            title: `New required signatures cannot exceed ${(owners?.length || 0) - 1}`,
-            type: "error",
-          });
+          notification.error(`New required signatures cannot exceed ${(owners?.length || 0) - 1}`);
           setIsCreating(false);
           return;
         }
@@ -186,16 +171,10 @@ const Owners: FC = () => {
 
         router.push(`/multisig/${multisigAddress}`);
       } else {
-        toaster.create({
-          title: "Only owners can propose transactions",
-          type: "info",
-        });
+        notification.info("Only owners can propose transactions");
       }
     } catch (e) {
-      toaster.create({
-        title: "Error while proposing transaction",
-        type: "error",
-      });
+      notification.error("Error while proposing transaction");
       console.log(e);
     } finally {
       setIsCreating(false);

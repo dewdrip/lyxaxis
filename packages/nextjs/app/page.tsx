@@ -49,6 +49,7 @@ const Home: NextPage = () => {
           </div>
         ) : (
           <div className="flex flex-col gap-y-3 w-full max-w-[398px]">
+            {!multisigs && <p className="text-center">Connect your wallet to get started</p>}
             {multisigs && (
               <div className="flex items-center w-full justify-between gap-x-4">
                 <h6 className="text-2xl text-left">My Multisigs</h6>

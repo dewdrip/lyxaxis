@@ -87,7 +87,7 @@ export default function LyxInput({ value = "", onChange = () => {}, placeholder 
         )}
       </Button>
     );
-  }, [isDollar]);
+  }, [isDollar, switchCurrency]);
 
   return (
     <div className={`flex flex-col items-center ${className}`}>
@@ -103,7 +103,7 @@ export default function LyxInput({ value = "", onChange = () => {}, placeholder 
       </div>
 
       <strong
-        className="text-xs text-center font-semibold italic text-gray-500"
+        className="text-md text-center font-semibold italic text-gray-500 mt-2"
         style={{
           opacity: nativeValue && dollarValue ? 1 : 0,
         }}

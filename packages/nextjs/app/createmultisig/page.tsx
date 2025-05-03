@@ -6,7 +6,6 @@ import { OptionalForm } from "./components/OptionalForm";
 import { RequiredForm } from "./components/RequiredForm";
 import type { NextPage } from "next";
 import { useAccount } from "wagmi";
-import { toaster } from "~~/components/ui/toaster";
 import { useCreateWallet } from "~~/hooks/contract/useCreateWallet";
 import { Link, UploadedImageData } from "~~/hooks/useProfileMetadata";
 import { notification } from "~~/utils/scaffold-eth";
@@ -83,11 +82,8 @@ const CreateMultiSig: NextPage = () => {
       }
     } catch (error) {
       console.error("Error creating multisig:", error);
-      toaster.create({
-        title: "Error creating multisig",
-        description: error instanceof Error ? error.message : "Unknown error",
-        type: "error",
-      });
+      const err = error instanceof Error ? error.message : "Error creating multisig";
+      notification.error(`${err}. Please check your network connection and try again`);
     }
   };
 

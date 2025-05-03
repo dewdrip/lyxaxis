@@ -11,7 +11,6 @@ import { WagmiProvider } from "wagmi";
 import { Footer } from "~~/components/Footer";
 import { BlockieAvatar } from "~~/components/scaffold-eth";
 import { Provider as ChakraProvider } from "~~/components/ui/provider";
-import { Toaster as ChakraToaster } from "~~/components/ui/toaster";
 import { useInitializeNativeCurrencyPrice } from "~~/hooks/scaffold-eth";
 import { wagmiConfig } from "~~/services/web3/wagmiConfig";
 
@@ -28,7 +27,6 @@ const ScaffoldEthApp = ({ children }: { children: React.ReactNode }) => {
           <Footer />
         </div>
         <Toaster />
-        <ChakraToaster />
       </ChakraProvider>
     </>
   );

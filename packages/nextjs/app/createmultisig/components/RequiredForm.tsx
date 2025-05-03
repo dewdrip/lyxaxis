@@ -7,7 +7,7 @@ import { PlusCircleIcon, TrashIcon } from "@heroicons/react/24/outline";
 import Profile from "~~/components/Profile";
 import { ProfileInput } from "~~/components/ProfileInput";
 import { InputBase } from "~~/components/scaffold-eth";
-import { toaster } from "~~/components/ui/toaster";
+import { notification } from "~~/utils/scaffold-eth";
 
 export const RequiredForm = ({
   setSigners,
@@ -57,10 +57,7 @@ export const RequiredForm = ({
       setSigners([...signers, newSigner]);
       setNewSigner("");
     } else {
-      toaster.create({
-        title: "Signer already added",
-        type: "error",
-      });
+      notification.error("Signer already added");
     }
   };
 
@@ -71,26 +68,17 @@ export const RequiredForm = ({
 
   const handleNext = () => {
     if (!name) {
-      toaster.create({
-        title: "Please enter a name for the multisig",
-        type: "error",
-      });
+      notification.error("Please enter a name for the multisig");
       return;
     }
 
     if (Number(requiredSignatures) <= 0) {
-      toaster.create({
-        title: "Required signatures must be greater than 0",
-        type: "error",
-      });
+      notification.error("Required signatures must be greater than 0");
       return;
     }
 
     if (Number(requiredSignatures) > signers.length) {
-      toaster.create({
-        title: "Required signatures cannot be greater than number of signers",
-        type: "error",
-      });
+      notification.error("Required signatures cannot be greater than number of signers");
       return;
     }
 

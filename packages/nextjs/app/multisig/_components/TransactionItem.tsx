@@ -1,4 +1,5 @@
 import { type FC, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Address, BlockieAvatar } from "../../../components/scaffold-eth";
 import { useHasSignedNewHash } from "../hook/useHasSignedNewHash";
 import { PreveiwProfileModal } from "./PreviewProfile";
@@ -19,6 +20,7 @@ import { notification } from "~~/utils/scaffold-eth";
 type TransactionItemProps = { tx: TransactionData; completed: boolean; outdated: boolean };
 
 export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outdated }) => {
+  const router = useRouter();
   const { address } = useAccount();
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
@@ -175,6 +177,8 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
         });
 
         setIsExecuting(false);
+
+        router.push(`/history/${tx.address}`);
       }
     } catch (e) {
       //notification.error("Error executing transaction");
@@ -330,37 +334,43 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
               <div className="text-sm">Pending Transaction</div>
             )} */}
 
-            <div className="flex justify-center items-center gap-x-2">
-              <div className="flex" title={hasSigned ? "You have already Signed this transaction" : ""}>
-                <button
-                  className="btn btn-xs w-[3.6rem] btn-primary"
-                  disabled={hasSigned && hasSignedNewHash}
-                  title={!hasEnoughSignatures ? "Not enough signers to Execute" : ""}
-                  onClick={signTransaction}
-                >
-                  {isSigning ? <div className="loading loading-xs" /> : "Sign"}
-                </button>
-              </div>
+            {!tx.isExecuted && (
+              <div className="flex justify-center items-center gap-x-2">
+                <div className="flex" title={hasSigned ? "You have already Signed this transaction" : ""}>
+                  <button
+                    className="btn btn-xs w-[3.6rem] btn-primary"
+                    disabled={hasSigned && hasSignedNewHash}
+                    title={!hasEnoughSignatures ? "Not enough signers to Execute" : ""}
+                    onClick={signTransaction}
+                  >
+                    {isSigning ? <div className="loading loading-xs" /> : "Sign"}
+                  </button>
+                </div>
 
-              <div title={!hasEnoughSignatures ? "Not enough signers to Execute" : ""}>
-                <button
-                  className="btn btn-xs w-[3.6rem] btn-primary "
-                  disabled={!hasEnoughSignatures}
-                  onClick={executeTransaction}
-                >
-                  {isExecuting ? <div className="loading loading-xs" /> : "Exec"}
-                </button>
+                <div title={!hasEnoughSignatures ? "Not enough signers to Execute" : ""}>
+                  <button
+                    className="btn btn-xs w-[3.6rem] btn-primary "
+                    disabled={!hasEnoughSignatures}
+                    onClick={executeTransaction}
+                  >
+                    {isExecuting ? <div className="loading loading-xs" /> : "Exec"}
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
         <div className="flex justify-between items-center text-xs gap-4 mt-2">
-          {(txnData.functionName === "addSigner" ? (
+          {txnData.functionName === "addSigner" ? (
             <div>Add a New Signer</div>
           ) : (
-            txnData.functionName === "setData" && <div>Update Profile</div>
-          )) || <div>Transfer funds</div>}
+            (txnData.functionName === "removeSigner" ? (
+              <div>Remove Signer</div>
+            ) : (
+              txnData.functionName === "setData" && <div>Update Profile</div>
+            )) || <div>Transfer funds</div>
+          )}
 
           {Object.keys(txnData).length === 0 && (
             <div className="flex gap-1 items-center">

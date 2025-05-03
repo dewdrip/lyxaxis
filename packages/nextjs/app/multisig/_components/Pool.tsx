@@ -1,4 +1,4 @@
-import { type FC, useMemo, useState } from "react";
+import { type FC, useEffect, useMemo, useState } from "react";
 import { TransactionItem } from "./TransactionItem";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useChainId } from "wagmi";
@@ -111,6 +111,12 @@ export const Pool = ({
         .sort((a, b) => (BigInt(a.nonce) < BigInt(b.nonce) ? 1 : -1))[0],
     [historyHashes, transactions],
   );
+
+  useEffect(() => {
+    if (transactions) {
+      console.log(transactions);
+    }
+  }, [transactions]);
 
   return (
     <div className="flex flex-col flex-1 w-full items-center gap-8">

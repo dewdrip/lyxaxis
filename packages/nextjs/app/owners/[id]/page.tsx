@@ -139,7 +139,7 @@ const Owners: FC = () => {
       if (isOwner) {
         const txData: TransactionData = {
           title: predefinedTxData.methodName === "addSigner" ? "Add Signer" : "Remove Signer",
-          description: predefinedTxData.description || "",
+          description: predefinedTxData.description?.trim() || "",
           chainId: chainId,
           address: multisigAddress,
           nonce: (nonce as bigint) || 0n,
@@ -150,6 +150,7 @@ const Owners: FC = () => {
           signatures: [signature],
           signers: [recover],
           requiredApprovals: (signaturesRequired as bigint) || 0n,
+          isExecuted: false,
         };
 
         await fetch(poolServerUrl, {

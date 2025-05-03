@@ -77,11 +77,11 @@ export default function LyxInput({ value = "", onChange = () => {}, placeholder 
     return (
       <Button onClick={switchCurrency} className="transition-transform duration-200 ease-in-out hover:scale-110">
         {isDollar ? (
-          <span className="text-sm text-green-500 transition-transform duration-200 ease-in-out hover:scale-110">
+          <span className="text-md text-green-500 transition-transform duration-200 ease-in-out hover:scale-110">
             $
           </span>
         ) : (
-          <div className="relative w-4 aspect-square transition-transform duration-200 ease-in-out hover:scale-110">
+          <div className="relative w-6 aspect-square transition-transform duration-200 ease-in-out hover:scale-110">
             <Image src="/images/lukso_logo.png" alt="LYX" fill />
           </div>
         )}

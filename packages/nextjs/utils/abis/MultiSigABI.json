@@ -27,12 +27,22 @@
   },
   {
     "inputs": [],
+    "name": "MultiSig__CannotRemoveLastOwner",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "MultiSig__DuplicateOrUnorderedSignatures",
     "type": "error"
   },
   {
     "inputs": [],
     "name": "MultiSig__InvalidSignaturesCount",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "MultiSig__InvalidSignaturesRequired",
     "type": "error"
   },
   {
@@ -69,31 +79,6 @@
     "inputs": [],
     "name": "MultiSig__ZeroRequiredSignatures",
     "type": "error"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "sender",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "balance",
-        "type": "uint256"
-      }
-    ],
-    "name": "Deposit",
-    "type": "event"
   },
   {
     "anonymous": false,
@@ -161,6 +146,19 @@
       }
     ],
     "name": "Owner",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "newRequiredSignatures",
+        "type": "uint256"
+      }
+    ],
+    "name": "UpdatedRequiredSignatures",
     "type": "event"
   },
   {
@@ -347,6 +345,19 @@
   {
     "inputs": [],
     "name": "nonce",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "numOfOwners",
     "outputs": [
       {
         "internalType": "uint256",

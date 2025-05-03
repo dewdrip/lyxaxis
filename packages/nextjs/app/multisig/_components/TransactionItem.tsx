@@ -57,7 +57,11 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
     tx,
   });
 
-  const { canExecuteTransaction, isLoading: isLoadingCanExecute } = useCanExecute({
+  const {
+    canExecuteTransaction,
+    validSignatureCount,
+    isLoading: isLoadingCanExecute,
+  } = useCanExecute({
     metaMultiSigWallet,
     signaturesRequired,
     nonce,
@@ -186,6 +190,10 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
         });
 
         setIsExecuting(false);
+
+        if (onRefetch) {
+          onRefetch();
+        }
       }
     } catch (e) {
       //notification.error("Error executing transaction");
@@ -300,7 +308,7 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
               <div className="mt-4">
                 {String(signaturesRequired) && (
                   <span>
-                    Signers: {tx.signatures.length}/{String(tx.requiredApprovals)} {hasSignedNewHash ? "✅" : ""}
+                    Signers: {validSignatureCount}/{String(signaturesRequired)} {hasSignedNewHash ? "✅" : ""}
                   </span>
                 )}
                 <div className="font-bold">Sig hash</div>{" "}
@@ -347,7 +355,7 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
               <div className="flex gap-1 font-bold">
                 {String(signaturesRequired) && (
                   <span>
-                    {tx.signatures.length}/{String(tx.requiredApprovals)} {hasSignedNewHash ? "✅" : ""}
+                    Signers: {validSignatureCount}/{String(signaturesRequired)} {hasSignedNewHash ? "✅" : ""}
                   </span>
                 )}
               </div>

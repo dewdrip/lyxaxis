@@ -190,14 +190,17 @@ const CreatePage: FC = () => {
   };
 
   useEffect(() => {
-    if (predefinedTxData && !predefinedTxData.callData && predefinedTxData.methodName !== "transferFunds") {
+    if (predefinedTxData.methodName !== "transferFunds") {
       setPredefinedTxData({
         ...predefinedTxData,
         methodName: "transferFunds",
+        signer: "",
+        newSignaturesNumber: "",
         callData: "",
+        amount: "",
       });
     }
-  }, [predefinedTxData, setPredefinedTxData]);
+  }, []);
 
   return isMounted() ? (
     <div className="w-full">

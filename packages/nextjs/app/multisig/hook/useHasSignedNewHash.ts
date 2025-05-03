@@ -63,7 +63,7 @@ export function useCanExecute({
 }) {
   const { address } = useAccount();
 
-  const { data: canExecuteTransaction = false, isLoading } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: [
       "canExecuteTransaction",
       metaMultiSigWallet?.address,
@@ -100,9 +100,9 @@ export function useCanExecute({
       }
 
       if (validSignatureCount >= Number(signaturesRequired)) {
-        return true;
+        return { canExecuteTransaction: true, validSignatureCount };
       } else {
-        return false;
+        return { canExecuteTransaction: false, validSignatureCount };
       }
     },
     refetchOnMount: true, // Always refetch when the component mounts
@@ -110,5 +110,9 @@ export function useCanExecute({
     staleTime: 10_000_000, // adjust as needed
   });
 
-  return { canExecuteTransaction, isLoading };
+  return {
+    canExecuteTransaction: data?.canExecuteTransaction ?? false,
+    validSignatureCount: data?.validSignatureCount,
+    isLoading,
+  };
 }

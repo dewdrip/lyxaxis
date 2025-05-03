@@ -1,12 +1,11 @@
 import Link from "next/link";
 import Profile from "../Profile";
 import { Balance } from "../scaffold-eth";
-import { usePublicClient } from "wagmi";
+import { useMultiSigRegistry } from "~~/hooks/contract/useMultiSigRegistry";
 import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
 
 export const MultisigCard = ({ multisigAddress }: { multisigAddress: string }) => {
-  const { data: owners } = useScaffoldReadContract({
-    contractName: "MultiSigRegistry",
+  const { data: owners } = useMultiSigRegistry({
     functionName: "getMultisigOwners",
     args: [multisigAddress],
   });

@@ -249,11 +249,13 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
 
   console.log("txnData.functionName", txnData.functionName);
 
+  console.log("txnData", txnData);
+
   return (
     <>
       <input type="checkbox" id={`label-${tx.hash}`} className="modal-toggle" />
       <div className="modal" role="dialog">
-        {Object.keys(txnData).length === 0 ? (
+        {txnData.functionName !== "setData" ? (
           <div className="modal-box w-[400px] top-20 mx-auto">
             <div className="flex flex-col">
               <div className="flex gap-2">

@@ -1,15 +1,11 @@
 // SPDX-License-Identifier: MIT
-
-// Off-chain signature gathering multisig that streams funds
-// added a very simple streaming mechanism where `onlyUP` can open a withdraw-based stream
-
 pragma solidity 0.8.29;
 
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "./MultiSigRegistry.sol";
 import { LSP0ERC725Account } from "@lukso/lsp-smart-contracts/contracts/LSP0ERC725Account/LSP0ERC725Account.sol";
 import { ILSP20CallVerifier } from "@lukso/lsp-smart-contracts/contracts/LSP20CallVerification/ILSP20CallVerifier.sol";
-
+import { IMultiSig } from "./interfaces/IMultiSig.sol";
 error MultiSig__ZeroAddress();
 error MultiSig__OwnerNotUnique();
 error MultiSig__NotUniversalProfile();
@@ -22,20 +18,12 @@ error MultiSig__InvalidSignaturesCount();
 error MultiSig__CannotRemoveLastOwner();
 error MultiSig__InvalidSignaturesRequired();
 
-contract MultiSig is ILSP20CallVerifier {
-    event Deposit(address indexed sender, uint256 amount, uint256 balance);
-    event ExecuteTransaction(
-        address indexed owner,
-        address payable to,
-        uint256 value,
-        bytes data,
-        uint256 nonce,
-        bytes32 hash,
-        bytes result
-    );
-    event Owner(address indexed owner, bool added);
-    event UpdatedRequiredSignatures(uint256 newRequiredSignatures);
-
+/**
+ * @title MultiSig
+ * @notice A multi-signature wallet contract that allows multiple owners to manage a Universal Profile
+ * @dev Implements LSP20 for call verification and uses ECDSA for signature verification
+ */
+contract MultiSig is IMultiSig, ILSP20CallVerifier {
     bytes32 constant LSP3_PROFILE_KEY = 0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5;
 
     MultiSigRegistry private immutable i_registry;
@@ -47,6 +35,13 @@ contract MultiSig is ILSP20CallVerifier {
 
     mapping(address => bool) public isOwner;
 
+    /**
+     * @notice Records owners and initializes the Universal Profile
+     * @param profileMetadata The metadata for the Universal Profile
+     * @param _owners Array of initial owner addresses
+     * @param _signaturesRequired Number of signatures required for transactions
+     * @param _registry Address of the MultiSigRegistry contract
+     */
     constructor(
         bytes memory profileMetadata,
         address[] memory _owners,
@@ -74,11 +69,20 @@ contract MultiSig is ILSP20CallVerifier {
         i_universalProfile.setData(LSP3_PROFILE_KEY, profileMetadata);
     }
 
+    /**
+     * @notice Modifier to restrict access to Universal Profile only
+     */
     modifier onlyUP() {
         require(msg.sender == address(i_universalProfile), MultiSig__NotUniversalProfile());
         _;
     }
 
+    /**
+     * @notice Adds a new signer to the multisig
+     * @dev Can only be called by the Universal Profile
+     * @param newSigner The address of the new signer to add
+     * @param newSignaturesRequired The new number of required signatures
+     */
     function addSigner(address newSigner, uint256 newSignaturesRequired) public onlyUP {
         require(newSigner != address(0), MultiSig__ZeroAddress());
         require(!isOwner[newSigner], MultiSig__OwnerNotUnique());
@@ -95,6 +99,12 @@ contract MultiSig is ILSP20CallVerifier {
         i_registry.addSigner(newSigner);
     }
 
+    /**
+     * @notice Removes an existing signer from the multisig
+     * @dev Can only be called by the Universal Profile
+     * @param oldSigner The address of the signer to remove
+     * @param newSignaturesRequired The new number of required signatures
+     */
     function removeSigner(address oldSigner, uint256 newSignaturesRequired) public onlyUP {
         require(isOwner[oldSigner], MultiSig__NotOwner());
         require(numOfOwners > 1, MultiSig__CannotRemoveLastOwner());
@@ -111,6 +121,11 @@ contract MultiSig is ILSP20CallVerifier {
         i_registry.removeSigner(oldSigner);
     }
 
+    /**
+     * @notice Updates the number of required signatures
+     * @dev Can only be called by the Universal Profile
+     * @param newSignaturesRequired The new number of required signatures
+     */
     function updateSignaturesRequired(uint256 newSignaturesRequired) public onlyUP {
         require(newSignaturesRequired > 0, MultiSig__ZeroRequiredSignatures());
         require(newSignaturesRequired <= numOfOwners, MultiSig__InvalidSignaturesRequired());
@@ -120,6 +135,14 @@ contract MultiSig is ILSP20CallVerifier {
         emit UpdatedRequiredSignatures(newSignaturesRequired);
     }
 
+    /**
+     * @notice Gets the hash of a transaction
+     * @param _nonce The transaction nonce
+     * @param to The destination address
+     * @param value The amount of LYX to send
+     * @param data The transaction data
+     * @return The transaction hash
+     */
     function getTransactionHash(
         uint256 _nonce,
         address to,
@@ -129,6 +152,15 @@ contract MultiSig is ILSP20CallVerifier {
         return keccak256(abi.encodePacked(address(this), _nonce, to, value, data));
     }
 
+    /**
+     * @notice Executes a transaction with multiple signatures
+     * @dev Requires sufficient valid signatures from owners to be in ascending order
+     * @param to The destination address
+     * @param value The amount of LYX to send
+     * @param data The transaction data
+     * @param signatures Array of signatures
+     * @return The result of the transaction execution
+     */
     function executeTransaction(
         address payable to,
         uint256 value,
@@ -166,10 +198,20 @@ contract MultiSig is ILSP20CallVerifier {
         return result;
     }
 
+    /**
+     * @notice Recovers the signer address from a signature
+     * @param _hash The hash that was signed
+     * @param _signature The signature to recover
+     * @return The recovered signer address
+     */
     function recover(bytes32 _hash, bytes memory _signature) public pure returns (address) {
         return ECDSA.recover(ECDSA.toEthSignedMessageHash(_hash), _signature);
     }
 
+    /**
+     * @notice Gets the address of the Universal Profile
+     * @return The address of the Universal Profile
+     */
     function getUniversalProfile() external view returns (address) {
         return address(i_universalProfile);
     }
@@ -192,6 +234,10 @@ contract MultiSig is ILSP20CallVerifier {
         return 0xd3fc45d3;
     }
 
+    /**
+     * @notice Fallback function to receive LYX
+     * @dev Forwards received LYX to the Universal Profile
+     */
     receive() external payable {
         (bool success, ) = payable(i_universalProfile).call{ value: msg.value }("");
         require(success, MultiSig__TransferFailed());

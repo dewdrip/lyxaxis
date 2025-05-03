@@ -164,7 +164,7 @@ export function ProfileInput({ value, onSelectAddress, placeholder = "Enter prof
       </InputGroup>
 
       {showDropdown && (
-        <div className="absolute top-[4.7rem] flex flex-col overflow-y-auto space-y-1 px-2 py-1 h-[3.5rem] w-full border border-gray bg-base-200 rounded text-accent shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),0px_1px_0px_0px_rgba(25,28,33,0.02),0px_0px_0px_1px_rgba(25,28,33,0.08)]">
+        <div className="absolute top-[4.7rem] z-10 flex flex-col overflow-y-auto space-y-1 px-2 py-1 h-[3.5rem] w-full border border-gray bg-base-200 rounded text-accent shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),0px_1px_0px_0px_rgba(25,28,33,0.02),0px_0px_0px_1px_rgba(25,28,33,0.08)]">
           {isSearching ? (
             <div className="flex justify-center items-center py-4">
               <div className="w-5 h-5 border-2 border-slate-300 border-t-slate-700 rounded-full animate-spin"></div>

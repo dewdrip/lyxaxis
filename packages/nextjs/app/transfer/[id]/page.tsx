@@ -17,7 +17,7 @@ import { notification } from "~~/utils/scaffold-eth/notification";
 
 export type TransactionData = {
   title: string;
-  description?: string;
+  description: string;
   chainId: number;
   address: Address;
   nonce: bigint;
@@ -135,7 +135,7 @@ const CreatePage: FC = () => {
       if (isOwner) {
         const txData: TransactionData = {
           title: "Transfer Funds",
-          description: predefinedTxData.description || "",
+          description: predefinedTxData.description?.trim() || "",
           chainId: chainId,
           address: multisigAddress,
           nonce: (nonce as bigint) || 0n,
@@ -146,6 +146,7 @@ const CreatePage: FC = () => {
           signatures: [signature],
           signers: [recover],
           requiredApprovals: (signaturesRequired as bigint) || 0n,
+          isExecuted: false,
         };
 
         await fetch(poolServerUrl, {

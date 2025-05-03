@@ -1,4 +1,4 @@
-import { type FC, useEffect, useState } from "react";
+import { type FC, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Address, BlockieAvatar } from "../../../components/scaffold-eth";
 import { useCanExecute, useHasSignedNewHash } from "../hook/useHasSignedNewHash";
@@ -186,8 +186,6 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
         });
 
         setIsExecuting(false);
-
-        router.push(`/history/${tx.address}`);
       }
     } catch (e) {
       //notification.error("Error executing transaction");
@@ -272,11 +270,17 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
           <div className="modal-box w-[400px] top-20 mx-auto">
             <div className="flex flex-col">
               <div className="flex gap-2">
-                <div className="font-bold">Function Signature:</div>
-                {txnData.functionName || "transferFunds"}
+                <div className="font-bold">{tx.title}</div>
               </div>
+
+              {tx.description ? (
+                <div className="text-sm max-h-[100px] overflow-y-auto mt-2">{tx.description}</div>
+              ) : (
+                <div className="text-sm flex-1 text-slate-400">No description</div>
+              )}
+
               <div className="flex flex-col gap-2 mt-6">
-                {txnData.args && txnData.functionName !== "setData" ? (
+                {txnData.args ? (
                   <>
                     <h4 className="font-bold">Arguments</h4>
                     <div className="flex gap-4">
@@ -287,13 +291,18 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
                 ) : (
                   <>
                     <div className="flex gap-4">
-                      Transfer to: <Address address={tx.to} />{" "}
+                      Recipient: <Address address={tx.to} />{" "}
                     </div>
                     <div>Amount: {formatEther(BigInt(tx.amount))} LYX </div>
                   </>
                 )}
               </div>
               <div className="mt-4">
+                {String(signaturesRequired) && (
+                  <span>
+                    Signers: {tx.signatures.length}/{String(tx.requiredApprovals)} {hasSignedNewHash ? "✅" : ""}
+                  </span>
+                )}
                 <div className="font-bold">Sig hash</div>{" "}
                 <div className="flex gap-1 mt-2">
                   <BlockieAvatar size={20} address={tx.hash} /> {tx.hash.slice(0, 7)}
@@ -385,7 +394,7 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
                 </div>
               ))}
 
-            <div>{formatEther(BigInt(tx.amount))} LYX</div>
+            <div className="max-w-[100px]">{formatEther(BigInt(tx.amount))} LYX</div>
           </div>
         </div>
       </div>

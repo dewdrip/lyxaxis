@@ -114,7 +114,11 @@ export const Pool = ({
         <div className="flex flex-col  items-center bg-base-100 border border-gray rounded-xl p-6 w-full">
           <div className="text-xl font-bold">Pool</div>
 
-          <div className="">Nonce: {nonce !== undefined ? `#${nonce}` : "Loading..."}</div>
+          {isHistory ? (
+            <div className="text-sm">Executed Proposals</div>
+          ) : (
+            <div className="">Nonce: {nonce !== undefined ? `#${nonce}` : "Loading..."}</div>
+          )}
           <div className="flex">
             <div className="text-sm">Controller Address:</div>{" "}
             <Address address={multisigAddress} disableBlockie={true} />

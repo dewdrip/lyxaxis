@@ -71,3 +71,21 @@ export function getAddressColor(address: `0x${string}`): string {
 
   return color;
 }
+
+/**
+ * Truncates a string to a specified maximum length, appending '...' if truncated.
+ *
+ * @param {string} str - The string to truncate
+ * @param {number} maxLength - The maximum length of the string before truncation
+ * @returns {string} The truncated string with '...' if it exceeds maxLength
+ *
+ * @example
+ * ```ts
+ * truncateString("This is a very long string", 10);
+ * // Output: "This is a..."
+ * ```
+ */
+export const truncateString = (str: string, maxLength: number): string => {
+  if (!str || str.length <= maxLength) return str;
+  return `${str.slice(0, maxLength)}...`;
+};

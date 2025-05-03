@@ -16,6 +16,7 @@ import {
 } from "~~/hooks/scaffold-eth";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
 import { getPoolServerUrl } from "~~/utils/getPoolServerUrl";
+import { truncateString } from "~~/utils/helpers";
 import { notification } from "~~/utils/scaffold-eth";
 
 type TransactionItemProps = { tx: TransactionData; completed: boolean; outdated: boolean; onRefetch?: () => void };
@@ -263,10 +264,6 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
     }
   };
 
-  console.log("txnData.functionName", txnData.functionName);
-
-  console.log("txnData", txnData);
-
   return (
     <>
       <input type="checkbox" id={`label-${tx.hash}`} className="modal-toggle" />
@@ -317,21 +314,33 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
       <div className="flex flex-col pb-2 border-b border-secondary last:border-b-0">
         <div className="flex w-full gap-4 justify-between">
           <div className="flex flex-col gap-y-1">
-            <div className="font-bold"># {String(tx.nonce)}</div>
-            {String(signaturesRequired) && (
-              <span>
-                Signers: {tx.signatures.length}/{String(tx.requiredApprovals)} {hasSignedNewHash ? "✅" : ""}
-              </span>
-            )}
-            <div>{formatEther(BigInt(tx.amount))} LYX</div>
+            <div className="font-bold">{truncateString(tx.title, 16)}</div>
 
-            {/* <Address address={tx.to} /> */}
+            {tx.description ? (
+              <div className="text-sm flex-1">{truncateString(tx.description, 50)}</div>
+            ) : (
+              <div className="text-sm flex-1 text-slate-400">No description</div>
+            )}
+
+            {Object.keys(txnData).length === 0 && (
+              <div className="flex gap-1 items-center">
+                To:{" "}
+                <Profile
+                  address={(txnData.args?.[0] ? String(txnData.args?.[0]) : tx.to) as `0x${string}`}
+                  imageClassName="w-6"
+                />
+              </div>
+            )}
           </div>
 
-          <div className="flex flex-col gap-y-4">
-            <div className="flex gap-x-2 items-center">
+          <div className="flex flex-col gap-y-4 items-end">
+            <div className="flex gap-x-2 items-center justify-end">
               <div className="flex gap-1 font-bold">
-                <BlockieAvatar size={20} address={tx.hash} /> {tx.hash.slice(0, 7)}
+                {String(signaturesRequired) && (
+                  <span>
+                    {tx.signatures.length}/{String(tx.requiredApprovals)} {hasSignedNewHash ? "✅" : ""}
+                  </span>
+                )}
               </div>
               <label htmlFor={`label-${tx.hash}`} className=" text-blue-500 hover:text-blue-700">
                 <IoIosInformationCircleOutline size={24} />
@@ -375,29 +384,9 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
                   </div>
                 </div>
               ))}
+
+            <div>{formatEther(BigInt(tx.amount))} LYX</div>
           </div>
-        </div>
-
-        <div className="flex justify-between items-center text-xs gap-4 mt-2">
-          {txnData.functionName === "addSigner" ? (
-            <div>Add a New Signer</div>
-          ) : (
-            (txnData.functionName === "removeSigner" ? (
-              <div>Remove Signer</div>
-            ) : (
-              txnData.functionName === "setData" && <div>Update Profile</div>
-            )) || <div>Transfer funds</div>
-          )}
-
-          {Object.keys(txnData).length === 0 && (
-            <div className="flex gap-1 items-center">
-              To:{" "}
-              <Profile
-                address={(txnData.args?.[0] ? String(txnData.args?.[0]) : tx.to) as `0x${string}`}
-                imageClassName="w-6"
-              />
-            </div>
-          )}
         </div>
       </div>
     </>

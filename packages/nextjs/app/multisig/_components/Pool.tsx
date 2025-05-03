@@ -116,15 +116,12 @@ export const Pool = ({
     <div className="flex flex-col flex-1 w-full items-center gap-8">
       <div className="flex items-center flex-col flex-grow w-full max-w-2xl">
         <div className="flex flex-col  items-center bg-base-100 border border-gray rounded-xl p-6 w-full">
-          <div className="text-xl font-bold">{isHistory ? "History" : "Pool"}</div>
+          <div className="flex items-center justify-between w-full">
+            <div className="text-xl font-bold">{isHistory ? "History" : "Proposals"}</div>
+          </div>
 
-          {isHistory ? (
-            <div className="text-sm">Executed Proposals</div>
-          ) : (
-            <div className="">Nonce: {nonce !== undefined ? `#${nonce}` : "Loading..."}</div>
-          )}
           {!isHistory && (
-            <div className="flex">
+            <div className="flex w-full">
               <div className="text-sm">Controller:</div> <Address address={multisigAddress} disableBlockie={true} />
             </div>
           )}

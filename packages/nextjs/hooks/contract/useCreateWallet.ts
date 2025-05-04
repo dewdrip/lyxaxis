@@ -8,7 +8,7 @@ import { ethers } from "ethers";
 import { Address } from "viem";
 import "viem";
 import { useAccount, usePublicClient } from "wagmi";
-import { useDeployedContractInfo, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
+import { useDeployedContractInfo, useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 import { notification } from "~~/utils/scaffold-eth";
 
 interface CreateWalletParams {
@@ -30,6 +30,11 @@ export const useCreateWallet = () => {
 
   const { data: multiSigRegistryData } = useDeployedContractInfo({
     contractName: "MultiSigRegistry",
+  });
+
+  const { data: registryAddress, isLoading: registryAddressLoading } = useScaffoldReadContract({
+    contractName: "Lyxaxis",
+    functionName: "getRegistry",
   });
 
   const { writeContractAsync: createWallet } = useScaffoldWriteContract({
@@ -77,6 +82,8 @@ export const useCreateWallet = () => {
         return;
       }
 
+      console.log(params.owners);
+
       setIsLoading(true);
       setError(null);
       setDeployedAddress(null); // Reset the deployed address
@@ -88,12 +95,12 @@ export const useCreateWallet = () => {
         args: [encodedProfileMetadata, params.owners, params.signaturesRequired],
       });
 
-      if (trxHash && multiSigRegistryData?.abi && connectedAddress) {
+      if (trxHash && multiSigRegistryData?.abi && connectedAddress && registryAddress) {
         const signerMultisigsData = await publicClient.readContract({
-          address: multiSigRegistryData.address as Address,
+          address: registryAddress,
           abi: multiSigRegistryData.abi,
           functionName: "getSignerMultisigs",
-          args: [connectedAddress],
+          args: [params.owners[0]],
         });
 
         setDeployedAddress(signerMultisigsData[signerMultisigsData.length - 1] as Address);

@@ -781,6 +781,11 @@ const externalContracts = {
         },
         {
           inputs: [],
+          name: "MultiSig__ContractNotAllowed",
+          type: "error",
+        },
+        {
+          inputs: [],
           name: "MultiSig__DuplicateOrUnorderedSignatures",
           type: "error",
         },

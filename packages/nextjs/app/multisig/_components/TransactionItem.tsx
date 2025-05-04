@@ -308,7 +308,7 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
               <div className="mt-4">
                 {String(signaturesRequired) && (
                   <span>
-                    Signers: {validSignatureCount}/{String(signaturesRequired)} {hasSignedNewHash ? "✅" : ""}
+                    Signed: {validSignatureCount}/{String(signaturesRequired)} {hasSignedNewHash ? "✅" : ""}
                   </span>
                 )}
                 <div className="font-bold">Sig hash</div>{" "}
@@ -354,8 +354,8 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
             <div className="flex gap-x-2 items-center justify-end">
               <div className="flex gap-1 font-bold">
                 {String(signaturesRequired) && (
-                  <span>
-                    Signers: {validSignatureCount}/{String(signaturesRequired)} {hasSignedNewHash ? "✅" : ""}
+                  <span className="whitespace-nowrap">
+                    Signed: {validSignatureCount}/{String(signaturesRequired)} {hasSignedNewHash ? "✅" : ""}
                   </span>
                 )}
               </div>
@@ -402,7 +402,7 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outda
                 </div>
               ))}
 
-            <div className="max-w-[100px]">{formatEther(BigInt(tx.amount))} LYX</div>
+            <div>{truncateString(formatEther(BigInt(tx.amount)), 9)} LYX</div>
           </div>
         </div>
       </div>

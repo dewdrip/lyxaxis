@@ -91,13 +91,13 @@ export function ProfileHeader({ profileLoading, profile, multisigAddress, upAddr
             <div className="flex gap-x-2">
               <button
                 onClick={() => setIsReceiveModalOpen(true)}
-                className="text-sm border border-gray-light rounded-full px-3 py-1 cursor-pointer hover:bg-gray"
+                className="transition-transform duration-200 ease-in-out hover:scale-105 text-sm border border-gray-light rounded-full px-3 py-1 cursor-pointer "
               >
                 Receive
               </button>
               <Link
                 href={`/editmultisigprofile/${multisigAddress}`}
-                className="text-sm whitespace-nowrap border border-gray-light rounded-full px-3 py-1 cursor-pointer hover:bg-gray"
+                className="transition-transform duration-200 ease-in-out hover:scale-105 text-sm whitespace-nowrap border border-gray-light rounded-full px-3 py-1 cursor-pointer"
               >
                 Edit profile
               </Link>

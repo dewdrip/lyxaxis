@@ -58,12 +58,12 @@ export function ProfileHeader({ profileLoading, profile, multisigAddress, upAddr
       return <div className="text-sm line-clamp-1 mt-4">{profile.description}</div>;
     } else {
       return (
-        <p className="text-sm mt-4">
+        <div className="text-sm mt-4">
           {profile.description.slice(0, 94)}...
           <button onClick={() => setIsDescriptionModalOpen(true)} className="text-primary text-sm hover:underline ml-1">
             See more
           </button>
-        </p>
+        </div>
       );
     }
   };

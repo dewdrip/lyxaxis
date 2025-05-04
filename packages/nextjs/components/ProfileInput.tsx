@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import LoadingIndicator from "./LoadingIndicator";
 import SearchProfile from "./SearchProfile";
 import { InputGroup } from "./ui/input-group";
 import { Input } from "@chakra-ui/react";
@@ -8,6 +9,8 @@ import { gql, request } from "graphql-request";
 import { CiSearch } from "react-icons/ci";
 import { useDebounceValue } from "usehooks-ts";
 import { isAddress } from "viem";
+import { UniversalProfileOwner } from "~~/types/universalProfile";
+import { getController } from "~~/utils/helpers";
 import { notification } from "~~/utils/scaffold-eth/notification";
 
 /**
@@ -60,15 +63,22 @@ type Profile = {
 type SearchProps = {
   placeholder?: string;
   value: string;
-  onSelectAddress: (address: `0x${string}`) => void;
+  onSelectAddress: (profile: UniversalProfileOwner) => void;
+  readController?: boolean;
 };
 
-export function ProfileInput({ value, onSelectAddress, placeholder = "Enter profile name or address" }: SearchProps) {
+export function ProfileInput({
+  value,
+  onSelectAddress,
+  placeholder = "Enter profile name or address",
+  readController = true,
+}: SearchProps) {
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useDebounceValue("", 200);
   const [results, setResults] = useState<Profile[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [isAddingController, setIsAddingController] = useState<`0x${string}` | null>(null);
 
   const handleSearch = async () => {
     if (debouncedQuery === "" || query === "") {
@@ -91,13 +101,22 @@ export function ProfileInput({ value, onSelectAddress, placeholder = "Enter prof
     }
   };
 
-  const handleSelectProfile = (address: `0x${string}`) => {
+  const handleSelectProfile = async (address: `0x${string}`) => {
     if (!isAddress(address)) {
       notification.error("Invalid address");
       return;
     }
 
-    onSelectAddress(address);
+    if (readController) {
+      setIsAddingController(address);
+    }
+    const controller = readController ? await getController(address as `0x${string}`) : address;
+
+    if (isAddingController) {
+      setIsAddingController(null);
+    }
+
+    onSelectAddress({ address, controller });
 
     setShowDropdown(false);
     setQuery(address);
@@ -164,11 +183,16 @@ export function ProfileInput({ value, onSelectAddress, placeholder = "Enter prof
         <div className="absolute top-[4.7rem] z-10 flex flex-col overflow-y-auto space-y-1 px-2 py-1 h-[3.5rem] w-full border border-gray bg-base-200 rounded text-accent shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),0px_1px_0px_0px_rgba(25,28,33,0.02),0px_0px_0px_1px_rgba(25,28,33,0.08)]">
           {isSearching ? (
             <div className="flex justify-center items-center py-4">
-              <div className="w-5 h-5 border-2 border-slate-300 border-t-slate-700 rounded-full animate-spin"></div>
+              <LoadingIndicator />
             </div>
           ) : results.length > 0 ? (
             results.map(result => (
-              <SearchProfile key={result.id} address={result.id as `0x${string}`} onSelect={handleSelectProfile} />
+              <SearchProfile
+                key={result.id}
+                address={result.id as `0x${string}`}
+                onSelect={handleSelectProfile}
+                isAddingController={isAddingController}
+              />
             ))
           ) : (
             <div className="text-gray-400 text-center py-2">No results found</div>

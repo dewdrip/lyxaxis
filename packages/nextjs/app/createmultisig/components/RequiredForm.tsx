@@ -7,6 +7,8 @@ import { PlusCircleIcon, TrashIcon } from "@heroicons/react/24/outline";
 import Profile from "~~/components/Profile";
 import { ProfileInput } from "~~/components/ProfileInput";
 import { InputBase } from "~~/components/scaffold-eth";
+import { UniversalProfileOwner } from "~~/types/universalProfile";
+import { getController } from "~~/utils/helpers";
 import { notification } from "~~/utils/scaffold-eth";
 
 export const RequiredForm = ({
@@ -27,8 +29,8 @@ export const RequiredForm = ({
   handleCreate: () => Promise<void>;
   setSigners: Dispatch<SetStateAction<string[]>>;
   setName: Dispatch<SetStateAction<string>>;
-  setNewSigner: Dispatch<SetStateAction<string>>;
-  newSigner: string;
+  setNewSigner: Dispatch<SetStateAction<UniversalProfileOwner>>;
+  newSigner: UniversalProfileOwner;
   signers: string[];
   name: string;
   isCreateWalletLoading: boolean;
@@ -44,31 +46,43 @@ export const RequiredForm = ({
 
   const [newSignerError, setNewSignerError] = useState<string>("");
 
+  const [owners, setOwners] = useState<UniversalProfileOwner[]>([]);
+
   useEffect(() => {
-    if (ownerAddress) {
-      setSigners([ownerAddress]);
-    }
+    (async () => {
+      if (ownerAddress) {
+        const controller = await getController(ownerAddress as `0x${string}`);
+        setOwners([{ address: ownerAddress, controller }]);
+        setSigners([controller]);
+      }
+    })();
   }, [ownerAddress]);
 
   const addSigner = () => {
     if (!newSigner) return;
 
-    if (!signers.includes(newSigner)) {
-      setSigners([...signers, newSigner]);
-      setNewSigner("");
+    if (!signers.includes(newSigner.controller)) {
+      setSigners([...signers, newSigner.controller]);
+      setOwners([...owners, newSigner]);
+      setNewSigner({ address: "", controller: "" });
     } else {
       notification.error("Signer already added");
     }
   };
 
   const removeSigner = (signerToRemove: string) => {
-    if (signerToRemove === ownerAddress) return;
     setSigners(signers.filter(signer => signer !== signerToRemove));
+    setOwners(owners.filter(owner => owner.controller !== signerToRemove));
   };
 
   const handleNext = () => {
     if (!name) {
       notification.error("Please enter a name for the multisig");
+      return;
+    }
+
+    if (signers.length === 0) {
+      notification.error("Please add at least one signer");
       return;
     }
 
@@ -115,12 +129,15 @@ export const RequiredForm = ({
                 <span className="label-text">Add Signers and number of confirmations</span>
               </label>
               <div className="flex flex-wrap gap-y-3 gap-x-3 max-h-[100px] overflow-y-auto">
-                {signers
-                  .map(signer => (
-                    <div key={signer} className="flex gap-x-1 cursor-pointer">
-                      <Profile address={signer as `0x${string}`} imageClassName="w-6" />
-                      {signers.length > 1 && (
-                        <TrashIcon className="w-5 text-red-500 cursor-pointer" onClick={() => removeSigner(signer)} />
+                {owners
+                  .map(owner => (
+                    <div key={owner.address} className="flex gap-x-1 cursor-pointer">
+                      <Profile address={owner.address as `0x${string}`} imageClassName="w-6" />
+                      {owners.length > 1 && (
+                        <TrashIcon
+                          className="w-5 text-red-500 cursor-pointer"
+                          onClick={() => removeSigner(owner.controller)}
+                        />
                       )}
                     </div>
                   ))
@@ -128,9 +145,9 @@ export const RequiredForm = ({
               </div>
               <div className="flex flex-col gap-y-1">
                 <ProfileInput
-                  value={newSigner}
-                  onSelectAddress={address => {
-                    setNewSigner(address);
+                  value={newSigner.address}
+                  onSelectAddress={profile => {
+                    setNewSigner(profile);
                     setNewSignerError("");
                   }}
                   placeholder={"Signer address"}
@@ -139,8 +156,8 @@ export const RequiredForm = ({
                 {newSignerError ? (
                   <div className="text-red-500 text-sm">{newSignerError}</div>
                 ) : (
-                  newSigner &&
-                  isAddress(newSigner) && (
+                  newSigner.address &&
+                  isAddress(newSigner.address) && (
                     <div
                       onClick={addSigner}
                       className="flex gap-x-1 text-primary mt-2 text-sm items-center cursor-pointer"

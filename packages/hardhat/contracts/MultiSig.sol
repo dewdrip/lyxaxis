@@ -167,8 +167,6 @@ contract MultiSig is IMultiSig, ILSP20CallVerifier {
         bytes memory data,
         bytes[] memory signatures
     ) public returns (bytes memory) {
-        require(isOwner[msg.sender], MultiSig__NotOwner());
-
         bytes32 _hash = getTransactionHash(nonce, to, value, data);
 
         nonce++;

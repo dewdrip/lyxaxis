@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction } from "react";
 import { BackButton } from "./BackButton";
 import { ImageUploader } from "./imageUploader";
 import { useIsMounted } from "usehooks-ts";
@@ -10,8 +10,6 @@ import { InputBase } from "~~/components/scaffold-eth";
 import { Link, UploadedImageData } from "~~/hooks/useProfileMetadata";
 
 export const OptionalForm = ({
-  profileImage,
-  backgroundImage,
   description,
   tags,
   links,
@@ -20,16 +18,11 @@ export const OptionalForm = ({
   setLinks,
   setProfileImage,
   setBackgroundImage,
-  setBackgroundImageFile,
-  setProfileImageFile,
   handleCreate,
   isCreateWalletLoading,
-  pages,
   setPages,
 }: {
   handleCreate: () => Promise<void>;
-  profileImage: UploadedImageData[];
-  backgroundImage: UploadedImageData[];
   description: string;
   tags: string[];
   links: Link[];
@@ -39,10 +32,7 @@ export const OptionalForm = ({
   setTags: Dispatch<SetStateAction<string[]>>;
   setLinks: Dispatch<SetStateAction<Link[]>>;
   isCreateWalletLoading: boolean;
-  setBackgroundImageFile: Dispatch<SetStateAction<File | null>>;
-  setProfileImageFile: Dispatch<SetStateAction<File | null>>;
   setPages: Dispatch<SetStateAction<number>>;
-  pages: number;
 }) => {
   const { data: walletClient } = useWalletClient();
 
@@ -85,15 +75,7 @@ export const OptionalForm = ({
         </div>
 
         <div className="flex flex-col gap-y-6 bg-base-200 border border-gray rounded-xl w-full h-[490px] overflow-y-scroll">
-          <ImageUploader
-            setFieldValue={async (field: string, value: string): Promise<void> => {
-              console.log(field, value);
-            }}
-            setBackgroundImage={setBackgroundImage}
-            setProfileImage={setProfileImage}
-            setBackgroundImageFile={setBackgroundImageFile}
-            setProfileImageFile={setProfileImageFile}
-          />
+          <ImageUploader setBackgroundImage={setBackgroundImage} setProfileImage={setProfileImage} />
           <div className="px-2 flex flex-col gap-y-6 pb-6">
             <div className="flex flex-col gap-y-4">
               <div className="flex flex-col gap-y-2">

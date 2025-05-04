@@ -16,17 +16,14 @@ export const RequiredForm = ({
   signers,
   setName,
   name,
-  handleCreate,
   isCreateWalletLoading,
 
   newSigner,
   setNewSigner,
   setRequiredSignatures,
   requiredSignatures,
-  pages,
   setPages,
 }: {
-  handleCreate: () => Promise<void>;
   setSigners: Dispatch<SetStateAction<string[]>>;
   setName: Dispatch<SetStateAction<string>>;
   setNewSigner: Dispatch<SetStateAction<UniversalProfileOwner>>;
@@ -38,7 +35,6 @@ export const RequiredForm = ({
   setRequiredSignatures: Dispatch<SetStateAction<string>>;
   requiredSignatures: string;
   setPages: Dispatch<SetStateAction<number>>;
-  pages: number;
 }) => {
   const { data: walletClient } = useWalletClient();
 
@@ -56,7 +52,7 @@ export const RequiredForm = ({
         setSigners([controller]);
       }
     })();
-  }, [ownerAddress]);
+  }, [ownerAddress, setSigners, setOwners]);
 
   const addSigner = () => {
     if (!newSigner) return;
@@ -97,12 +93,6 @@ export const RequiredForm = ({
     }
 
     setPages(1);
-  };
-
-  const handleKeyPressOnAddSigner = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      addSigner();
-    }
   };
 
   return useIsMounted() ? (

@@ -1,15 +1,9 @@
-import { type FC, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { TransactionItem } from "./TransactionItem";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useChainId } from "wagmi";
 import { TransactionData } from "~~/app/transfer/[id]/page";
 import { Address } from "~~/components/scaffold-eth";
-import {
-  useDeployedContractInfo,
-  useScaffoldContract,
-  useScaffoldEventHistory,
-  useScaffoldReadContract,
-} from "~~/hooks/scaffold-eth";
+import { useScaffoldContract, useScaffoldEventHistory } from "~~/hooks/scaffold-eth";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
 import { getPoolServerUrl } from "~~/utils/getPoolServerUrl";
 import { notification } from "~~/utils/scaffold-eth";
@@ -25,15 +19,8 @@ export const Pool = ({
 
   const [transactions, setTransactions] = useState<TransactionData[]>();
   const [loading, setLoading] = useState<boolean>(false);
-  // const [subscriptionEventsHashes, setSubscriptionEventsHashes] = useState<`0x${string}`[]>([]);
   const { targetNetwork } = useTargetNetwork();
   const poolServerUrl = getPoolServerUrl(targetNetwork.id);
-  const chainId = useChainId();
-  const { data: nonce } = useScaffoldReadContract({
-    contractName: "MultiSig",
-    contractAddress: multisigAddress,
-    functionName: "nonce",
-  });
 
   const { data: eventsHistory } = useScaffoldEventHistory({
     contractName: "MultiSig",
@@ -141,21 +128,12 @@ export const Pool = ({
               transactions &&
               transactions.map(tx => {
                 return isHistory
-                  ? tx.isExecuted && (
-                      <TransactionItem
-                        key={tx.hash}
-                        tx={tx}
-                        completed={historyHashes.includes(tx.hash as `0x${string}`)}
-                        outdated={lastTx?.nonce != undefined && BigInt(tx.nonce) <= BigInt(lastTx?.nonce)}
-                      />
-                    )
+                  ? tx.isExecuted && <TransactionItem key={tx.hash} tx={tx} />
                   : !tx.isExecuted && (
                       <TransactionItem
                         key={tx.hash}
                         tx={tx}
                         onRefetch={() => queryClient.invalidateQueries({ queryKey })}
-                        completed={historyHashes.includes(tx.hash as `0x${string}`)}
-                        outdated={lastTx?.nonce != undefined && BigInt(tx.nonce) <= BigInt(lastTx?.nonce)}
                       />
                     );
               })

@@ -1,9 +1,6 @@
 import * as React from "react";
 import Link from "next/link";
-import { Balance, FaucetButton, RainbowKitCustomConnectButton } from "./scaffold-eth";
-// import Logo from "../assets/logo.svg";
-import { useAccount } from "wagmi";
-import { useNetworkColor } from "~~/hooks/scaffold-eth";
+import { RainbowKitCustomConnectButton } from "./scaffold-eth";
 
 export const NavButton = ({ link, title }: { link: string; title: string }) => {
   return (
@@ -16,10 +13,6 @@ export const NavButton = ({ link, title }: { link: string; title: string }) => {
 };
 
 export const Navbar = () => {
-  const { address, isConnected, chain } = useAccount();
-
-  const networkColor = useNetworkColor();
-
   return (
     <div className="bg-base-200 w-[432px] mx-auto justify-between flex  gap-x-1 px-2  border-b border-gray py-4">
       <Link href="/">

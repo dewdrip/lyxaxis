@@ -1,4 +1,4 @@
-import { MouseEvent, SetStateAction } from "react";
+import { SetStateAction } from "react";
 import { useRouter } from "next/navigation";
 import { RiArrowLeftLine } from "react-icons/ri";
 

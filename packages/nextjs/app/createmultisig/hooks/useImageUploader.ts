@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Buffer } from "buffer";
 import { ethers } from "ethers";
 import { notification } from "~~/utils/scaffold-eth";
 
@@ -74,7 +73,6 @@ export function useImageUploader({ image, enabled, onUpload, onError }: UseImage
       if (!rawBase64) {
         throw new Error("Failed to process base64 image data");
       }
-      // const imageBuffer = Buffer.from(rawBase64, "base64");
 
       const imageBuffer = base64ToUint8Array(rawBase64);
 

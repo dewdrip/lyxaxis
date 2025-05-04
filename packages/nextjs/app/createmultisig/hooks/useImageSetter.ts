@@ -3,7 +3,6 @@ import { Dispatch, SetStateAction, useRef, useState } from "react";
 import { UploadedImageData } from "~~/hooks/useProfileMetadata";
 
 export function useImageSetter(
-  setFieldFile: Dispatch<SetStateAction<File | null>>,
   setUploadedImage: Dispatch<SetStateAction<UploadedImageData[]>>,
   existingImage?: string,
 ) {
@@ -17,7 +16,6 @@ export function useImageSetter(
 
   const handleImageClear = () => {
     setFile(null);
-    setFieldFile(null);
     setPreviewUrl("");
     setUploadedImage([]);
     setIsPreviewVisible(false);
@@ -26,7 +24,6 @@ export function useImageSetter(
 
   const handleFileChange = (file: File) => {
     setFile(file);
-    setFieldFile(file);
     setPreviewUrl(URL.createObjectURL(file));
     setIsPreviewVisible(true);
     setError(null);

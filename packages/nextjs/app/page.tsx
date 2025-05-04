@@ -45,10 +45,9 @@ const Home: NextPage = () => {
             {/* <MagnifyingGlassIcon className="h-8 w-8 fill-secondary" /> */}
             <h5 className="text-lg">Get started</h5>
             <p className="text-base ">Create a multisig to get started</p>
-            <Link
-              href={"/createmultisig"}
-              children={<button className="btn btn-primary btn-sm ">Create Multisig</button>}
-            />
+            <Link href={"/createmultisig"}>
+              <button className="btn btn-primary btn-sm">Create Multisig</button>
+            </Link>
           </div>
         ) : (
           <div className="flex flex-col gap-y-3 w-full max-w-[398px]">
@@ -56,10 +55,9 @@ const Home: NextPage = () => {
             {multisigs && (
               <div className="flex items-center w-full justify-between gap-x-4">
                 <h6 className="text-2xl text-left">My Multisigs</h6>
-                <Link
-                  href={"/createmultisig"}
-                  children={<button className="btn btn-primary btn-sm">Create Multisig</button>}
-                />
+                <Link href={"/createmultisig"}>
+                  <button className="btn btn-primary btn-sm">Create Multisig</button>
+                </Link>
               </div>
             )}
             <div className="flex flex-col gap-y-2 w-full h-[32rem] overflow-y-scroll">

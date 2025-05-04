@@ -7,7 +7,7 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 const deployedContracts = {
   42: {
     Lyxaxis: {
-      address: "0xbc0E34459151bec77c75ef205fC7507CaC64588e",
+      address: "0x8feB3A0810F2B6EC9D30726054747C06ACFB756A",
       abi: [
         {
           inputs: [],

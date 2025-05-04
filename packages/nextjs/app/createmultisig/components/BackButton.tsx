@@ -11,7 +11,7 @@ export const BackButton = ({
 }) => {
   const router = useRouter();
 
-  const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
+  const handleClick = () => {
     isRequiredPage ? router.back() : action(prev => prev - 1);
   };
 

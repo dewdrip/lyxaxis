@@ -11,7 +11,12 @@ type Props = {
   className?: string;
 };
 
-export default function LyxInput({ value = "", onChange = () => {}, placeholder = "0", className = "" }: Props) {
+export default function LyxInput({
+  value = "",
+  onChange = (value: string) => {},
+  placeholder = "0",
+  className = "",
+}: Props) {
   const {
     price: nativeCurrencyPrice,
     loading: isFetchingNativeCurrency,

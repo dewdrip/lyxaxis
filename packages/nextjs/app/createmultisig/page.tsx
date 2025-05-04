@@ -90,6 +90,7 @@ const CreateMultiSig: NextPage = () => {
 
   const componentArray = [
     <RequiredForm
+      key="required-form"
       handleCreate={handleCreate}
       setSigners={setSigners}
       setName={setName}
@@ -104,6 +105,7 @@ const CreateMultiSig: NextPage = () => {
       setPages={setPages}
     />,
     <OptionalForm
+      key="optional-form"
       handleCreate={handleCreate}
       profileImage={profileImage}
       backgroundImage={backgroundImage}

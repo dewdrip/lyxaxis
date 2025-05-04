@@ -9,9 +9,8 @@ import { useChainId, usePublicClient, useReadContract, useWalletClient } from "w
 import { TrashIcon } from "@heroicons/react/24/solid";
 import { TransactionData } from "~~/app/transfer/[id]/page";
 import { MultiSigNav } from "~~/components/Navbar";
-import Profile from "~~/components/Profile";
 import { ProfileInput } from "~~/components/ProfileInput";
-import { InputBase, IntegerInput } from "~~/components/scaffold-eth";
+import { Address, InputBase, IntegerInput } from "~~/components/scaffold-eth";
 import { useMultiSigRegistry } from "~~/hooks/contract/useMultiSigRegistry";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
 import MultiSigABI from "~~/utils/abis/MultiSigABI.json";
@@ -210,7 +209,7 @@ const Owners: FC = () => {
           <div className="mt-6 w-full space-y-3 max-h-[100px] overflow-y-auto">
             {owners?.map((owner: string, i: number) => (
               <div key={i} className="flex justify-between items-center">
-                <Profile address={owner as `0x${string}`} imageClassName="w-6" />
+                <Address address={owner as `0x${string}`} />
                 <div className="flex items-center gap-2">
                   <span>Owner</span>
                   {!addSigner && selectedForRemoval !== owner && (
@@ -281,7 +280,7 @@ const Owners: FC = () => {
 
             <ProfileInput
               value={predefinedTxData.signer}
-              onSelectAddress={address => setPredefinedTxData({ ...predefinedTxData, signer: address })}
+              onSelectAddress={profile => setPredefinedTxData({ ...predefinedTxData, signer: profile.controller })}
             />
 
             <IntegerInput

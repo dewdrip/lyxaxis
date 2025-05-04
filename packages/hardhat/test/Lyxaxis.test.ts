@@ -235,6 +235,48 @@ describe("Lyxaxis", function () {
         "MultiSig__NotUniversalProfile",
       );
     });
+
+    it("Should revert if contract is added as signer", async function () {
+      // Create initial multisig
+      const profileMetadata = {
+        name: "Test Wallet",
+        description: "Test Description",
+        links: [],
+        tags: [],
+        profileImage: [],
+        backgroundImage: [],
+      };
+
+      const encodedProfileMetadata = await encodeProfileMetadata(profileMetadata);
+      const owners = [owner.address];
+      const signaturesRequired = 1;
+
+      const tx = await lyxaxis.createWallet(encodedProfileMetadata.value, owners, signaturesRequired);
+      await tx.wait();
+
+      // Get the multisig address
+      const ownerMultisigs = await registry.getSignerMultisigs(owner.address);
+      const multisigAddress = ownerMultisigs[0];
+      const multisig = await ethers.getContractAt("MultiSig", multisigAddress);
+
+      // Try to add the contract as a signer
+      const newSignaturesRequired = 2;
+
+      // Execute through UP
+      const addSignerData = multisig.interface.encodeFunctionData("addSigner", [
+        await multisig.getUniversalProfile(),
+        newSignaturesRequired,
+      ]);
+
+      const nonce = await multisig.nonce();
+      const txHash = await multisig.getTransactionHash(nonce, multisigAddress, 0n, addSignerData);
+
+      const signature = await owner.provider.send("personal_sign", [txHash, owner.address]);
+
+      await expect(
+        multisig.executeTransaction(multisigAddress, 0n, addSignerData, [signature]),
+      ).to.be.revertedWithCustomError(multisig, "MultiSig__ContractNotAllowed");
+    });
   });
 
   describe("Fund Transfer", function () {

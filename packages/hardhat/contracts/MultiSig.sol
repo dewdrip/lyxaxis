@@ -17,6 +17,7 @@ error MultiSig__TransferFailed();
 error MultiSig__InvalidSignaturesCount();
 error MultiSig__CannotRemoveLastOwner();
 error MultiSig__InvalidSignaturesRequired();
+error MultiSig__ContractNotAllowed();
 
 /**
  * @title MultiSig
@@ -54,6 +55,7 @@ contract MultiSig is IMultiSig, ILSP20CallVerifier {
             address owner = _owners[i];
 
             require(owner != address(0), MultiSig__ZeroAddress());
+            require(owner.code.length == 0, MultiSig__ContractNotAllowed());
             require(!isOwner[owner], MultiSig__OwnerNotUnique());
 
             isOwner[owner] = true;
@@ -85,6 +87,7 @@ contract MultiSig is IMultiSig, ILSP20CallVerifier {
      */
     function addSigner(address newSigner, uint256 newSignaturesRequired) public onlyUP {
         require(newSigner != address(0), MultiSig__ZeroAddress());
+        require(newSigner.code.length == 0, MultiSig__ContractNotAllowed());
         require(!isOwner[newSigner], MultiSig__OwnerNotUnique());
         require(newSignaturesRequired > 0, MultiSig__ZeroRequiredSignatures());
         require(newSignaturesRequired <= numOfOwners + 1, MultiSig__InvalidSignaturesRequired());

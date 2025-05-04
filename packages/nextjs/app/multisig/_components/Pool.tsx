@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { TransactionItem } from "./TransactionItem";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { TransactionData } from "~~/app/transfer/[id]/page";
 import { Address } from "~~/components/scaffold-eth";
-import { useScaffoldContract, useScaffoldEventHistory } from "~~/hooks/scaffold-eth";
+import { useScaffoldContract } from "~~/hooks/scaffold-eth";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
 import { getPoolServerUrl } from "~~/utils/getPoolServerUrl";
 import { notification } from "~~/utils/scaffold-eth";

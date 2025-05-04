@@ -6,6 +6,7 @@ import WelcomeUI from "./_components/WelcomeUI";
 import type { NextPage } from "next";
 import { useAccount } from "wagmi";
 import { MultisigCard } from "~~/components/cards/MultisigCard";
+import { useUPProvider } from "~~/contexts/UPProviderContext";
 import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
 import { getController } from "~~/utils/helpers";
 
@@ -13,6 +14,8 @@ const Home: NextPage = () => {
   const { address: connectedAddress } = useAccount();
 
   const [controller, setController] = useState<string | undefined>(undefined);
+
+  const { contextAccounts } = useUPProvider();
 
   const { data: registryAddress, isLoading: registryAddressLoading } = useScaffoldReadContract({
     contractName: "Lyxaxis",
@@ -28,11 +31,11 @@ const Home: NextPage = () => {
 
   useEffect(() => {
     (async () => {
-      if (connectedAddress) {
-        setController(await getController(connectedAddress as `0x${string}`));
+      if (connectedAddress || contextAccounts.length > 0) {
+        setController(await getController((connectedAddress || contextAccounts[0]) as `0x${string}`));
       }
     })();
-  }, [connectedAddress]);
+  }, [connectedAddress, contextAccounts]);
 
   return (
     <div className="flex items-center flex-col flex-grow pt-10 w-full h-screen overflow-y-auto">

@@ -1,3 +1,8 @@
+import { ERC725 } from "@erc725/erc725.js";
+// This contains the schemas of the data keys:
+// - AddressPermissions[] -> list of controllers
+// - `AddressPermission:Permissions:<controller-address> -> permission of a specific controller
+import LSP6Schema from "@erc725/erc725.js/schemas/LSP6KeyManager.json";
 import { keccak256 } from "viem";
 
 /**
@@ -89,3 +94,26 @@ export const truncateString = (str: string, maxLength: number): string => {
   if (!str || str.length <= maxLength) return str;
   return `${str.slice(0, maxLength)}...`;
 };
+
+interface AddressPermission {
+  key: string;
+  name: string;
+  value: `0x${string}`[];
+}
+
+export async function getController(address: `0x${string}`): Promise<`0x${string}`> {
+  try {
+    const erc725 = new ERC725(LSP6Schema, address, "https://rpc.mainnet.lukso.network");
+
+    // Get the list of addresses that have permissions on the Universal Profile
+    const controllerAddresses = (await erc725.getData("AddressPermissions[]")) as AddressPermission;
+
+    if (!controllerAddresses) {
+      return address;
+    } else {
+      return controllerAddresses.value[1] as `0x${string}`;
+    }
+  } catch (error) {
+    return address;
+  }
+}

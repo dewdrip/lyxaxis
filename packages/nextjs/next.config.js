@@ -9,19 +9,22 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: process.env.NEXT_PUBLIC_IGNORE_BUILD_ERROR === "true",
   },
+  images: {
+    /** Allow images from all domains
+     *  @next/image
+     */
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**", // Wildcard for all hostnames
+        pathname: "**", // Wildcard for all paths
+      },
+    ],
+  },
   webpack: config => {
     config.resolve.fallback = { fs: false, net: false, tls: false };
     config.externals.push("pino-pretty", "lokijs", "encoding");
     return config;
-  },
-  images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "api.universalprofile.cloud",
-        pathname: "/ipfs/**",
-      },
-    ],
   },
 };
 

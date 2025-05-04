@@ -8,6 +8,7 @@ import type { NextPage } from "next";
 import { useAccount } from "wagmi";
 import { useCreateWallet } from "~~/hooks/contract/useCreateWallet";
 import { Link, UploadedImageData } from "~~/hooks/useProfileMetadata";
+import { UniversalProfileOwner } from "~~/types/universalProfile";
 import { notification } from "~~/utils/scaffold-eth";
 
 const CreateMultiSig: NextPage = () => {
@@ -25,7 +26,7 @@ const CreateMultiSig: NextPage = () => {
   const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
   const [backgroundImageFile, setBackgroundImageFile] = useState<File | null>(null);
 
-  const [newSigner, setNewSigner] = useState<string>("");
+  const [newSigner, setNewSigner] = useState<UniversalProfileOwner>({ address: "", controller: "" });
 
   const [requiredSignatures, setRequiredSignatures] = useState<string>("");
 
@@ -75,7 +76,7 @@ const CreateMultiSig: NextPage = () => {
       if (newMultisigAddress) {
         setName("");
         setSigners(ownerAddress ? [ownerAddress] : []);
-        setNewSigner("");
+        setNewSigner({ address: "", controller: "" });
         setRequiredSignatures("");
 
         router.replace(`/multisig/${newMultisigAddress}`);

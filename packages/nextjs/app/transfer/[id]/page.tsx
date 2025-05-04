@@ -10,6 +10,7 @@ import { MultiSigNav } from "~~/components/Navbar";
 import { ProfileInput } from "~~/components/ProfileInput";
 import { InputBase } from "~~/components/scaffold-eth";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
+import { UniversalProfileOwner } from "~~/types/universalProfile";
 import MultiSigABI from "~~/utils/abis/MultiSigABI.json";
 import { getPoolServerUrl } from "~~/utils/getPoolServerUrl";
 import { DEFAULT_TX_DATA, PredefinedTxData } from "~~/utils/methods";
@@ -175,8 +176,8 @@ const CreatePage: FC = () => {
     }
   };
 
-  const handleSelectAddress = (address: `0x${string}`) => {
-    setPredefinedTxData({ ...predefinedTxData, signer: address });
+  const handleSelectAddress = (profile: UniversalProfileOwner) => {
+    setPredefinedTxData({ ...predefinedTxData, signer: profile.address });
   };
 
   useEffect(() => {
@@ -210,6 +211,7 @@ const CreatePage: FC = () => {
                 value={predefinedTxData.signer}
                 onSelectAddress={handleSelectAddress}
                 placeholder="Enter profile name or address"
+                readController={false}
               />
 
               <LyxInput

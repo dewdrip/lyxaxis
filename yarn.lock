@@ -1655,12 +1655,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@heroicons/react@npm:~2.1.5":
-  version: 2.1.5
-  resolution: "@heroicons/react@npm:2.1.5"
+"@heroicons/react@npm:^2.2.0":
+  version: 2.2.0
+  resolution: "@heroicons/react@npm:2.2.0"
   peerDependencies:
-    react: ">= 16"
-  checksum: 1c793f96443580416eccdb60d72c19f640ce068a95f8568bfe8176c6e8ef1318f3d4d4caa8656b571002fe3a7f2d989d6812429fd6bca4bdff641e4b8998c0cd
+    react: ">= 16 || ^19.0.0-rc"
+  checksum: ff4dbfa98dacc41f86db82be9102d0c2cd0b8652b428f0b49ffd2580bee8f36fca43937a3d3d5e8f209c7303f5317a32163c018dfa13a3730d79dec43addac93
   languageName: node
   linkType: hard
 
@@ -3541,7 +3541,7 @@ __metadata:
     "@chakra-ui/react": ^3.17.0
     "@emotion/react": ^11.14.0
     "@erc725/erc725.js": ^0.27.2
-    "@heroicons/react": ~2.1.5
+    "@heroicons/react": ^2.2.0
     "@lukso/up-provider": ^0.3.5
     "@rainbow-me/rainbowkit": 2.1.6
     "@tanstack/react-query": ~5.59.15
@@ -3563,6 +3563,7 @@ __metadata:
     eslint-config-prettier: ~8.10.0
     eslint-plugin-prettier: ~5.2.1
     ethers: ^6.13.5
+    framer-motion: ^12.9.4
     graphql: ^16.10.0
     graphql-request: ^7.1.2
     next: ~14.2.11
@@ -11242,6 +11243,28 @@ __metadata:
   languageName: node
   linkType: hard
 
+"framer-motion@npm:^12.9.4":
+  version: 12.9.4
+  resolution: "framer-motion@npm:12.9.4"
+  dependencies:
+    motion-dom: ^12.9.4
+    motion-utils: ^12.9.4
+    tslib: ^2.4.0
+  peerDependencies:
+    "@emotion/is-prop-valid": "*"
+    react: ^18.0.0 || ^19.0.0
+    react-dom: ^18.0.0 || ^19.0.0
+  peerDependenciesMeta:
+    "@emotion/is-prop-valid":
+      optional: true
+    react:
+      optional: true
+    react-dom:
+      optional: true
+  checksum: 110cf5c3ba5ea4e81430bf8274fc7d9852753447ccce75e63d509edac13c462647b43ffd419d35413cc80b349bb9589acda08da8dff7f5e18d51a0586576f0a9
+  languageName: node
+  linkType: hard
+
 "fresh@npm:0.5.2":
   version: 0.5.2
   resolution: "fresh@npm:0.5.2"
@@ -14290,6 +14313,22 @@ __metadata:
     mongodb: ^2.2.6
     streamz: ^1.5.2
   checksum: 7a52cff897631c4c8eb6352e6a0d7b00ed8e909a653b5b850076a43f7cc8098fcc12f193ef2d94edba070c0cfdbfbfb36542833f08d5d84431057cd9733b8077
+  languageName: node
+  linkType: hard
+
+"motion-dom@npm:^12.9.4":
+  version: 12.9.4
+  resolution: "motion-dom@npm:12.9.4"
+  dependencies:
+    motion-utils: ^12.9.4
+  checksum: 0c167073865f6d6a61d26833a3a6b47a0453a53ae9cf695302a3fa51576859e52bc4025b8ffeea5bb3f084943ec31d3f11780ea00572c47b031da8887fc9296f
+  languageName: node
+  linkType: hard
+
+"motion-utils@npm:^12.9.4":
+  version: 12.9.4
+  resolution: "motion-utils@npm:12.9.4"
+  checksum: 7fe97beb216e0591afac3188e1ad10de40099b9092813078e2b5d86b4403331e3006f5866e75bc3e14097379dd456fd6e79b95cee9d685001690630ea7fa54d0
   languageName: node
   linkType: hard
 

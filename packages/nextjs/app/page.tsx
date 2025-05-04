@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import WelcomeUI from "./_components/WelcomeUI";
 import type { NextPage } from "next";
 import { useAccount } from "wagmi";
 import { MultisigCard } from "~~/components/cards/MultisigCard";
@@ -34,24 +35,18 @@ const Home: NextPage = () => {
   }, [connectedAddress]);
 
   return (
-    <div className="flex items-center flex-col flex-grow pt-10 w-full">
+    <div className="flex items-center flex-col flex-grow pt-10 w-full h-screen overflow-y-auto">
       <div className="flex flex-col justify-center items-center gap-y-8 w-full">
         {multisigsLoading || registryAddressLoading ? (
           <div className="flex items-center justify-center py-32">
             <span className="loading w-6" />
           </div>
-        ) : multisigs && multisigs.length === 0 ? (
-          <div className="flex flex-col min-w-[398px] border border-gray p-4 text-center items-center  rounded-xl">
-            {/* <MagnifyingGlassIcon className="h-8 w-8 fill-secondary" /> */}
-            <h5 className="text-lg">Get started</h5>
-            <p className="text-base ">Create a multisig to get started</p>
-            <Link href={"/createmultisig"}>
-              <button className="btn btn-primary btn-sm">Create Multisig</button>
-            </Link>
+        ) : !multisigs || multisigs.length === 0 ? (
+          <div className="max-w-[398px]">
+            <WelcomeUI />
           </div>
         ) : (
           <div className="flex flex-col gap-y-3 w-full max-w-[398px]">
-            {!multisigs && <p className="text-center">Connect your wallet to get started</p>}
             {multisigs && (
               <div className="flex items-center w-full justify-between gap-x-4">
                 <h6 className="text-2xl text-left">My Multisigs</h6>

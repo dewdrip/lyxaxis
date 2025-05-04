@@ -23,8 +23,6 @@ const CreateMultiSig: NextPage = () => {
   const [description, setDescription] = useState<string>("");
   const [tags, setTags] = useState<string[]>([]);
   const [links, setLinks] = useState<Link[]>([]);
-  const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
-  const [backgroundImageFile, setBackgroundImageFile] = useState<File | null>(null);
 
   const [newSigner, setNewSigner] = useState<UniversalProfileOwner>({ address: "", controller: "" });
 
@@ -91,7 +89,6 @@ const CreateMultiSig: NextPage = () => {
   const componentArray = [
     <RequiredForm
       key="required-form"
-      handleCreate={handleCreate}
       setSigners={setSigners}
       setName={setName}
       setNewSigner={setNewSigner}
@@ -101,14 +98,10 @@ const CreateMultiSig: NextPage = () => {
       signers={signers}
       name={name}
       isCreateWalletLoading={isCreateWalletLoading}
-      pages={pages}
       setPages={setPages}
     />,
     <OptionalForm
       key="optional-form"
-      handleCreate={handleCreate}
-      profileImage={profileImage}
-      backgroundImage={backgroundImage}
       description={description}
       setDescription={setDescription}
       tags={tags}
@@ -117,10 +110,8 @@ const CreateMultiSig: NextPage = () => {
       setLinks={setLinks}
       setProfileImage={setProfileImage}
       setBackgroundImage={setBackgroundImage}
-      setBackgroundImageFile={setBackgroundImageFile}
-      setProfileImageFile={setProfileImageFile}
+      handleCreate={handleCreate}
       isCreateWalletLoading={isCreateWalletLoading}
-      pages={pages}
       setPages={setPages}
     />,
   ];

@@ -1,5 +1,4 @@
 import { type FC, useState } from "react";
-import { useRouter } from "next/navigation";
 import { Address, BlockieAvatar } from "../../../components/scaffold-eth";
 import { useCanExecute, useHasSignedNewHash } from "../hook/useHasSignedNewHash";
 import { PreveiwProfileModal } from "./PreviewProfile";
@@ -19,10 +18,9 @@ import { getPoolServerUrl } from "~~/utils/getPoolServerUrl";
 import { truncateString } from "~~/utils/helpers";
 import { notification } from "~~/utils/scaffold-eth";
 
-type TransactionItemProps = { tx: TransactionData; completed: boolean; outdated: boolean; onRefetch?: () => void };
+type TransactionItemProps = { tx: TransactionData; onRefetch?: () => void };
 
-export const TransactionItem: FC<TransactionItemProps> = ({ tx, completed, outdated, onRefetch }) => {
-  const router = useRouter();
+export const TransactionItem: FC<TransactionItemProps> = ({ tx, onRefetch }) => {
   const { address } = useAccount();
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();

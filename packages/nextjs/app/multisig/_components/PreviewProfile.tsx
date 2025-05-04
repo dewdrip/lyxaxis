@@ -1,9 +1,7 @@
-import { Abi, decodeFunctionData } from "viem";
 import { TransactionData } from "~~/app/transfer/[id]/page";
 import { BlockieAvatar } from "~~/components/scaffold-eth";
-import { useCreateWallet, useDecodedProfileMetadata } from "~~/hooks/contract/useCreateWallet";
+import { useDecodedProfileMetadata } from "~~/hooks/contract/useCreateWallet";
 import { ProfilePayload } from "~~/hooks/useProfileMetadata";
-import LspABI from "~~/utils/abis/LspABI.json";
 
 export const PreveiwProfileModal = ({
   txnData,
@@ -15,17 +13,10 @@ export const PreveiwProfileModal = ({
   };
   tx: TransactionData;
 }) => {
-  const {
-    data: profile,
-    loading: profileLoading,
-    error,
-  } = useDecodedProfileMetadata(txnData.args?.[1] as `0x${string}`) as {
+  const { data: profile, loading: profileLoading } = useDecodedProfileMetadata(txnData.args?.[1] as `0x${string}`) as {
     data: ProfilePayload;
     loading: boolean;
-    error: any;
   };
-
-  console.log("data", profile);
 
   const getImageUrl = (ipfsUrl: string) => ipfsUrl.replace("ipfs://", "https://api.universalprofile.cloud/ipfs/");
 

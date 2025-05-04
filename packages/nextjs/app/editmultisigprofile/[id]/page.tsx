@@ -6,7 +6,6 @@ import { useParams } from "next/navigation";
 import { InterfaceAbi, ethers } from "ethers";
 import type { NextPage } from "next";
 import { useIsMounted, useLocalStorage } from "usehooks-ts";
-import { Abi, encodeFunctionData } from "viem";
 import { useChainId, usePublicClient, useWalletClient } from "wagmi";
 import { PlusCircleIcon } from "@heroicons/react/24/outline";
 import { BackButton } from "~~/app/createmultisig/components/BackButton";
@@ -36,7 +35,7 @@ const EditMultiSigProfile: NextPage = () => {
 
   const router = useRouter();
 
-  const { data: upAddress, isLoading: isUpAddressLoading } = useScaffoldReadContract({
+  const { data: upAddress } = useScaffoldReadContract({
     contractName: "MultiSig",
     functionName: "getUniversalProfile",
     contractAddress: multisigAddress,
@@ -49,9 +48,6 @@ const EditMultiSigProfile: NextPage = () => {
     profile: ProfilePayload | null;
     loading: boolean;
   };
-
-  const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
-  const [backgroundImageFile, setBackgroundImageFile] = useState<File | null>(null);
 
   const [name, setName] = useState<string>("");
   const [description, setDescription] = useState<string>("");
@@ -71,12 +67,6 @@ const EditMultiSigProfile: NextPage = () => {
     contractName: "MultiSig",
     contractAddress: multisigAddress,
     functionName: "signaturesRequired",
-  });
-
-  const { data: owners } = useScaffoldReadContract({
-    contractName: "MultiSigRegistry",
-    functionName: "getMultisigOwners",
-    args: [multisigAddress],
   });
 
   const { data: nonce } = useScaffoldReadContract({
@@ -118,10 +108,6 @@ const EditMultiSigProfile: NextPage = () => {
       };
 
       const encodedProfileMetadata = await encodeProfileMetadata(profileMetadata);
-
-      console.log("encodedProfileMetadata", encodedProfileMetadata);
-
-      console.log("upAddress", upAddress);
 
       const upContract = new ethers.Contract(upAddress as `0x${string}`, LspABI as InterfaceAbi);
 
@@ -226,7 +212,6 @@ const EditMultiSigProfile: NextPage = () => {
   };
 
   useEffect(() => {
-    console.log("profile", profile);
     if (profile) {
       setName(profile.name || "");
       setDescription(profile.description || "");
@@ -244,12 +229,6 @@ const EditMultiSigProfile: NextPage = () => {
 
     return (
       <ImageUploader
-        setFieldValue={async (field: string, value: string): Promise<void> => {
-          // Handle the image upload field value setting
-          console.log(field, value);
-        }}
-        setBackgroundImageFile={setBackgroundImageFile}
-        setProfileImageFile={setProfileImageFile}
         setBackgroundImage={setBackgroundImage}
         setProfileImage={setProfileImage}
         profileImageUrl={

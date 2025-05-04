@@ -3,19 +3,13 @@
 import { type FC } from "react";
 import { useParams } from "next/navigation";
 import { TransactionEventItem } from "../../multisig/_components";
-import { QRCodeSVG } from "qrcode.react";
-import { MultiSigNav, Navbar } from "~~/components/Navbar";
-import { Address, Balance } from "~~/components/scaffold-eth";
-import { useDeployedContractInfo, useScaffoldEventHistory } from "~~/hooks/scaffold-eth";
+import { MultiSigNav } from "~~/components/Navbar";
+import { useScaffoldEventHistory } from "~~/hooks/scaffold-eth";
 
 const Events: FC = () => {
   let { id: multisigAddress } = useParams();
 
   multisigAddress = multisigAddress as `0x${string}`;
-
-  const { data: contractInfo } = useDeployedContractInfo("MultiSig");
-
-  const contractAddress = contractInfo?.address;
 
   const { data: executeTransactionEvents } = useScaffoldEventHistory({
     contractName: "MultiSig",

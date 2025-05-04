@@ -7,23 +7,15 @@ import { MdCancel } from "react-icons/md";
 import { UploadedImageData } from "~~/hooks/useProfileMetadata";
 
 interface Props {
-  setFieldValue: (field: string, value: string) => void;
   setUploadedImage: Dispatch<SetStateAction<UploadedImageData[]>>;
-  setProfileFile: Dispatch<SetStateAction<File | null>>;
   existingImage?: string;
 }
 
-export const ProfileImageUploader: FC<Props> = ({ setFieldValue, setUploadedImage, setProfileFile, existingImage }) => {
-  const {
-    file,
-    previewUrl,
-    isPreviewVisible,
-    inputFileRef,
-    handleDrop,
-    handleInputChange,
-    handleImageClear,
-    isLoading,
-  } = useImageSetter(setProfileFile, setUploadedImage, existingImage);
+export const ProfileImageUploader: FC<Props> = ({ setUploadedImage, existingImage }) => {
+  const { file, previewUrl, inputFileRef, handleDrop, handleInputChange, handleImageClear } = useImageSetter(
+    setUploadedImage,
+    existingImage,
+  );
 
   const { upload: uploadImage, isUploading, error } = useImageUploader({ enabled: false });
 
@@ -64,7 +56,7 @@ export const ProfileImageUploader: FC<Props> = ({ setFieldValue, setUploadedImag
     if (file) {
       handleUpload();
     }
-  }, [file]);
+  }, [file, handleUpload]);
 
   return (
     <div className="relative bg-base-100 w-[140px] h-[140px] rounded-full -mt-14 ml-5">

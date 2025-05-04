@@ -5,6 +5,87 @@
 import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 
 const deployedContracts = {
+  42: {
+    Lyxaxis: {
+      address: "0xbc0E34459151bec77c75ef205fC7507CaC64588e",
+      abi: [
+        {
+          inputs: [],
+          stateMutability: "nonpayable",
+          type: "constructor",
+        },
+        {
+          inputs: [],
+          name: "Lyxaxis__NoOwners",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "Lyxaxis__NoRequiredSignatures",
+          type: "error",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "address",
+              name: "multisig",
+              type: "address",
+            },
+          ],
+          name: "CreatedMultisig",
+          type: "event",
+        },
+        {
+          inputs: [
+            {
+              internalType: "bytes",
+              name: "profileMetadata",
+              type: "bytes",
+            },
+            {
+              internalType: "address[]",
+              name: "_owners",
+              type: "address[]",
+            },
+            {
+              internalType: "uint256",
+              name: "_signaturesRequired",
+              type: "uint256",
+            },
+          ],
+          name: "createWallet",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "getRegistry",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+      ],
+      inheritedFunctions: {
+        createWallet: "contracts/interfaces/ILyxaxis.sol",
+        getRegistry: "contracts/interfaces/ILyxaxis.sol",
+      },
+    },
+  },
   31337: {
     Lyxaxis: {
       address: "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e",

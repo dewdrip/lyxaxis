@@ -22,25 +22,12 @@ export const Pool = ({
   const { targetNetwork } = useTargetNetwork();
   const poolServerUrl = getPoolServerUrl(targetNetwork.id);
 
-  const { data: eventsHistory } = useScaffoldEventHistory({
-    contractName: "MultiSig",
-    eventName: "ExecuteTransaction",
-    contractAddress: multisigAddress,
-    fromBlock: 0n,
-    watch: true,
-  });
-
   const { data: MultiSig } = useScaffoldContract({
     contractName: "MultiSig",
     contractAddress: multisigAddress,
   });
 
-  const historyHashes = useMemo(
-    () => (eventsHistory ? eventsHistory.filter(ev => ev.args && ev.args.hash).map(ev => ev.args.hash) : []),
-    [eventsHistory],
-  );
-
-  const fetchTransactionData = async (id?: string) => {
+  const fetchTransactionData = async () => {
     try {
       setLoading(true);
 
@@ -90,14 +77,6 @@ export const Pool = ({
     refetchOnMount: true, // Always refetch when the component mounts
     refetchOnWindowFocus: true,
   });
-
-  const lastTx = useMemo(
-    () =>
-      transactions
-        ?.filter(tx => historyHashes.includes(tx.hash))
-        .sort((a, b) => (BigInt(a.nonce) < BigInt(b.nonce) ? 1 : -1))[0],
-    [historyHashes, transactions],
-  );
 
   useEffect(() => {
     if (transactions) {

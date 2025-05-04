@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAccount } from "wagmi";
+import { getController } from "~~/utils/helpers";
 
 export function useHasSignedNewHash({
   metaMultiSigWallet,
@@ -32,10 +33,13 @@ export function useHasSignedNewHash({
         tx.data,
       ])) as `0x${string}`;
 
+      if (!address) throw new Error("Address is undefined");
+      const controller = await getController(address as `0x${string}`);
+
       for (const sig of tx.signatures) {
         const signer = await metaMultiSigWallet.read.recover([newHash, sig]);
         const isOwner = await metaMultiSigWallet.read.isOwner([signer as string]);
-        if (isOwner && signer === address) {
+        if (isOwner && signer === controller) {
           return true;
         }
       }

@@ -1,6 +1,5 @@
 import { FC } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { ArrowRightIcon, CubeIcon, DocumentCheckIcon, UserGroupIcon, WalletIcon } from "@heroicons/react/24/outline";
 
@@ -22,8 +21,6 @@ const FeatureCard: FC<FeatureCardProps> = ({ icon, title, description }) => (
 );
 
 export default function WelcomeUI() {
-  const router = useRouter();
-
   const features = [
     {
       icon: <CubeIcon className="w-full h-full" />,
@@ -48,7 +45,7 @@ export default function WelcomeUI() {
   ];
 
   return (
-    <div className="max-h-screen bg-gradient-to-b from-base-100 to-base-200">
+    <div className="bg-gradient-to-b from-base-100 to-base-200">
       <div className="container mx-auto px-4 py-16">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -76,7 +73,7 @@ export default function WelcomeUI() {
           </Link>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+        <div className="flex flex-col gap-8 mb-16">
           {features.map((feature, index) => (
             <motion.div
               key={index}

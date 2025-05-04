@@ -6,12 +6,12 @@ import { notification } from "~~/utils/scaffold-eth/notification";
 
 type Props = {
   value?: string;
-  onChange?: (value: string) => void;
+  onChange: (value: string) => void;
   placeholder?: string;
   className?: string;
 };
 
-export default function LyxInput({ value = "", onChange = () => {}, placeholder = "0", className = "" }: Props) {
+export const LyxInput = ({ value = "", onChange, placeholder = "0", className = "" }: Props) => {
   const {
     price: nativeCurrencyPrice,
     loading: isFetchingNativeCurrency,
@@ -110,4 +110,6 @@ export default function LyxInput({ value = "", onChange = () => {}, placeholder 
       </strong>
     </div>
   );
-}
+};
+
+export default LyxInput;

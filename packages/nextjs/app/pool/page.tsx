@@ -15,7 +15,7 @@ import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
 import { getPoolServerUrl } from "~~/utils/getPoolServerUrl";
 import { notification } from "~~/utils/scaffold-eth";
 
-export const Pool: FC = () => {
+const Pool: FC = () => {
   const [transactions, setTransactions] = useState<TransactionData[]>();
   // const [subscriptionEventsHashes, setSubscriptionEventsHashes] = useState<`0x${string}`[]>([]);
   const { targetNetwork } = useTargetNetwork();
@@ -97,14 +97,7 @@ export const Pool: FC = () => {
             {transactions === undefined
               ? "Loading..."
               : transactions.map(tx => {
-                  return (
-                    <TransactionItem
-                      key={tx.hash}
-                      tx={tx}
-                      completed={historyHashes.includes(tx.hash as `0x${string}`)}
-                      outdated={lastTx?.nonce != undefined && BigInt(tx.nonce) <= BigInt(lastTx?.nonce)}
-                    />
-                  );
+                  return <TransactionItem key={tx.hash} tx={tx} />;
                 })}
           </div>
         </div>
@@ -112,3 +105,5 @@ export const Pool: FC = () => {
     </div>
   );
 };
+
+export default Pool;

@@ -56,7 +56,7 @@ export const ProfileImageUploader: FC<Props> = ({ setUploadedImage, existingImag
     if (file) {
       handleUpload();
     }
-  }, [file, handleUpload]);
+  }, [file]);
 
   return (
     <div className="relative bg-base-100 w-[140px] h-[140px] rounded-full -mt-14 ml-5">

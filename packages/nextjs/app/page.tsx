@@ -3,32 +3,35 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { NextPage } from "next";
-import { useAccount, usePublicClient } from "wagmi";
+import { useAccount } from "wagmi";
 import { MultisigCard } from "~~/components/cards/MultisigCard";
-import { useDeployedContractInfo, useScaffoldReadContract } from "~~/hooks/scaffold-eth";
+import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
+import { getController } from "~~/utils/helpers";
 
 const Home: NextPage = () => {
   const { address: connectedAddress } = useAccount();
 
-  const {
-    data: registryAddress,
-    isLoading: registryAddressLoading,
-    error: registryAddressError,
-  } = useScaffoldReadContract({
+  const [controller, setController] = useState<string | undefined>(undefined);
+
+  const { data: registryAddress, isLoading: registryAddressLoading } = useScaffoldReadContract({
     contractName: "Lyxaxis",
     functionName: "getRegistry",
   });
 
-  const {
-    data: multisigs,
-    isLoading: multisigsLoading,
-    error: multisigsError,
-  } = useScaffoldReadContract({
+  const { data: multisigs, isLoading: multisigsLoading } = useScaffoldReadContract({
     contractName: "MultiSigRegistry",
     functionName: "getSignerMultisigs",
     contractAddress: registryAddress,
-    args: [connectedAddress],
+    args: [controller],
   });
+
+  useEffect(() => {
+    (async () => {
+      if (connectedAddress) {
+        setController(await getController(connectedAddress as `0x${string}`));
+      }
+    })();
+  }, [connectedAddress]);
 
   return (
     <div className="flex items-center flex-col flex-grow pt-10 w-full">

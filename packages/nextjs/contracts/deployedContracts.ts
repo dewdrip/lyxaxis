@@ -88,7 +88,7 @@ const deployedContracts = {
   },
   31337: {
     Lyxaxis: {
-      address: "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e",
+      address: "0x0B306BF915C4d645ff596e518fAf3F9669b97016",
       abi: [
         {
           inputs: [],

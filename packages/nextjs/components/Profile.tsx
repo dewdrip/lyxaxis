@@ -4,7 +4,7 @@ import Link from "next/link";
 import { BlockieAvatar } from "./scaffold-eth";
 import { AddressCopyIcon } from "./scaffold-eth/Address/AddressCopyIcon";
 import { useProfileMetadata } from "~~/hooks/useProfileMetadata";
-import { getAddressColor, getFirst4Hex, truncateAddress } from "~~/utils/helpers";
+import { getAddressColor, getFirst4Hex, truncateAddress, truncateString } from "~~/utils/helpers";
 
 type Props = {
   address: `0x${string}`;
@@ -55,7 +55,7 @@ export default function Profile({
       </div>
 
       <strong className={`text-md font-thin ml-2 text-center ${nameClassName}`}>
-        {profile ? `${profile.name}` : truncateAddress(address)}
+        {profile ? `${truncateString(profile.name, 12)}` : truncateAddress(address)}
         {profile && <span className="text-purple-400 whitespace-nowrap">#{getFirst4Hex(address)}</span>}
       </strong>
 

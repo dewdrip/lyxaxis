@@ -97,7 +97,7 @@ export function ProfileHeader({ profileLoading, profile, multisigAddress, upAddr
               </button>
               <Link
                 href={`/editmultisigprofile/${multisigAddress}`}
-                className="text-sm border border-gray-light rounded-full px-3 py-1 cursor-pointer hover:bg-gray"
+                className="text-sm whitespace-nowrap border border-gray-light rounded-full px-3 py-1 cursor-pointer hover:bg-gray"
               >
                 Edit profile
               </Link>

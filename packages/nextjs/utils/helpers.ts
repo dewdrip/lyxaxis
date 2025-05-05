@@ -103,7 +103,7 @@ interface AddressPermission {
 
 export async function getController(address: `0x${string}`): Promise<`0x${string}`> {
   try {
-    const erc725 = new ERC725(LSP6Schema, address, "https://rpc.mainnet.lukso.network");
+    const erc725 = new ERC725(LSP6Schema, address, "https://rpc.testnet.lukso.network");
 
     // Get the list of addresses that have permissions on the Universal Profile
     const controllerAddresses = (await erc725.getData("AddressPermissions[]")) as AddressPermission;

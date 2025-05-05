@@ -34,26 +34,17 @@ export type TransactionData = {
 };
 
 const CreatePage: FC = () => {
-  let { id: multisigAddress } = useParams();
-
-  multisigAddress = multisigAddress as `0x${string}`;
-
+  // Hooks and state
+  const { id: multisigAddress } = useParams() as { id: `0x${string}` };
   const isMounted = useIsMounted();
   const router = useRouter();
   const chainId = useChainId();
   const { data: walletClient } = useWalletClient();
   const { targetNetwork } = useTargetNetwork();
+  const publicClient = usePublicClient();
+  const [isProposing, setIsProposing] = useState(false);
 
-  const poolServerUrl = getPoolServerUrl(targetNetwork.id);
-
-  const [predefinedTxData, setPredefinedTxData] = useLocalStorage<PredefinedTxData>("predefined-tx-data", {
-    methodName: "transferFunds",
-    signer: "",
-    newSignaturesNumber: "",
-    amount: "",
-    description: "",
-  });
-
+  // Contract reads
   const { data: nonce } = useReadContract({
     address: multisigAddress,
     abi: MultiSigABI,
@@ -66,37 +57,61 @@ const CreatePage: FC = () => {
     functionName: "signaturesRequired",
   });
 
-  const publicClient = usePublicClient();
+  // Local storage
+  const [predefinedTxData, setPredefinedTxData] = useLocalStorage<PredefinedTxData>("predefined-tx-data", {
+    methodName: "transferFunds",
+    signer: "",
+    newSignaturesNumber: "",
+    amount: "",
+    description: "",
+  });
 
-  const [isProposing, setIsProposing] = useState(false);
+  const poolServerUrl = getPoolServerUrl(targetNetwork.id);
+
+  // Validation helpers
+  const validateInputs = () => {
+    if (!walletClient) {
+      notification.error("No wallet client!");
+      return false;
+    }
+
+    if (!isAddress(predefinedTxData.signer)) {
+      notification.error("Invalid recipient address");
+      return false;
+    }
+
+    if (!predefinedTxData.amount || Number(predefinedTxData.amount) <= 0) {
+      notification.error("Amount must be greater than 0");
+      return false;
+    }
+
+    return true;
+  };
+
+  // Transaction creation
+  const createTransactionData = (
+    newHash: `0x${string}`,
+    signature: `0x${string}`,
+    recover: Address,
+  ): TransactionData => ({
+    title: "Transfer Funds",
+    description: predefinedTxData.description?.trim() || "",
+    chainId,
+    address: multisigAddress,
+    nonce: (nonce as bigint) || 0n,
+    to: predefinedTxData.signer,
+    amount: predefinedTxData.amount!,
+    data: predefinedTxData.callData as `0x${string}`,
+    hash: newHash,
+    signatures: [signature],
+    signers: [recover],
+    requiredApprovals: (signaturesRequired as bigint) || 0n,
+    isExecuted: false,
+  });
 
   const handleCreate = async () => {
     try {
-      if (!walletClient) {
-        notification.error("No wallet client!");
-        return;
-      }
-
-      if (!isAddress(predefinedTxData.signer)) {
-        notification.error("Invalid recipient address");
-        setIsProposing(false);
-        return;
-      }
-
-      if (!predefinedTxData.amount || Number(predefinedTxData.amount) <= 0) {
-        notification.error("Amount must be greater than 0");
-        setIsProposing(false);
-        return;
-      }
-
-      if (!isAddress(predefinedTxData.signer)) {
-        notification.error("Invalid recipient address");
-        setIsProposing(false);
-        return;
-      }
-
-      if (!predefinedTxData.amount || Number(predefinedTxData.amount) <= 0) {
-        notification.error("Amount must be greater than 0");
+      if (!validateInputs()) {
         setIsProposing(false);
         return;
       }
@@ -115,7 +130,7 @@ const CreatePage: FC = () => {
         ],
       })) as `0x${string}`;
 
-      const signature = await walletClient.signMessage({
+      const signature = await walletClient!.signMessage({
         message: { raw: newHash },
       });
 
@@ -134,37 +149,16 @@ const CreatePage: FC = () => {
       });
 
       if (isOwner) {
-        const txData: TransactionData = {
-          title: "Transfer Funds",
-          description: predefinedTxData.description?.trim() || "",
-          chainId: chainId,
-          address: multisigAddress,
-          nonce: (nonce as bigint) || 0n,
-          to: predefinedTxData.signer,
-          amount: predefinedTxData.amount,
-          data: predefinedTxData.callData as `0x${string}`,
-          hash: newHash,
-          signatures: [signature],
-          signers: [recover],
-          requiredApprovals: (signaturesRequired as bigint) || 0n,
-          isExecuted: false,
-        };
+        const txData = createTransactionData(newHash, signature, recover);
 
         await fetch(poolServerUrl, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(
-            txData,
-            // stringifying bigint
-            (key, value) => (typeof value === "bigint" ? value.toString() : value),
-          ),
+          body: JSON.stringify(txData, (key, value) => (typeof value === "bigint" ? value.toString() : value)),
         });
 
         setPredefinedTxData(DEFAULT_TX_DATA);
-
-        setTimeout(() => {
-          router.push(`/multisig/${multisigAddress}`);
-        }, 777);
+        setTimeout(() => router.push(`/multisig/${multisigAddress}`), 777);
       } else {
         notification.info("Only owners can propose transactions");
       }
@@ -194,7 +188,9 @@ const CreatePage: FC = () => {
     }
   }, []);
 
-  return isMounted() ? (
+  if (!isMounted()) return null;
+
+  return (
     <div className="w-full">
       <MultiSigNav multisigAddress={multisigAddress} />
       <div className="flex flex-col flex-1 items-center my-10 gap-8 px-4">
@@ -241,7 +237,7 @@ const CreatePage: FC = () => {
         </div>
       </div>
     </div>
-  ) : null;
+  );
 };
 
 export default CreatePage;

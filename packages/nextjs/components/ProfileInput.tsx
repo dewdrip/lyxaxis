@@ -9,9 +9,13 @@ import { gql, request } from "graphql-request";
 import { CiSearch } from "react-icons/ci";
 import { useDebounceValue } from "usehooks-ts";
 import { isAddress } from "viem";
+import { useAccount } from "wagmi";
 import { UniversalProfileOwner } from "~~/types/universalProfile";
 import { getController } from "~~/utils/helpers";
 import { notification } from "~~/utils/scaffold-eth/notification";
+
+const ENVIO_TESTNET_URL = "https://envio.lukso-testnet.universal.tech/v1/graphql";
+const ENVIO_MAINNET_URL = "https://envio.lukso-mainnet.universal.tech/v1/graphql";
 
 /**
  * ProfileInput Component
@@ -29,8 +33,6 @@ import { notification } from "~~/utils/scaffold-eth/notification";
  * @param {Object} props
  * @param {(address: `0x${string}`) => void} props.onSelectAddress - Callback function triggered when a profile is selected
  */
-
-const ENVIO_MAINNET_URL = "https://envio.lukso-mainnet.universal.tech/v1/graphql";
 
 const gqlQuery = gql`
   query MyQuery($id: String!) {
@@ -80,6 +82,7 @@ export function ProfileInput({
   const [showDropdown, setShowDropdown] = useState(false);
   const [isAddingController, setIsAddingController] = useState<`0x${string}` | null>(null);
 
+  const account = useAccount();
   const handleSearch = async () => {
     if (debouncedQuery === "" || query === "") {
       setResults([]);
@@ -88,7 +91,7 @@ export function ProfileInput({
 
     setIsSearching(true);
     try {
-      const envioUrl = ENVIO_MAINNET_URL;
+      const envioUrl = account.chainId === 4201 ? ENVIO_TESTNET_URL : ENVIO_MAINNET_URL;
       const { search_profiles: data } = (await request(envioUrl, gqlQuery, { id: debouncedQuery })) as {
         search_profiles: Profile[];
       };

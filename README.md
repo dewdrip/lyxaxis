@@ -12,6 +12,10 @@
 - **Update Required Signatures:** DAO managers can update the number of signatures required to execute a proposal.
 - **Transaction History:** Anyone can view the past proposals and transaction history of the Lyxaxis multi-sig of each DAO.
 
+### Architecture Diagram
+
+![image](./lyxaxisarchitecturediagram.svg)
+
 ### How Lyxaxis Differs from Key Manager
 
 Lyxaxis represents a significant evolution from traditional key manager systems in several key ways:

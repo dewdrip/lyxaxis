@@ -204,27 +204,27 @@ const Owners: FC = () => {
       <MultiSigNav multisigAddress={multisigAddress} />
       <div className="flex items-center flex-col flex-grow w-full max-w-lg px-4">
         <div className="flex flex-col items-center bg-base-100 shadow shadow-secondary border-gray rounded-xl p-6 w-full">
-          <div className="max-w-full">Signatures required: {String(signaturesRequired)}</div>
+          <div className="flex justify-between items-center w-full">
+            <div>Owners: {owners?.length}</div>
+            <div className="max-w-full">Required: {String(signaturesRequired)}</div>
+          </div>
 
           <div className="mt-6 w-full space-y-3 max-h-[100px] overflow-y-auto">
             {owners?.map((owner: string, i: number) => (
               <div key={i} className="flex justify-between items-center">
                 <Address address={owner as `0x${string}`} />
-                <div className="flex items-center gap-2">
-                  <span>Owner</span>
-                  {!addSigner && selectedForRemoval !== owner && (
-                    <TrashIcon
-                      className="w-5 text-red-500 cursor-pointer hover:text-red-700"
-                      onClick={() => {
-                        setSelectedForRemoval(owner);
-                        setPredefinedTxData({
-                          ...predefinedTxData,
-                          signer: owner,
-                        });
-                      }}
-                    />
-                  )}
-                </div>
+                {!addSigner && selectedForRemoval !== owner && (
+                  <TrashIcon
+                    className="w-5 text-red-500 cursor-pointer hover:text-red-700"
+                    onClick={() => {
+                      setSelectedForRemoval(owner);
+                      setPredefinedTxData({
+                        ...predefinedTxData,
+                        signer: owner,
+                      });
+                    }}
+                  />
+                )}
               </div>
             ))}
           </div>

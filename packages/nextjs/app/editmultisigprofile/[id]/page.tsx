@@ -159,8 +159,6 @@ const EditMultiSigProfile: NextPage = () => {
           requiredApprovals: (signaturesRequired as bigint) || 0n,
         };
 
-        console.log("txData", txData);
-
         await fetch(poolServerUrl, {
           method: "POST",
           headers: { "Content-Type": "application/json" },

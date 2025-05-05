@@ -81,7 +81,13 @@ export function ProfileHeader({ profileLoading, profile, multisigAddress, upAddr
             {profileLoading || !profile ? (
               <div className="skeleton w-24 h-6"></div>
             ) : (
-              <div className="text-base font-semibold">{profile.name}</div>
+              <Link
+                href={`https://universaleverything.io/${upAddress}`}
+                target="_blank"
+                className="text-base font-semibold"
+              >
+                {profile.name}
+              </Link>
             )}
             <Balance className="text-xl -ml-4" address={upAddress} />
             <Address address={upAddress} disableBlockie={false} />

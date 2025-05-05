@@ -339,7 +339,6 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, onRefetch }) => 
 
             {Object.keys(txnData).length === 0 && (
               <div className="flex gap-1 items-center">
-                To:{" "}
                 <Profile
                   address={(txnData.args?.[0] ? String(txnData.args?.[0]) : tx.to) as `0x${string}`}
                   imageClassName="w-6"

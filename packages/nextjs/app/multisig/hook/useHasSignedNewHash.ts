@@ -2,43 +2,70 @@ import { useQuery } from "@tanstack/react-query";
 import { useAccount } from "wagmi";
 import { getController } from "~~/utils/helpers";
 
-export function useHasSignedNewHash({
-  metaMultiSigWallet,
-  nonce,
-  tx,
-}: {
+// Common types and interfaces
+interface TransactionParams {
   metaMultiSigWallet: any;
   nonce: bigint | undefined;
   tx: any;
-}) {
+}
+
+interface CanExecuteParams extends TransactionParams {
+  signaturesRequired: bigint | undefined;
+}
+
+// Common query configuration
+const commonQueryConfig = {
+  refetchOnMount: true,
+  refetchOnWindowFocus: true,
+  staleTime: 10_000_000,
+};
+
+const getTransactionHash = async (
+  wallet: any,
+  params: { nonce: bigint; to: string; amount: string | bigint; data: string },
+) => {
+  return (await wallet.read.getTransactionHash([
+    params.nonce,
+    params.to,
+    BigInt(params.amount),
+    params.data,
+  ])) as `0x${string}`;
+};
+
+const validateSignature = async (wallet: any, hash: `0x${string}`, signature: string) => {
+  const signer = await wallet.read.recover([hash, signature]);
+  const isOwner = await wallet.read.isOwner([signer as string]);
+  return { signer, isOwner };
+};
+
+export function useHasSignedNewHash({ metaMultiSigWallet, nonce, tx }: TransactionParams) {
   const { address } = useAccount();
 
   const { data: hasSignedNewHash = false, isLoading } = useQuery({
     queryKey: [
       "hasSignedNewHash",
       metaMultiSigWallet?.address,
-      nonce?.toString(), // ✅ Convert BigInt to string
+      nonce?.toString(),
       tx?.to,
-      tx?.amount?.toString?.() || tx?.amount, // ✅ Safe conversion if it's BigInt
+      tx?.amount?.toString?.() || tx?.amount,
       tx?.data,
       tx?.signatures,
       address,
     ],
     enabled: !!metaMultiSigWallet && nonce !== undefined && !!tx && Array.isArray(tx.signatures) && !!address,
     queryFn: async () => {
-      const newHash = (await metaMultiSigWallet.read.getTransactionHash([
-        nonce as bigint,
-        tx.to,
-        BigInt(tx.amount),
-        tx.data,
-      ])) as `0x${string}`;
+      const newHash = await getTransactionHash(metaMultiSigWallet, {
+        nonce: nonce as bigint,
+        to: tx.to,
+        amount: tx.amount,
+        data: tx.data,
+      });
 
       if (!address) throw new Error("Address is undefined");
       const controller = await getController(address as `0x${string}`);
 
       for (const sig of tx.signatures) {
-        const signer = await metaMultiSigWallet.read.recover([newHash, sig]);
-        const isOwner = await metaMultiSigWallet.read.isOwner([signer as string]);
+        const { signer, isOwner } = await validateSignature(metaMultiSigWallet, newHash, sig);
         if (isOwner && signer === controller) {
           return true;
         }
@@ -46,34 +73,22 @@ export function useHasSignedNewHash({
 
       return false;
     },
-    refetchOnMount: true, // Always refetch when the component mounts
-    refetchOnWindowFocus: true,
-    staleTime: 10_000_000, // adjust as needed
+    ...commonQueryConfig,
   });
 
   return { hasSignedNewHash, isLoading };
 }
 
-export function useCanExecute({
-  metaMultiSigWallet,
-  signaturesRequired,
-  nonce,
-  tx,
-}: {
-  metaMultiSigWallet: any;
-  signaturesRequired: bigint | undefined;
-  nonce: bigint | undefined;
-  tx: any;
-}) {
+export function useCanExecute({ metaMultiSigWallet, signaturesRequired, nonce, tx }: CanExecuteParams) {
   const { address } = useAccount();
 
   const { data, isLoading } = useQuery({
     queryKey: [
       "canExecuteTransaction",
       metaMultiSigWallet?.address,
-      nonce?.toString(), // ✅ Convert BigInt to string
+      nonce?.toString(),
       tx?.to,
-      tx?.amount?.toString?.() || tx?.amount, // ✅ Safe conversion if it's BigInt
+      tx?.amount?.toString?.() || tx?.amount,
       tx?.data,
       tx?.signatures,
       address,
@@ -86,32 +101,28 @@ export function useCanExecute({
       !!address &&
       !!signaturesRequired,
     queryFn: async () => {
-      const newHash = (await metaMultiSigWallet.read.getTransactionHash([
-        nonce as bigint,
-        tx.to,
-        BigInt(tx.amount),
-        tx.data,
-      ])) as `0x${string}`;
+      const newHash = await getTransactionHash(metaMultiSigWallet, {
+        nonce: nonce as bigint,
+        to: tx.to,
+        amount: tx.amount,
+        data: tx.data,
+      });
 
       let validSignatureCount = 0;
 
       for (const sig of tx.signatures) {
-        const signer = await metaMultiSigWallet.read.recover([newHash, sig]);
-        const isOwner = await metaMultiSigWallet.read.isOwner([signer as string]);
+        const { isOwner } = await validateSignature(metaMultiSigWallet, newHash, sig);
         if (isOwner) {
           validSignatureCount++;
         }
       }
 
-      if (validSignatureCount >= Number(signaturesRequired)) {
-        return { canExecuteTransaction: true, validSignatureCount };
-      } else {
-        return { canExecuteTransaction: false, validSignatureCount };
-      }
+      return {
+        canExecuteTransaction: validSignatureCount >= Number(signaturesRequired),
+        validSignatureCount,
+      };
     },
-    refetchOnMount: true, // Always refetch when the component mounts
-    refetchOnWindowFocus: true,
-    staleTime: 10_000_000, // adjust as needed
+    ...commonQueryConfig,
   });
 
   return {

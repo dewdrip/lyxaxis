@@ -55,7 +55,7 @@ export default function Profile({
       </div>
 
       <strong className={`text-md font-thin ml-2 text-center ${nameClassName}`}>
-        {profile ? `${truncateString(profile.name, 12)}` : truncateAddress(address)}
+        {profile ? `${truncateString(profile.name, 9)}` : truncateAddress(address)}
         {profile && <span className="text-purple-400 whitespace-nowrap">#{getFirst4Hex(address)}</span>}
       </strong>
 

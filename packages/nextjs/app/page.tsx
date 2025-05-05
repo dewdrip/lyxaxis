@@ -22,7 +22,11 @@ const Home: NextPage = () => {
     functionName: "getRegistry",
   });
 
-  const { data: multisigs, isLoading: multisigsLoading } = useScaffoldReadContract({
+  const {
+    data: multisigs,
+    isLoading: multisigsLoading,
+    isSuccess,
+  } = useScaffoldReadContract({
     contractName: "MultiSigRegistry",
     functionName: "getSignerMultisigs",
     contractAddress: registryAddress,

@@ -1,6 +1,11 @@
-import * as React from "react";
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import DarkLogo from "../public/lyxaxisdarkbg.svg";
+import WhiteLogo from "../public/lyxaxiswhitebg.svg";
 import { RainbowKitCustomConnectButton } from "./scaffold-eth";
+import { useTheme } from "next-themes";
 
 export const NavButton = ({ link, title }: { link: string; title: string }) => {
   return (
@@ -13,11 +18,19 @@ export const NavButton = ({ link, title }: { link: string; title: string }) => {
 };
 
 export const Navbar = () => {
+  const { setTheme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+
+  if (!mounted) return null;
+
+  const isDarkMode = resolvedTheme === "dark";
+
   return (
     <div className="bg-base-200 w-[432px] mx-auto justify-between flex  gap-x-1 px-2  border-b border-gray py-4">
       <Link href="/">
-        {/* <img src={Logo.src} alt="GoluksMe" className="mt-1 cursor-pointer w-28" /> */}
-        <div className="ml-2">Lyxaxis</div>
+        <img src={isDarkMode ? DarkLogo.src : WhiteLogo.src} alt="lyxaxis" className="mt-1 cursor-pointer w-28" />
       </Link>
 
       <div className=" flex">

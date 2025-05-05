@@ -393,7 +393,7 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, onRefetch }) => 
                       disabled={!canExecuteTransaction}
                       onClick={executeTransaction}
                     >
-                      {isExecuting ? <div className="loading loading-xs" /> : "Exec"}
+                      {isExecuting ? <div className="loading loading-xs" /> : "Run"}
                     </button>
                   </div>
                 </div>

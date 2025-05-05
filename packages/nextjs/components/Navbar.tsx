@@ -17,7 +17,7 @@ export const Navbar = () => {
     <div className="bg-base-200 w-[432px] mx-auto justify-between flex  gap-x-1 px-2  border-b border-gray py-4">
       <Link href="/">
         {/* <img src={Logo.src} alt="GoluksMe" className="mt-1 cursor-pointer w-28" /> */}
-        <div className="ml-2">Logo</div>
+        <div className="ml-2">Lyxaxis</div>
       </Link>
 
       <div className=" flex">

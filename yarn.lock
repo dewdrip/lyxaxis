@@ -7918,9 +7918,9 @@ __metadata:
   linkType: hard
 
 "caniuse-lite@npm:^1.0.30001579, caniuse-lite@npm:^1.0.30001702, caniuse-lite@npm:^1.0.30001716":
-  version: 1.0.30001716
-  resolution: "caniuse-lite@npm:1.0.30001716"
-  checksum: ff087ff38c339d0b697ef7862f575cdd0aeb5986a9c3660be97071c3b3c5ccf52380da73bb8397fdb8a528e4f05de009f6885219f7f6d908b1bff2d89334bfce
+  version: 1.0.30001717
+  resolution: "caniuse-lite@npm:1.0.30001717"
+  checksum: 357fbb230d86d28c0f7005d0c19a2274059ad4f1ed419ebe8754737ec908b567c9745abf0d16eda93417f40913221adc6290eb2f0432bc5bb5364f95bd7eabfa
   languageName: node
   linkType: hard
 
@@ -10480,7 +10480,7 @@ __metadata:
   dependencies:
     bn.js: ^4.11.8
     ethereumjs-util: ^6.0.0
-  checksum: a161423c222207b99a8f2a6980d86d3093f8cf8d52dd1cfcb0fc7c9f49a586e22d5fb1606cfb9bb1c88543831138b9ed8c4131247096bf8f6eae1066c80e2698
+  checksum: ae074be0bb012857ab5d3ae644d1163b908a48dd724b7d2567cfde309dc72222d460438f2411936a70dc949dc604ce1ef7118f7273bd525815579143c907e336
   languageName: node
   linkType: hard
 
@@ -14391,8 +14391,8 @@ __metadata:
   linkType: hard
 
 "msw@npm:^2.3.1":
-  version: 2.7.5
-  resolution: "msw@npm:2.7.5"
+  version: 2.7.6
+  resolution: "msw@npm:2.7.6"
   dependencies:
     "@bundled-es-modules/cookie": ^2.0.1
     "@bundled-es-modules/statuses": ^1.0.1
@@ -14419,7 +14419,7 @@ __metadata:
       optional: true
   bin:
     msw: cli/index.js
-  checksum: d35786207e1f01e42a628e15aee9abfdaaf5770ab2afab421436df8b0095b0778d3ceee4f9c3aea840af993a0cc93444cdbfe64de949d3d42b451ba8682cdb8a
+  checksum: ebb9c0d27683fa953da30c346540d1513dd11da8ca22d0c5e3591bc8300fdc68fde307ee639894eece72d8f2ccff2ab9bcf303f3fa264fb063f346bf914d6f94
   languageName: node
   linkType: hard
 
@@ -19309,8 +19309,8 @@ __metadata:
   linkType: hard
 
 "viem@npm:^2.1.1, viem@npm:^2.27.0":
-  version: 2.28.3
-  resolution: "viem@npm:2.28.3"
+  version: 2.28.4
+  resolution: "viem@npm:2.28.4"
   dependencies:
     "@noble/curves": 1.8.2
     "@noble/hashes": 1.7.2
@@ -19325,7 +19325,7 @@ __metadata:
   peerDependenciesMeta:
     typescript:
       optional: true
-  checksum: ae92515636ff89fe415cabf68e5f427715d3b10bd42ca263749ee0a862e48f575d7a5127e5721c2f64f271b9830ae2fe6a533287a2aaf51bc1b0d4ec196f502b
+  checksum: 04e6e6e0617f004ff0cb70cf26b0f461299abf43f51b485ec42386dede8168a6d9a073420b3b2ef4fd1de4db286a0b915fb439f1d2512762ac61ca9bdf8bc5c3
   languageName: node
   linkType: hard
 
@@ -20615,9 +20615,9 @@ __metadata:
   linkType: hard
 
 "zod@npm:^3.21.4":
-  version: 3.24.3
-  resolution: "zod@npm:3.24.3"
-  checksum: 9c3976e61cec25908f3405502abdf28ab1893afd5182c6739a30375c5c6bf4b9b6ea7e78735324e5ac63571c160ce607ebe320ff389b044223c357ccc2f8c94c
+  version: 3.24.4
+  resolution: "zod@npm:3.24.4"
+  checksum: 62829789765a9187bd72bed3972a7c1a39fdfe6c59bc752eedabec5f99af701658471b8577d22e0fee2081e6e35d4efc93c02c90e13350755a36feadbf72bbbc
   languageName: node
   linkType: hard
 

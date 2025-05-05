@@ -75,8 +75,6 @@ const addTransaction = async (txData: ITransaction) => {
 
 // Express route to add a transaction
 app.post("/", async (req, res) => {
-  console.log("POST /", req.body);
-
   try {
     const response = await addTransaction(req.body);
 

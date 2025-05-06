@@ -77,7 +77,7 @@ const CreateMultiSig: NextPage = () => {
         setNewSigner({ address: "", controller: "" });
         setRequiredSignatures("");
 
-        router.replace(`/multisig/${newMultisigAddress}`);
+        router.replace(`/${newMultisigAddress}`);
       }
     } catch (error) {
       console.error("Error creating multisig:", error);

@@ -2,7 +2,7 @@
 
 import { type FC } from "react";
 import { useParams } from "next/navigation";
-import { Pool } from "~~/app/multisig/_components/Pool";
+import { Pool } from "~~/app/multisig_components/Pool";
 import { MultiSigNav } from "~~/components/Navbar";
 
 const History: FC = () => {

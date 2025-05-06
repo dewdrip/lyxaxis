@@ -2,8 +2,8 @@
 
 import { type FC } from "react";
 import { useParams } from "next/navigation";
-import { Pool } from "../_components/Pool";
-import { ProfileHeader } from "../_components/ProfileHeader";
+import { Pool } from "../multisig_components/Pool";
+import { ProfileHeader } from "../multisig_components/ProfileHeader";
 import { MultiSigNav } from "~~/components/Navbar";
 import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
 import { useProfileMetadata } from "~~/hooks/useProfileMetadata";

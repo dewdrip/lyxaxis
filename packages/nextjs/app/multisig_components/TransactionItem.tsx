@@ -1,12 +1,12 @@
 import { type FC, useState } from "react";
-import { Address, BlockieAvatar } from "../../../components/scaffold-eth";
-import { useCanExecute, useHasSignedNewHash } from "../hook/useHasSignedNewHash";
+import { useCanExecute, useHasSignedNewHash } from "../multisig_hook/useHasSignedNewHash";
 import { PreveiwProfileModal } from "./PreviewProfile";
 import { IoIosInformationCircleOutline } from "react-icons/io";
 import { Abi, DecodeFunctionDataReturnType, decodeFunctionData, formatEther } from "viem";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 import { TransactionData } from "~~/app/transfer/[id]/page";
 import Profile from "~~/components/Profile";
+import { Address, BlockieAvatar } from "~~/components/scaffold-eth";
 import {
   useDeployedContractInfo,
   useScaffoldContract,

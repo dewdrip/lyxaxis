@@ -161,7 +161,7 @@ const CreatePage: FC = () => {
 
         setPredefinedTxData(DEFAULT_TX_DATA);
         setAmount("");
-        setTimeout(() => router.push(`/multisig/${multisigAddress}`), 777);
+        setTimeout(() => router.push(`/${multisigAddress}`), 777);
       } else {
         notification.info("Only owners can propose transactions");
       }

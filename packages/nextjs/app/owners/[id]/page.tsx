@@ -169,7 +169,7 @@ const Owners: FC = () => {
           to: multisigAddress,
         });
 
-        router.push(`/multisig/${multisigAddress}`);
+        router.push(`/${multisigAddress}`);
       } else {
         notification.info("Only owners can propose transactions");
       }

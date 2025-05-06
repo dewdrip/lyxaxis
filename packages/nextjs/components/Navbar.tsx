@@ -18,7 +18,7 @@ export const NavButton = ({ link, title }: { link: string; title: string }) => {
 };
 
 export const Navbar = () => {
-  const { setTheme, resolvedTheme } = useTheme();
+  const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => setMounted(true), []);
@@ -44,7 +44,7 @@ export const Navbar = () => {
 export const MultiSigNav = ({ multisigAddress }: { multisigAddress: string }) => {
   return (
     <div className=" w-full flex gap-x-3  border-b border-gray py-4  px-2">
-      <NavButton link={`/multisig/${multisigAddress}`} title="Wallet" />
+      <NavButton link={`/${multisigAddress}`} title="Wallet" />
       <NavButton link={`/transfer/${multisigAddress}`} title="Transfer" />
       <NavButton link={`/owners/${multisigAddress}`} title="Signers" />
       <NavButton link={`/history/${multisigAddress}`} title="History" />

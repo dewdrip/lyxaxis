@@ -2,7 +2,7 @@
 
 import { type FC } from "react";
 import { useParams } from "next/navigation";
-import { TransactionEventItem } from "../../multisig/_components";
+import { TransactionEventItem } from "../../multisig_components";
 import { MultiSigNav } from "~~/components/Navbar";
 import { useScaffoldEventHistory } from "~~/hooks/scaffold-eth";
 

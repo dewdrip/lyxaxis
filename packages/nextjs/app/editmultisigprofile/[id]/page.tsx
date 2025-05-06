@@ -171,7 +171,7 @@ const EditMultiSigProfile: NextPage = () => {
 
         setPredefinedTxData(DEFAULT_TX_DATA);
 
-        router.push(`/multisig/${multisigAddress}`);
+        router.push(`/${multisigAddress}`);
       } else {
         notification.info("Only owners can propose transactions");
       }

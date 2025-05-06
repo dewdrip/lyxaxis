@@ -97,7 +97,7 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, onRefetch }) => 
     : [];
 
   const txnData =
-    combinedAbi.length > 0 && tx.data
+    combinedAbi.length > 0 && tx.data && tx.data !== "0x"
       ? decodeFunctionData({ abi: combinedAbi as Abi, data: tx.data })
       : ({} as DecodeFunctionDataReturnType);
 

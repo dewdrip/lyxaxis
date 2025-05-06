@@ -66,6 +66,8 @@ const CreatePage: FC = () => {
     description: "",
   });
 
+  const [amount, setAmount] = useState("");
+
   const poolServerUrl = getPoolServerUrl(targetNetwork.id);
 
   // Validation helpers
@@ -80,7 +82,7 @@ const CreatePage: FC = () => {
       return false;
     }
 
-    if (!predefinedTxData.amount || Number(predefinedTxData.amount) <= 0) {
+    if (!amount || Number(amount) <= 0) {
       notification.error("Amount must be greater than 0");
       return false;
     }
@@ -100,7 +102,7 @@ const CreatePage: FC = () => {
     address: multisigAddress,
     nonce: (nonce as bigint) || 0n,
     to: predefinedTxData.signer,
-    amount: predefinedTxData.amount!,
+    amount: amount!,
     data: predefinedTxData.callData as `0x${string}`,
     hash: newHash,
     signatures: [signature],
@@ -125,7 +127,7 @@ const CreatePage: FC = () => {
         args: [
           nonce as bigint,
           String(predefinedTxData.signer),
-          BigInt(predefinedTxData.amount as string),
+          BigInt(amount as string),
           predefinedTxData.callData as `0x${string}`,
         ],
       })) as `0x${string}`;
@@ -158,6 +160,7 @@ const CreatePage: FC = () => {
         });
 
         setPredefinedTxData(DEFAULT_TX_DATA);
+        setAmount("");
         setTimeout(() => router.push(`/multisig/${multisigAddress}`), 777);
       } else {
         notification.info("Only owners can propose transactions");
@@ -211,9 +214,9 @@ const CreatePage: FC = () => {
               />
 
               <LyxInput
-                value={predefinedTxData.amount}
+                value={amount}
                 onChange={val => {
-                  setPredefinedTxData({ ...predefinedTxData, amount: String(parseEther(val)) });
+                  setAmount(String(parseEther(val)));
                 }}
               />
 

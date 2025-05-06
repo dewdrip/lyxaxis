@@ -12,6 +12,7 @@ import { Footer } from "~~/components/Footer";
 import { BlockieAvatar } from "~~/components/scaffold-eth";
 import { Provider as ChakraProvider } from "~~/components/ui/provider";
 import { UPProvider } from "~~/contexts/UPProviderContext";
+import { UniversalProfileProvider } from "~~/contexts/UniversalProfileContext";
 import { useInitializeNativeCurrencyPrice } from "~~/hooks/scaffold-eth";
 import { wagmiConfig } from "~~/services/web3/wagmiConfig";
 
@@ -59,7 +60,9 @@ export const ScaffoldEthAppWithProviders = ({ children }: { children: React.Reac
           theme={mounted ? (isDarkMode ? darkTheme() : lightTheme()) : lightTheme()}
         >
           <UPProvider>
-            <ScaffoldEthApp>{children}</ScaffoldEthApp>
+            <UniversalProfileProvider>
+              <ScaffoldEthApp>{children}</ScaffoldEthApp>
+            </UniversalProfileProvider>
           </UPProvider>
         </RainbowKitProvider>
       </QueryClientProvider>

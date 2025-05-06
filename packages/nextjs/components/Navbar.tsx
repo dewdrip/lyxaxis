@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import DarkLogo from "../public/lyxaxisdarkbg.svg";
 import WhiteLogo from "../public/lyxaxiswhitebg.svg";
-import { RainbowKitCustomConnectButton } from "./scaffold-eth";
+import { UPRainbowKitCustomConnectButton } from "./scaffold-eth";
 import { useTheme } from "next-themes";
 
 export const NavButton = ({ link, title }: { link: string; title: string }) => {
@@ -34,8 +34,7 @@ export const Navbar = () => {
       </Link>
 
       <div className=" flex">
-        <RainbowKitCustomConnectButton />
-        {/* <FaucetButton /> */}
+        <UPRainbowKitCustomConnectButton />
       </div>
     </div>
   );

@@ -7,15 +7,13 @@ import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
 import { getPoolServerUrl } from "~~/utils/getPoolServerUrl";
 import { notification } from "~~/utils/scaffold-eth";
 
-export const Pool = ({
-  multisigAddress,
-  isHistory = false,
-  refetchProfile,
-}: {
+interface Props {
   multisigAddress: `0x${string}`;
   isHistory?: boolean;
-  refetchProfile: () => Promise<void>;
-}) => {
+  refetchProfile?: () => Promise<void>;
+}
+
+export const Pool = ({ multisigAddress, isHistory = false, refetchProfile }: Props) => {
   const queryClient = useQueryClient();
   const { targetNetwork } = useTargetNetwork();
   const poolServerUrl = getPoolServerUrl(targetNetwork.id);
@@ -91,7 +89,7 @@ export const Pool = ({
                   key={tx.hash}
                   tx={tx}
                   onRefetch={() => queryClient.invalidateQueries({ queryKey })}
-                  refetchProfile={refetchProfile}
+                  refetchProfile={!isHistory ? refetchProfile : undefined}
                 />
               ))
             )}

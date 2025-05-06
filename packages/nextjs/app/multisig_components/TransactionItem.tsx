@@ -18,7 +18,7 @@ import { getPoolServerUrl } from "~~/utils/getPoolServerUrl";
 import { truncateString } from "~~/utils/helpers";
 import { notification } from "~~/utils/scaffold-eth";
 
-type TransactionItemProps = { tx: TransactionData; onRefetch?: () => void; refetchProfile: () => Promise<void> };
+type TransactionItemProps = { tx: TransactionData; onRefetch?: () => void; refetchProfile?: () => Promise<void> };
 
 export const TransactionItem: FC<TransactionItemProps> = ({ tx, onRefetch, refetchProfile }) => {
   const { address } = useAccount();
@@ -193,7 +193,9 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, onRefetch, refet
         if (onRefetch) {
           onRefetch();
 
-          refetchProfile();
+          if (refetchProfile) {
+            refetchProfile();
+          }
         }
       } else {
         notification.error("Error executing transaction");

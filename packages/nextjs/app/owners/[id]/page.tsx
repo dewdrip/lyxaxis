@@ -9,7 +9,7 @@ import { useChainId, usePublicClient, useReadContract, useWalletClient } from "w
 import { TrashIcon } from "@heroicons/react/24/solid";
 import { TransactionData } from "~~/app/transfer/[id]/page";
 import { MultiSigNav } from "~~/components/Navbar";
-import { ProfileInput } from "~~/components/ProfileInput";
+import { SignerInput } from "~~/components/SignerInput";
 import { Address, InputBase, IntegerInput } from "~~/components/scaffold-eth";
 import { useMultiSigRegistry } from "~~/hooks/contract/useMultiSigRegistry";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
@@ -278,7 +278,7 @@ const Owners: FC = () => {
               </div>
             </div>
 
-            <ProfileInput
+            <SignerInput
               value={predefinedTxData.signer}
               onSelectAddress={profile => setPredefinedTxData({ ...predefinedTxData, signer: profile.controller })}
             />

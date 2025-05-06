@@ -173,8 +173,8 @@ const CreatePage: FC = () => {
     }
   };
 
-  const handleSelectAddress = (profile: UniversalProfileOwner) => {
-    setPredefinedTxData({ ...predefinedTxData, signer: profile.address });
+  const handleSelectAddress = (address: `0x${string}`) => {
+    setPredefinedTxData({ ...predefinedTxData, signer: address });
   };
 
   useEffect(() => {
@@ -210,7 +210,6 @@ const CreatePage: FC = () => {
                 value={predefinedTxData.signer}
                 onSelectAddress={handleSelectAddress}
                 placeholder="Enter profile name or address"
-                readController={false}
               />
 
               <LyxInput

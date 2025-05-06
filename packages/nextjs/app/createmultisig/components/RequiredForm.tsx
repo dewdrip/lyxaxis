@@ -5,7 +5,7 @@ import { isAddress } from "viem";
 import { useAccount, useWalletClient } from "wagmi";
 import { PlusCircleIcon, TrashIcon } from "@heroicons/react/24/outline";
 import Profile from "~~/components/Profile";
-import { ProfileInput } from "~~/components/ProfileInput";
+import { SignerInput } from "~~/components/SignerInput";
 import { InputBase } from "~~/components/scaffold-eth";
 import { UniversalProfileOwner } from "~~/types/universalProfile";
 import { getController, truncateAddress } from "~~/utils/helpers";
@@ -128,7 +128,7 @@ export const RequiredForm = ({
                       <div className="flex flex-col gap-y-1">
                         <Profile address={owner.address as `0x${string}`} imageClassName="w-6" />
                         {owner.address !== owner.controller && (
-                          <span className="text-xs">Controller: {truncateAddress(owner.controller)}</span>
+                          <span className="text-xs">Signer: {truncateAddress(owner.controller)}</span>
                         )}
                       </div>
                       {owners.length > 1 && (
@@ -142,13 +142,14 @@ export const RequiredForm = ({
                   .reverse()}
               </div>
               <div className="flex flex-col gap-y-1">
-                <ProfileInput
+                <SignerInput
                   value={newSigner.address}
                   onSelectAddress={profile => {
                     setNewSigner(profile);
                     setNewSignerError("");
                   }}
                   placeholder={"Signer address"}
+                  showController={false}
                 />
 
                 {newSignerError ? (

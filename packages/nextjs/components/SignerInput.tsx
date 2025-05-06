@@ -3,22 +3,23 @@
 import { useEffect, useRef, useState } from "react";
 import LoadingIndicator from "./LoadingIndicator";
 import SearchProfile from "./SearchProfile";
+import { Address } from "./scaffold-eth";
 import { InputGroup } from "./ui/input-group";
 import { Input } from "@chakra-ui/react";
 import { gql, request } from "graphql-request";
-import { CiSearch } from "react-icons/ci";
+import { FaCheck } from "react-icons/fa";
 import { useDebounceValue } from "usehooks-ts";
 import { isAddress } from "viem";
 import { useAccount } from "wagmi";
 import { UniversalProfileOwner } from "~~/types/universalProfile";
-import { getController } from "~~/utils/helpers";
+import { getController, truncateAddress } from "~~/utils/helpers";
 import { notification } from "~~/utils/scaffold-eth/notification";
 
 const ENVIO_TESTNET_URL = "https://envio.lukso-testnet.universal.tech/v1/graphql";
 const ENVIO_MAINNET_URL = "https://envio.lukso-mainnet.universal.tech/v1/graphql";
 
 /**
- * ProfileInput Component
+ * SignerInput Component
  *
  * A searchable interface for LUKSO Universal Profiles that allows users to search and select
  * blockchain addresses associated with profiles.
@@ -65,19 +66,32 @@ type Profile = {
 type SearchProps = {
   placeholder?: string;
   value: string;
-  onSelectAddress: (address: `0x${string}`) => void;
+  onSelectAddress: (profile: UniversalProfileOwner) => void;
+  showController?: boolean;
 };
 
-export function ProfileInput({ value, onSelectAddress, placeholder = "Enter profile name or address" }: SearchProps) {
+type ControllerReadStatus = "pending" | "resolved" | "null";
+
+export function SignerInput({
+  value,
+  onSelectAddress,
+  placeholder = "Enter profile name or address",
+  showController = true,
+}: SearchProps) {
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useDebounceValue("", 500);
   const [results, setResults] = useState<Profile[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [controllerReadStatus, setControllerReadStatus] = useState<ControllerReadStatus>("null");
   const abortControllerRef = useRef<AbortController | null>(null);
-
+  const [controller, setController] = useState<`0x${string}` | null>(null);
   const account = useAccount();
   const handleSearch = async () => {
+    if (isAddress(query) || isAddress(debouncedQuery)) {
+      return;
+    }
+
     if (debouncedQuery === "" || query === "") {
       setResults([]);
       return;
@@ -120,10 +134,17 @@ export function ProfileInput({ value, onSelectAddress, placeholder = "Enter prof
       return;
     }
 
-    onSelectAddress(address);
+    setQuery(address);
+    setControllerReadStatus("pending");
+
+    const controller = await getController(address as `0x${string}`);
+
+    setControllerReadStatus("resolved");
+
+    onSelectAddress({ address, controller });
+    setController(controller);
 
     setShowDropdown(false);
-    setQuery(address);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -144,7 +165,12 @@ export function ProfileInput({ value, onSelectAddress, placeholder = "Enter prof
       return;
     }
 
+    if (controllerReadStatus !== "null") {
+      setControllerReadStatus("null");
+    }
+
     if (!value) {
+      setController(null);
       setShowDropdown(false);
     } else {
       if (!isSearching) {
@@ -168,9 +194,22 @@ export function ProfileInput({ value, onSelectAddress, placeholder = "Enter prof
   }, [debouncedQuery, query]);
 
   return (
-    <div className="w-full flex justify-center relative">
+    <div className="w-full flex flex-col justify-center relative">
+      {showController && controller && (
+        <div className="flex items-center mb-[-0.9rem]">
+          Signer: <Address address={controller} disableBlockie={true} onlyEnsOrAddress={true} />
+        </div>
+      )}
       <InputGroup
-        endElement={<CiSearch className="text-2xl text-black" />}
+        endElement={
+          query ? (
+            controllerReadStatus === "pending" ? (
+              <LoadingIndicator size="sm" />
+            ) : controllerReadStatus === "resolved" ? (
+              <FaCheck className="pl-2 text-2xl text-green-500" />
+            ) : null
+          ) : null
+        }
         className="border border-gray bg-base-200 rounded text-accent w-full mt-4"
       >
         <Input

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import LoadingIndicator from "./LoadingIndicator";
 import { BlockieAvatar } from "./scaffold-eth";
 import { ERC725, ERC725JSONSchema } from "@erc725/erc725.js";
 import lsp3ProfileSchema from "@erc725/erc725.js/schemas/LSP3ProfileMetadata.json";
@@ -13,10 +12,9 @@ import { getAddressColor } from "~~/utils/scaffold-eth/getAddressColor";
 type Props = {
   address: `0x${string}`;
   onSelect: (address: `0x${string}`) => void;
-  isAddingController: `0x${string}` | null;
 };
 
-export default function SearchProfile({ address, onSelect, isAddingController }: Props) {
+export default function SearchProfile({ address, onSelect }: Props) {
   const [profile, setProfile] = useState<ProfileType | null>(null);
 
   const account = useAccount();
@@ -48,7 +46,7 @@ export default function SearchProfile({ address, onSelect, isAddingController }:
 
   return (
     <button
-      className="flex items-center justify-between hover:bg-gray-100 px-4 py-2 rounded-lg duration-200"
+      className="flex items-center hover:bg-gray-100 px-4 py-2 rounded-lg duration-200"
       onClick={() => onSelect(address)}
     >
       <div className="flex items-center space-x-2 h-8">
@@ -78,8 +76,6 @@ export default function SearchProfile({ address, onSelect, isAddingController }:
           {profile && <span className="text-purple-400 whitespace-nowrap">#{getFirst4Hex(address)}</span>}
         </strong>
       </div>
-
-      {isAddingController === address && <LoadingIndicator />}
     </button>
   );
 }

@@ -13,6 +13,7 @@ type Props = {
   nameClassName?: string;
   iconClassName?: string;
   containerClassName?: string;
+  disableLink?: boolean;
 };
 
 export default function Profile({
@@ -22,6 +23,7 @@ export default function Profile({
   nameClassName = "",
   iconClassName = "",
   containerClassName = "",
+  disableLink = false,
 }: Props) {
   const { profile } = useProfileMetadata({
     address,
@@ -34,8 +36,29 @@ export default function Profile({
         className={`w-10 aspect-square rounded-full ${imageClassName}`}
         style={{ backgroundColor: getAddressColor(address) }}
       >
-        <Link href={`https://universaleverything.io/${address}`} target="_blank">
-          {!profile?.profileImage || profile.profileImage.length === 0 ? (
+        {!disableLink && (
+          <Link href={`https://universaleverything.io/${address}`} target="_blank">
+            {!profile?.profileImage || profile.profileImage.length === 0 ? (
+              <BlockieAvatar
+                address={address}
+                // @ts-ignore
+                size={"100%"}
+              />
+            ) : (
+              <div className={`relative w-10 aspect-square rounded-full object-cover ${imageClassName}`}>
+                <Image
+                  src={profile.profileImage[0].url.replace("ipfs://", "https://api.universalprofile.cloud/ipfs/")}
+                  alt="Profile"
+                  fill
+                  className="rounded-full object-cover"
+                />
+              </div>
+            )}
+          </Link>
+        )}
+
+        {disableLink &&
+          (!profile?.profileImage || profile.profileImage.length === 0 ? (
             <BlockieAvatar
               address={address}
               // @ts-ignore
@@ -50,14 +73,24 @@ export default function Profile({
                 className="rounded-full object-cover"
               />
             </div>
-          )}
-        </Link>
+          ))}
       </div>
 
-      <strong className={`text-md font-thin ml-2 text-center ${nameClassName}`}>
-        {profile ? `${truncateString(profile.name, 9)}` : truncateAddress(address)}
-        {profile && <span className="text-purple-400 whitespace-nowrap">#{getFirst4Hex(address)}</span>}
-      </strong>
+      {!disableLink && (
+        <Link href={`https://universaleverything.io/${address}`} target="_blank">
+          <strong className={`text-md font-thin ml-2 text-center ${nameClassName}`}>
+            {profile ? `${truncateString(profile.name, 9)}` : truncateAddress(address)}
+            {profile && <span className="text-purple-400 whitespace-nowrap">#{getFirst4Hex(address)}</span>}
+          </strong>
+        </Link>
+      )}
+
+      {disableLink && (
+        <strong className={`text-md font-thin ml-2 text-center ${nameClassName}`}>
+          {profile ? `${truncateString(profile.name, 9)}` : truncateAddress(address)}
+          {profile && <span className="text-purple-400 whitespace-nowrap">#{getFirst4Hex(address)}</span>}
+        </strong>
+      )}
 
       {copyable && (
         <AddressCopyIcon className={`ml-1 w-5 aspect-square cursor-pointer ${iconClassName}`} address={address} />

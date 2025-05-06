@@ -24,7 +24,9 @@ export const MultisigCard = ({ multisigAddress }: { multisigAddress: string }) =
   return (
     <Link href={`/${multisigAddress}`}>
       <div className="flex bg-base-100 text-center items-center justify-between w-full py-4 px-4  rounded-xl">
-        {universalProfileAddress && <Profile address={universalProfileAddress as `0x${string}`} />}
+        {universalProfileAddress && (
+          <Profile address={universalProfileAddress as `0x${string}`} copyable={false} disableLink={true} />
+        )}
         <div>
           <p className="m-0">
             Signers: {signaturesRequired?.toString() || "?"}/{owners?.length || 0}

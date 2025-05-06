@@ -19,7 +19,11 @@ const Multisig: FC = () => {
     contractAddress: multisigAddress,
   });
 
-  const { profile, loading: profileLoading } = useProfileMetadata({
+  const {
+    profile,
+    loading: profileLoading,
+    refetch: refetchProfile,
+  } = useProfileMetadata({
     address: upAddress as `0x${string}`,
     enabled: true,
   });
@@ -36,7 +40,7 @@ const Multisig: FC = () => {
       />
 
       <div className="w-full flex flex-col px-4 pt-6">
-        <Pool multisigAddress={multisigAddress as `0x${string}`} />
+        <Pool multisigAddress={multisigAddress as `0x${string}`} refetchProfile={refetchProfile} />
       </div>
     </div>
   );

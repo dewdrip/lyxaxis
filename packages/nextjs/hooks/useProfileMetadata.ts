@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTargetNetwork } from "./scaffold-eth";
 import { ERC725, ERC725JSONSchema } from "@erc725/erc725.js";
 import lsp3ProfileSchema from "@erc725/erc725.js/schemas/LSP3ProfileMetadata.json";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 export interface Profile {
   name: string;
@@ -53,6 +53,7 @@ interface UseProfileMetadataOptions {
 interface UseProfileMetadataResult {
   profile: Profile | null;
   loading: boolean;
+  refetch: () => Promise<void>;
   fetchProfile: (address: `0x${string}`) => Promise<Profile | null>;
 }
 
@@ -64,61 +65,54 @@ interface UseProfileMetadataResult {
  */
 export function useProfileMetadata(options: UseProfileMetadataOptions = { enabled: true }): UseProfileMetadataResult {
   const { address, enabled = true } = options;
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [loading, setLoading] = useState(false);
-
   const { targetNetwork } = useTargetNetwork();
+  const queryClient = useQueryClient();
 
-  // Fetch profile data
-  const fetchProfile = useCallback(
-    async (address: `0x${string}`): Promise<Profile | null> => {
-      const erc725js = new ERC725(
-        lsp3ProfileSchema as ERC725JSONSchema[],
-        address,
-        targetNetwork.rpcUrls.default.http[0],
-        {
-          ipfsGateway: "https://api.universalprofile.cloud/ipfs/",
-        },
-      );
+  const fetchProfile = async (address: `0x${string}`): Promise<Profile | null> => {
+    const erc725js = new ERC725(
+      lsp3ProfileSchema as ERC725JSONSchema[],
+      address,
+      targetNetwork.rpcUrls.default.http[0],
+      {
+        ipfsGateway: "https://api.universalprofile.cloud/ipfs/",
+      },
+    );
 
-      try {
-        setLoading(true);
-        const profileMetaData = await erc725js.fetchData("LSP3Profile");
+    try {
+      const profileMetaData = await erc725js.fetchData("LSP3Profile");
 
-        if (
-          profileMetaData.value &&
-          typeof profileMetaData.value === "object" &&
-          "LSP3Profile" in profileMetaData.value
-        ) {
-          const fetchedProfile = profileMetaData.value.LSP3Profile;
-          setProfile(fetchedProfile);
-
-          return fetchedProfile;
-        }
-      } catch (error) {
-        console.log("Cannot fetch universal profile data: ", error);
-      } finally {
-        setLoading(false);
+      if (
+        profileMetaData.value &&
+        typeof profileMetaData.value === "object" &&
+        "LSP3Profile" in profileMetaData.value
+      ) {
+        return profileMetaData.value.LSP3Profile;
       }
-
-      return null;
-    },
-    [address],
-  );
-
-  // Fetch profile automatically if enabled
-  useEffect(() => {
-    if (enabled && address) {
-      fetchProfile(address);
+    } catch (error) {
+      console.log("Cannot fetch universal profile data: ", error);
     }
-  }, [address, fetchProfile, enabled]);
 
-  return useMemo(
-    () => ({
-      profile,
-      loading,
-      fetchProfile,
-    }),
-    [profile, loading, fetchProfile],
-  );
+    return null;
+  };
+
+  const queryKey = ["profile", address];
+
+  const {
+    data: profile,
+    isLoading: loading,
+    refetch,
+  } = useQuery({
+    queryKey: ["profile", address],
+    queryFn: () => (address ? fetchProfile(address) : null),
+    enabled: enabled && !!address,
+  });
+
+  return {
+    profile: profile ?? null,
+    loading,
+    refetch: async () => {
+      queryClient.invalidateQueries({ queryKey });
+    },
+    fetchProfile,
+  };
 }

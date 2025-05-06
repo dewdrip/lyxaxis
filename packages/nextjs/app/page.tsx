@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import WelcomeUI from "./_components/WelcomeUI";
 import type { NextPage } from "next";
+import { useIsMounted } from "usehooks-ts";
 import { useAccount } from "wagmi";
 import { MultisigCard } from "~~/components/cards/MultisigCard";
 import { useUPProvider } from "~~/contexts/UPProviderContext";
@@ -11,6 +12,7 @@ import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
 import { getController } from "~~/utils/helpers";
 
 const Home: NextPage = () => {
+  const isMounted = useIsMounted();
   const { address: connectedAddress } = useAccount();
 
   const [controller, setController] = useState<string | undefined>(undefined);
@@ -41,14 +43,14 @@ const Home: NextPage = () => {
     })();
   }, [connectedAddress, contextAccounts]);
 
-  return (
+  return isMounted() ? (
     <div className="flex items-center flex-col flex-grow pt-10 w-full h-screen overflow-y-auto">
       <div className="flex flex-col justify-center items-center gap-y-8 w-full">
         {multisigsLoading || registryAddressLoading ? (
           <div className="flex items-center justify-center py-32">
             <span className="loading w-6" />
           </div>
-        ) : !multisigs || multisigs.length === 0 ? (
+        ) : multisigs && multisigs.length === 0 ? (
           <div className="max-w-[398px]">
             <WelcomeUI />
           </div>
@@ -77,7 +79,7 @@ const Home: NextPage = () => {
         )}
       </div>
     </div>
-  );
+  ) : null;
 };
 
 export default Home;

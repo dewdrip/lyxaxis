@@ -18,9 +18,9 @@ import { getPoolServerUrl } from "~~/utils/getPoolServerUrl";
 import { truncateString } from "~~/utils/helpers";
 import { notification } from "~~/utils/scaffold-eth";
 
-type TransactionItemProps = { tx: TransactionData; onRefetch?: () => void };
+type TransactionItemProps = { tx: TransactionData; onRefetch?: () => void; refetchProfile: () => Promise<void> };
 
-export const TransactionItem: FC<TransactionItemProps> = ({ tx, onRefetch }) => {
+export const TransactionItem: FC<TransactionItemProps> = ({ tx, onRefetch, refetchProfile }) => {
   const { address } = useAccount();
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
@@ -138,6 +138,7 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, onRefetch }) => 
   const executeTransaction = async () => {
     try {
       setIsExecuting(true);
+
       if (!contractInfo || !metaMultiSigWallet) {
         console.log("No contract info");
         return;
@@ -191,7 +192,12 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, onRefetch }) => 
 
         if (onRefetch) {
           onRefetch();
+
+          refetchProfile();
         }
+      } else {
+        notification.error("Error executing transaction");
+        setIsExecuting(false);
       }
     } catch (e) {
       //notification.error("Error executing transaction");
@@ -398,8 +404,9 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, onRefetch }) => 
                   </div>
                 </div>
               ))}
-
-            <div>{truncateString(formatEther(BigInt(tx.amount)), 9)} LYX</div>
+            {tx.title.trim().toLowerCase() === "transfer funds" && (
+              <div>{truncateString(formatEther(BigInt(tx.amount)), 9)} LYX</div>
+            )}
           </div>
         </div>
       </div>

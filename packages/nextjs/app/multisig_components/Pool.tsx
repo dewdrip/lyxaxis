@@ -10,9 +10,11 @@ import { notification } from "~~/utils/scaffold-eth";
 export const Pool = ({
   multisigAddress,
   isHistory = false,
+  refetchProfile,
 }: {
   multisigAddress: `0x${string}`;
   isHistory?: boolean;
+  refetchProfile: () => Promise<void>;
 }) => {
   const queryClient = useQueryClient();
   const { targetNetwork } = useTargetNetwork();
@@ -85,7 +87,12 @@ export const Pool = ({
               <div className="w-full" />
             ) : (
               filteredTransactions.map(tx => (
-                <TransactionItem key={tx.hash} tx={tx} onRefetch={() => queryClient.invalidateQueries({ queryKey })} />
+                <TransactionItem
+                  key={tx.hash}
+                  tx={tx}
+                  onRefetch={() => queryClient.invalidateQueries({ queryKey })}
+                  refetchProfile={refetchProfile}
+                />
               ))
             )}
           </div>

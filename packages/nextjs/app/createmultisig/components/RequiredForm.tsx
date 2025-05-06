@@ -8,7 +8,7 @@ import Profile from "~~/components/Profile";
 import { ProfileInput } from "~~/components/ProfileInput";
 import { InputBase } from "~~/components/scaffold-eth";
 import { UniversalProfileOwner } from "~~/types/universalProfile";
-import { getController } from "~~/utils/helpers";
+import { getController, truncateAddress } from "~~/utils/helpers";
 import { notification } from "~~/utils/scaffold-eth";
 
 export const RequiredForm = ({
@@ -121,8 +121,16 @@ export const RequiredForm = ({
               <div className="flex flex-wrap gap-y-3 gap-x-3 max-h-[100px] overflow-y-auto">
                 {owners
                   .map(owner => (
-                    <div key={owner.address} className="flex gap-x-1 cursor-pointer">
-                      <Profile address={owner.address as `0x${string}`} imageClassName="w-6" />
+                    <div
+                      key={owner.address}
+                      className={`flex gap-x-1 cursor-pointer ${owners.length > 1 ? "border-b border-b-slate-600 pb-2" : ""}`}
+                    >
+                      <div className="flex flex-col gap-y-1">
+                        <Profile address={owner.address as `0x${string}`} imageClassName="w-6" />
+                        {owner.address !== owner.controller && (
+                          <span className="text-xs">Controller: {truncateAddress(owner.controller)}</span>
+                        )}
+                      </div>
                       {owners.length > 1 && (
                         <TrashIcon
                           className="w-5 text-red-500 cursor-pointer"

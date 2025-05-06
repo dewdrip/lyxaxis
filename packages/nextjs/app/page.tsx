@@ -24,11 +24,7 @@ const Home: NextPage = () => {
     functionName: "getRegistry",
   });
 
-  const {
-    data: multisigs,
-    isLoading: multisigsLoading,
-    isSuccess,
-  } = useScaffoldReadContract({
+  const { data: multisigs, isLoading: multisigsLoading } = useScaffoldReadContract({
     contractName: "MultiSigRegistry",
     functionName: "getSignerMultisigs",
     contractAddress: registryAddress,
@@ -50,7 +46,7 @@ const Home: NextPage = () => {
           <div className="flex items-center justify-center py-32">
             <span className="loading w-6" />
           </div>
-        ) : multisigs && multisigs.length === 0 ? (
+        ) : (multisigs && multisigs.length === 0) || !connectedAddress ? (
           <div className="max-w-[398px]">
             <WelcomeUI />
           </div>
@@ -71,9 +67,6 @@ const Home: NextPage = () => {
                     <MultisigCard key={multisigAddress} multisigAddress={multisigAddress} />
                   </>
                 ))}
-              {/* {(!multisigs || multisigs.length === 0) && (
-                <p className="text-center text-gray-500">No multisigs found</p>
-              )} */}
             </div>
           </div>
         )}

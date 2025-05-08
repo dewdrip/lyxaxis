@@ -281,6 +281,7 @@ const Owners: FC = () => {
             <SignerInput
               value={predefinedTxData.signer}
               onSelectAddress={profile => setPredefinedTxData({ ...predefinedTxData, signer: profile.controller })}
+              showController={addSigner && predefinedTxData.signer !== ""}
             />
 
             <IntegerInput

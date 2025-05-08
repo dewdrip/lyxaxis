@@ -12,7 +12,7 @@ import { useDebounceValue } from "usehooks-ts";
 import { isAddress } from "viem";
 import { useAccount } from "wagmi";
 import { UniversalProfileOwner } from "~~/types/universalProfile";
-import { getController, truncateAddress } from "~~/utils/helpers";
+import { getController } from "~~/utils/helpers";
 import { notification } from "~~/utils/scaffold-eth/notification";
 
 const ENVIO_TESTNET_URL = "https://envio.lukso-testnet.universal.tech/v1/graphql";
@@ -186,6 +186,8 @@ export function SignerInput({
   };
 
   useEffect(() => {
+    if (value == controller) return;
+
     setQuery(value);
   }, [value]);
 

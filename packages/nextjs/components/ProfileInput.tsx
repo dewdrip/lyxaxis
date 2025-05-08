@@ -10,8 +10,6 @@ import { CiSearch } from "react-icons/ci";
 import { useDebounceValue } from "usehooks-ts";
 import { isAddress } from "viem";
 import { useAccount } from "wagmi";
-import { UniversalProfileOwner } from "~~/types/universalProfile";
-import { getController } from "~~/utils/helpers";
 import { notification } from "~~/utils/scaffold-eth/notification";
 
 const ENVIO_TESTNET_URL = "https://envio.lukso-testnet.universal.tech/v1/graphql";
@@ -137,7 +135,7 @@ export function ProfileInput({ value, onSelectAddress, placeholder = "Enter prof
   };
 
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.trim();
+    const value = e.target.value;
 
     if (isAddress(value)) {
       handleSelectProfile(value as `0x${string}`);

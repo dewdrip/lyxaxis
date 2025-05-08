@@ -6,7 +6,7 @@ import { ERC725, ERC725JSONSchema } from "@erc725/erc725.js";
 import lsp3ProfileSchema from "@erc725/erc725.js/schemas/LSP3ProfileMetadata.json";
 import { useAccount } from "wagmi";
 import { Profile as ProfileType, luksoNetworks } from "~~/contexts/UniversalProfileContext";
-import { getFirst4Hex, truncateAddress } from "~~/utils/helpers";
+import { getFirst4Hex, truncateAddress, truncateString } from "~~/utils/helpers";
 import { getAddressColor } from "~~/utils/scaffold-eth/getAddressColor";
 
 type Props = {
@@ -72,7 +72,7 @@ export default function SearchProfile({ address, onSelect }: Props) {
         </div>
 
         <strong className="text-xs text-accent font-bold">
-          {profile ? `@${profile.name}` : truncateAddress(address)}
+          {profile ? `@${truncateString(profile.name, 50)}` : truncateAddress(address)}
           {profile && <span className="text-purple-400 whitespace-nowrap">#{getFirst4Hex(address)}</span>}
         </strong>
       </div>

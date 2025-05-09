@@ -3,7 +3,7 @@ import { useCanExecute, useHasSignedNewHash } from "../multisig_hook/useHasSigne
 import { PreveiwProfileModal } from "./PreviewProfile";
 import { IoIosInformationCircleOutline } from "react-icons/io";
 import { Abi, DecodeFunctionDataReturnType, decodeFunctionData, formatEther } from "viem";
-import { useAccount, usePublicClient, useWalletClient } from "wagmi";
+import { usePublicClient, useWalletClient } from "wagmi";
 import { TransactionData } from "~~/app/transfer/[id]/page";
 import Profile from "~~/components/Profile";
 import { Address, BlockieAvatar } from "~~/components/scaffold-eth";
@@ -21,7 +21,6 @@ import { notification } from "~~/utils/scaffold-eth";
 type TransactionItemProps = { tx: TransactionData; onRefetch?: () => void; refetchProfile?: () => Promise<void> };
 
 export const TransactionItem: FC<TransactionItemProps> = ({ tx, onRefetch, refetchProfile }) => {
-  const { address } = useAccount();
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
   const transactor = useTransactor();
@@ -101,7 +100,6 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, onRefetch, refet
       ? decodeFunctionData({ abi: combinedAbi as Abi, data: tx.data })
       : ({} as DecodeFunctionDataReturnType);
 
-  const hasSigned = tx.signers.indexOf(address as string) >= 0 && BigInt(tx.nonce) === nonce;
   const hasEnoughSignatures = signaturesRequired ? tx.signatures.length >= Number(signaturesRequired) : false;
 
   const getSortedSigList = async (allSigs: `0x${string}`[], newHash: `0x${string}`) => {
@@ -184,7 +182,7 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, onRefetch, refet
               isExecuted: true,
             },
             // stringifying bigint
-            (key, value) => (typeof value === "bigint" ? value.toString() : value),
+            (_, value) => (typeof value === "bigint" ? value.toString() : value),
           ),
         });
 
@@ -232,46 +230,47 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, onRefetch, refet
 
       const isOwner = await metaMultiSigWallet?.read.isOwner([signer as string]);
 
-      if (isOwner) {
-        // Remove any existing signature from the same signer
-        const filteredSignatures: `0x${string}`[] = [];
-        for (const sig of tx.signatures) {
-          const recovered = await metaMultiSigWallet?.read.recover([newHash, sig]);
-          if (recovered !== signer) {
-            filteredSignatures.push(sig);
-          }
-        }
-        // Add the new signature
-        const updatedSignatures = [...filteredSignatures, signature];
-
-        const [finalSigList, finalSigners] = await getSortedSigList(updatedSignatures, newHash);
-
-        await fetch(poolServerUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(
-            {
-              ...tx,
-              nonce,
-              signatures: finalSigList,
-              signers: finalSigners,
-            },
-            // stringifying bigint
-            (key, value) => (typeof value === "bigint" ? value.toString() : value),
-          ),
-        });
-
-        if (onRefetch) {
-          onRefetch();
-        }
-      } else {
+      if (!isOwner) {
         notification.info("Only owners can sign transactions");
+        setIsSigning(false);
+        return;
       }
 
-      setIsSigning(false);
+      // Remove any existing signature from the same signer
+      const filteredSignatures: `0x${string}`[] = [];
+      for (const sig of tx.signatures) {
+        const recovered = await metaMultiSigWallet?.read.recover([newHash, sig]);
+        if (recovered !== signer) {
+          filteredSignatures.push(sig);
+        }
+      }
+      // Add the new signature
+      const updatedSignatures = [...filteredSignatures, signature];
+
+      const [finalSigList, finalSigners] = await getSortedSigList(updatedSignatures, newHash);
+
+      await fetch(poolServerUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(
+          {
+            ...tx,
+            nonce,
+            signatures: finalSigList,
+            signers: finalSigners,
+          },
+          // stringifying bigint
+          (key, value) => (typeof value === "bigint" ? value.toString() : value),
+        ),
+      });
+
+      if (onRefetch) {
+        onRefetch();
+      }
     } catch (e) {
       notification.error("Error signing transaction");
       console.log(e);
+    } finally {
       setIsSigning(false);
     }
   };
@@ -368,14 +367,6 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, onRefetch, refet
                 <IoIosInformationCircleOutline size={24} />
               </label>
             </div>
-            {/* 
-            {isCheckingSignatures ? (
-              <div>Loading...</div>
-            ) : !hasSignedNewHash ? (
-              <div className="text-sm">Outdated, Resign!</div>
-            ) : (
-              <div className="text-sm">Pending Transaction</div>
-            )} */}
 
             {!tx.isExecuted &&
               (isCheckingSignatures || isLoadingCanExecute ? (
@@ -384,11 +375,10 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, onRefetch, refet
                 </div>
               ) : (
                 <div className="flex justify-center items-center gap-x-2">
-                  <div className="flex" title={hasSigned ? "You have already Signed this transaction" : ""}>
+                  <div className="flex" title={hasSignedNewHash ? "You have already Signed this transaction" : ""}>
                     <button
                       className="btn btn-xs w-[3.6rem] btn-primary"
-                      disabled={hasSignedNewHash}
-                      title={!hasEnoughSignatures ? "Not enough signers to Execute" : ""}
+                      disabled={hasSignedNewHash || !walletClient}
                       onClick={signTransaction}
                     >
                       {isSigning ? <div className="loading loading-xs" /> : "Sign"}
@@ -398,7 +388,7 @@ export const TransactionItem: FC<TransactionItemProps> = ({ tx, onRefetch, refet
                   <div title={!hasEnoughSignatures ? "Not enough signers to Execute" : ""}>
                     <button
                       className="btn btn-xs w-[3.6rem] btn-primary "
-                      disabled={!canExecuteTransaction}
+                      disabled={!canExecuteTransaction || !walletClient}
                       onClick={executeTransaction}
                     >
                       {isExecuting ? <div className="loading loading-xs" /> : "Run"}

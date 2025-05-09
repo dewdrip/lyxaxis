@@ -28,7 +28,7 @@ export const Navbar = () => {
   const isDarkMode = resolvedTheme === "dark";
 
   return (
-    <div className="bg-base-200 w-[432px] mx-auto justify-between flex  gap-x-1 px-2  border-b border-gray py-4">
+    <div className="bg-base-200 w-full max-w-[432px] mx-auto justify-between flex  gap-x-1 px-2  border-b border-gray py-4">
       <Link href="/">
         <img src={isDarkMode ? DarkLogo.src : WhiteLogo.src} alt="lyxaxis" className="mt-1 cursor-pointer w-28" />
       </Link>

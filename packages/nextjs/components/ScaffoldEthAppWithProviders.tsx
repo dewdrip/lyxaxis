@@ -23,7 +23,7 @@ const ScaffoldEthApp = ({ children }: { children: React.ReactNode }) => {
     <>
       <ChakraProvider>
         <div className={`flex flex-col min-h-screen  font-space-grotesk`}>
-          <main className="relative flex flex-col w-[432px] mx-auto flex-1 bg-base-300">
+          <main className="relative flex flex-col w-full max-w-[432px] mx-auto flex-1 bg-base-300">
             <Navbar /> {children}
           </main>
           <Footer />

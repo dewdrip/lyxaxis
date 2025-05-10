@@ -41,7 +41,7 @@ export const UPRainbowKitCustomConnectButton = () => {
 
               return (
                 <>
-                  <Balance address={account.address as Address} className="min-h-0 h-auto text-black" />
+                  <Balance address={account.address as Address} className="min-h-0 h-auto" />
                   <AddressInfoDropdown
                     address={account.address as Address}
                     displayName={account.displayName}
